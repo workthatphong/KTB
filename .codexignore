@@ -1,0 +1,167 @@
+# =================================================================
+# AI SUPREME IGNORE RULES (SYNCHRONIZED)
+# Target: Maximum Token Efficiency & Absolute Source Integrity
+# =================================================================
+
+# [OS & SYSTEM]
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.stackdump
+.localized
+
+# [VCS & EDITORS]
+.git/
+.hg/
+.svn/
+.vscode/
+.idea/
+.agents/
+*.code-workspace
+.editorconfig
+.gitignore
+.npmrc
+.yarnrc
+
+# [BUILD ARTIFACTS - THE FORBIDDEN ZONES]
+dist/
+build/
+out/
+target/
+bin/
+obj/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.turbo/
+.nx/
+.vite-inspect/
+frontend/dist/
+public/dist/
+public/assets/
+*.bak
+*.tmp
+*.temp
+
+# [DEPENDENCIES & PACKAGE MANAGERS]
+node_modules/
+bower_components/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+composer.lock
+vendor/
+.pnp.*
+
+# [PYTHON & BACKEND SPECIFIC]
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+nosetests.xml
+coverage.xml
+*.lprof
+
+# [DATA, DATABASES & HEAVY STORAGE]
+data/
+storage/
+uploads/
+**/logs/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+*.parquet
+*.feather
+*.csv
+*.xlsx
+*.xls
+*.ods
+*.json
+!package.json
+!vercel.json
+!postcss.config.json
+!tailwind.config.json
+!tsconfig.json
+!*.schema.json
+
+# [MEDIA & BINARIES]
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.tif
+*.tiff
+*.ico
+*.svg
+*.mp4
+*.mov
+*.avi
+*.webm
+*.flv
+*.mkv
+*.pdf
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# [FONTS & DOCUMENTS]
+*.ttf
+*.woff
+*.woff2
+*.eot
+*.otf
+docs/
+site/
+_build/
+*.md
+!GEMINI.md
+!README.md
+!AGENTS.md
+
+# [TESTING & COVERAGE]
+coverage/
+test-results/
+.nyc_output/
+junit.xml
+
+# [DEPLOYMENT & CLOUD]
+.vercel/
+.serverless/
+.terraform/
+capistrano.log
+
+# [CROSS-AI PARITY & SECURITY]
+.env
+.env.*
+.gemini/
+.geminiignore
+.codexignore
+GEMINI.md
+AGENTS.md
+MEMORY.md

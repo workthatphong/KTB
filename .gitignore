@@ -1,0 +1,19 @@
+﻿# Python cache
+__pycache__/
+*.py[cod]
+
+# Local environment files
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# Vercel local metadata
+.vercel/
+
+# Optional local DB copy
+data/*.db
+local_dashboard.db
+artifacts/
+node_modules/
+frontend/dist/

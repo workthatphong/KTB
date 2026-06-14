@@ -1,0 +1,87 @@
+from __future__ import annotations
+
+WORKFLOW_STATE_ORDER = [
+    "Uploading",
+    "Processing",
+    "Pending Review by Moodys",
+    "In Review by Moodys",
+    "Pending Re-Review by Moodys",
+    "Completed",
+]
+
+WORKFLOW_STATES = set(WORKFLOW_STATE_ORDER)
+PENDING_STATES = {"Pending Review by Moodys", "Pending Re-Review by Moodys"}
+IN_REVIEW_STATE = "In Review by Moodys"
+COMPLETED_STATE = "Completed"
+
+SYSTEM_DETAIL_EVIDENCE_CHANGE_TYPES = {
+    "AI Account Mapping",
+    "Account Value",
+    "Mapped Account",
+    "Remapped Account",
+    "Unmapped Account",
+    "Spread Metadata",
+}
+USER_EDIT_CHANGE_TYPES = {
+    "Account Value",
+    "Mapped Account",
+    "Remapped Account",
+    "Unmapped Account",
+}
+USER_METADATA_EDIT_CHANGE_TYPES = {
+    "Spread Metadata",
+}
+
+SYSTEM_TIME_SEGMENT_TYPES = {
+    "SYSTEM_INITIAL_PROCESSING",
+    "SYSTEM_SCHEDULED_REPROCESSING",
+    "SYSTEM_INTERNAL_TRANSITION",
+    "AUTO_TIMEOUT_MARKER",
+}
+USER_TIME_SEGMENT_TYPES = {
+    "USER_UPLOADING",
+    "USER_REVIEW_AUTO_TIMEOUT",
+    "USER_EDITING_CORRECTION_AND_COMPLETION_APPROVAL",
+    "USER_COMPLETION_APPROVAL",
+    "USER_EDITING_CORRECTION",
+    "USER_EDITING_METADATA_CORRECTION_AND_COMPLETION_APPROVAL",
+    "USER_EDITING_METADATA_CORRECTION",
+    "USER_REVIEW_COMMENT_CHECK",
+}
+IDLE_TIME_SEGMENT_TYPES = {
+    "IDLE_WAITING_FOR_REVIEW",
+    "IDLE_WAITING_FOR_REREVIEW",
+    "IDLE_WAITING_FOR_SCHEDULED_REPROCESS",
+    "IDLE_AFTER_SYSTEM_REPROCESS",
+    "POST_COMPLETED_ELAPSED",
+    "UNKNOWN_OR_LOW_CONFIDENCE",
+}
+
+CORE_USER_SESSION_SEGMENT_TYPES = {
+    "USER_REVIEW_AUTO_TIMEOUT",
+    "USER_EDITING_CORRECTION_AND_COMPLETION_APPROVAL",
+    "USER_COMPLETION_APPROVAL",
+    "USER_EDITING_CORRECTION",
+    "USER_EDITING_METADATA_CORRECTION_AND_COMPLETION_APPROVAL",
+    "USER_EDITING_METADATA_CORRECTION",
+    "USER_REVIEW_COMMENT_CHECK",
+}
+
+SESSION_TIMEOUT_MINUTES_DEFAULT = 35
+ACTIVITY_GRACE_MINUTES_DEFAULT = 10
+
+PENDING_REVIEW_STATUSES = {
+    "pendingreviewbymoodys",
+    "pendingreview",
+}
+PENDING_REREVIEW_STATUSES = {
+    "pendingrereviewbymoodys",
+    "pendingrereview",
+}
+IN_REVIEW_STATUSES = {
+    "inreviewbymoodys",
+    "inreview",
+}
+COMPLETED_STATUSES = {
+    "completed",
+}
