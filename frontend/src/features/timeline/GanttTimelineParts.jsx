@@ -27,7 +27,7 @@ export const GanttLegend = ({ items }) => (
   </div>
 );
 
-export const GanttHeader = ({ laneLabelWidth, headerScrollRef, timelineSvgWidth, headerHeight, visibleTicks, getX, getLabelTs }) => (
+export const GanttHeader = ({ laneLabelWidth, headerScrollRef, timelineSvgWidth, headerHeight, visibleTicks, getTickX, getLabelTs }) => (
   <div className="scroll-clarity-layer flex border-b border-slate-200 bg-slate-50/95 sticky top-0 z-20">
     <div style={{ width: laneLabelWidth }} className="shrink-0 border-r border-slate-200 p-3 max-sm:px-2 flex items-center">
       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest max-sm:text-[9px]">Lane</span>
@@ -35,7 +35,7 @@ export const GanttHeader = ({ laneLabelWidth, headerScrollRef, timelineSvgWidth,
     <div ref={headerScrollRef} className="flex-1 overflow-hidden no-scrollbar">
       <svg width={timelineSvgWidth} height={headerHeight}>
         {visibleTicks.map((tick, idx) => {
-          const x = getX(tick);
+          const x = getTickX(tick);
           const labelTs = getLabelTs ? getLabelTs(tick) : tick;
           const previousLabelTs = idx > 0 ? (getLabelTs ? getLabelTs(visibleTicks[idx - 1]) : visibleTicks[idx - 1]) : null;
           const header = formatTickHeader(labelTs);
@@ -82,7 +82,7 @@ export const GanttBarsSvg = ({
   stackStep,
   scrollState,
   showStarMarkers,
-  getX,
+  getTickX,
   onPickSegment,
   onShowTooltip,
   onHideTooltip,
@@ -90,7 +90,7 @@ export const GanttBarsSvg = ({
 }) => (
   <svg width={timelineSvgWidth} height={bodyChartHeight} className="block bg-white/50">
     {visibleTicks.map((tick) => (
-      <line key={tick} x1={getX(tick)} x2={getX(tick)} y1={0} y2={bodyChartHeight} stroke="#F1F5F9" />
+      <line key={tick} x1={getTickX(tick)} x2={getTickX(tick)} y1={0} y2={bodyChartHeight} stroke="#F1F5F9" />
     ))}
 
     {visibleLanes.map((lane) => {

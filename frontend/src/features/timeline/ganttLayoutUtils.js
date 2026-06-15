@@ -228,6 +228,75 @@ export function buildGanttPositionedBars(config) {
   return { positionedByLane, laneStackDepths };
 }
 
+export function buildGanttAxisAnchors(config) {
+  const {
+    lanes,
+    laneToPositionedBars,
+    displayMinTs,
+    displayMaxTs,
+    timelinePadLeft,
+    timelineWidth,
+    timelineSvgWidth,
+  } = config;
+
+  const anchorMap = new Map();
+  const pushAnchor = (ts, x) => {
+    if (!Number.isFinite(ts) || !Number.isFinite(x)) return;
+    const existingX = anchorMap.get(ts);
+    anchorMap.set(ts, existingX == null ? x : Math.max(existingX, x));
+  };
+
+  pushAnchor(displayMinTs, timelinePadLeft);
+  pushAnchor(displayMaxTs, Math.max(timelinePadLeft + timelineWidth, timelineSvgWidth - 18));
+
+  lanes.forEach((lane) => {
+    const positionedBars = laneToPositionedBars[lane] || [];
+    positionedBars.forEach(({ s, x, w }) => {
+      pushAnchor(s.startTs, x);
+      pushAnchor(s.endTs, x + w);
+    });
+  });
+
+  const anchors = Array.from(anchorMap.entries())
+    .map(([ts, x]) => ({ ts, x }))
+    .sort((a, b) => a.ts - b.ts);
+
+  for (let idx = 1; idx < anchors.length; idx += 1) {
+    if (anchors[idx].x < anchors[idx - 1].x) {
+      anchors[idx].x = anchors[idx - 1].x;
+    }
+  }
+
+  return anchors;
+}
+
+export function interpolateGanttAxisX(ts, anchors, fallbackX) {
+  if (!Array.isArray(anchors) || anchors.length === 0 || !Number.isFinite(ts)) {
+    return fallbackX(ts);
+  }
+
+  if (anchors.length === 1) return anchors[0].x;
+  if (ts <= anchors[0].ts) return anchors[0].x;
+  if (ts >= anchors[anchors.length - 1].ts) return anchors[anchors.length - 1].x;
+
+  let low = 0;
+  let high = anchors.length - 1;
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    if (anchors[mid].ts === ts) return anchors[mid].x;
+    if (anchors[mid].ts < ts) low = mid + 1;
+    else high = mid - 1;
+  }
+
+  const right = anchors[low];
+  const left = anchors[Math.max(0, low - 1)];
+  const spanTs = right.ts - left.ts;
+  if (spanTs <= 0) return Math.max(left.x, right.x);
+
+  const ratio = (ts - left.ts) / spanTs;
+  return left.x + (right.x - left.x) * ratio;
+}
+
 export function buildGanttTicks(config) {
   const {
     timelineWidth,
@@ -236,7 +305,7 @@ export function buildGanttTicks(config) {
     displayMaxTs,
     collapseGaps,
     visibleSegments,
-    getX,
+    getTickX,
   } = config;
 
   const effPxPerHour = timelineWidth / Math.max(displaySpanHours, 1);
@@ -264,8 +333,8 @@ export function buildGanttTicks(config) {
       return;
     }
 
-    const lastX = getX(finalTicks[finalTicks.length - 1]);
-    const currX = getX(tickTs);
+    const lastX = getTickX(finalTicks[finalTicks.length - 1]);
+    const currX = getTickX(tickTs);
     if (tickTs === displayMaxTs) {
       if (currX - lastX >= 65) finalTicks.push(tickTs);
       else if (finalTicks.length > 1) finalTicks[finalTicks.length - 1] = tickTs;

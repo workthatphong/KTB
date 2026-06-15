@@ -8,6 +8,7 @@ import {
 import { mapSegmentsToRows } from './timelineUtils.js';
 import { resolveBusinessAxisTimestamp } from '../dashboard/utils/segmentData.js';
 import {
+  buildGanttAxisAnchors,
   buildGanttDisplayBounds,
   buildGanttGapInfo,
   buildGanttLaneSegments,
@@ -16,7 +17,8 @@ import {
   buildGanttPositionedBars,
   buildGanttTicks,
   compactGanttTimestamp,
-  getGanttVisibleLaneWindow
+  getGanttVisibleLaneWindow,
+  interpolateGanttAxisX
 } from './ganttLayoutUtils.js';
 import {
   GanttBarsSvg,
@@ -225,6 +227,18 @@ export const GanttTimelineChart = ({
     return maxRight;
   }, [lanes, laneToPositionedBars, timelineWidth]);
 
+  const axisAnchors = useMemo(() => buildGanttAxisAnchors({
+    lanes,
+    laneToPositionedBars,
+    displayMinTs,
+    displayMaxTs,
+    timelinePadLeft,
+    timelineWidth,
+    timelineSvgWidth,
+  }), [lanes, laneToPositionedBars, displayMinTs, displayMaxTs, timelinePadLeft, timelineWidth, timelineSvgWidth]);
+
+  const getAxisX = useCallback((ts) => interpolateGanttAxisX(ts, axisAnchors, getX), [axisAnchors, getX]);
+
   const isMobileViewport = typeof window !== 'undefined' && window.innerWidth <= 639;
   const mobileLaneLabelWidth = useMemo(() => {
     if (typeof document === 'undefined' || lanes.length === 0) return 72;
@@ -269,13 +283,13 @@ export const GanttTimelineChart = ({
     displayMaxTs,
     collapseGaps,
     visibleSegments,
-    getX,
-  }), [timelineWidth, displaySpanHours, displayMinTs, displayMaxTs, collapseGaps, visibleSegments, getX]);
+    getTickX: getAxisX,
+  }), [timelineWidth, displaySpanHours, displayMinTs, displayMaxTs, collapseGaps, visibleSegments, getAxisX]);
 
   const { startLaneIdx, endLaneIdx } = getGanttVisibleLaneWindow(scrollState, rowTopPadding, rowSlotHeight, lanes.length);
   const visibleLanes = lanes.slice(startLaneIdx, endLaneIdx + 1);
   const visibleTicks = ticks.filter((tick) => {
-    const x = getX(tick);
+    const x = getAxisX(tick);
     return x >= scrollState.left - 200 && x <= scrollState.left + scrollState.viewW + 200;
   });
 
@@ -474,7 +488,7 @@ export const GanttTimelineChart = ({
           timelineSvgWidth={timelineSvgWidth}
           headerHeight={headerHeight}
           visibleTicks={visibleTicks}
-          getX={getX}
+          getTickX={getAxisX}
           getLabelTs={getLabelTs}
         />
 
@@ -521,7 +535,7 @@ export const GanttTimelineChart = ({
                 stackStep={stackStep}
                 scrollState={scrollState}
                 showStarMarkers={showStarMarkers}
-                getX={getX}
+                getTickX={getAxisX}
                 onPickSegment={pickSegment}
                 onShowTooltip={showTooltip}
                 onHideTooltip={() => setHoveredSegment(null)}
