@@ -86,6 +86,8 @@ function toTimelineBarLabel(segmentType) {
 function shouldExcludeDetailActivity(activityLabel, documentLabel) {
   const haystack = `${String(activityLabel || '')} ${String(documentLabel || '')}`.toLowerCase();
   return haystack.includes('markup')
+    || haystack.includes('markdown')
+    || haystack.includes('mark down')
     || haystack.includes('timestamp')
     || haystack.includes('time stamp')
     || haystack.includes('time stam');
@@ -123,6 +125,7 @@ function buildTimelineDetailData(segments, timelineSettings) {
         documentLabel: segment.documentLabel || (segment.pageName ? `${segment.fileName || 'Unknown File'} / ${segment.pageName}` : (segment.fileName || 'Unknown File')),
       };
     })
+    .filter((bar) => !shouldExcludeDetailActivity(bar.activity, bar.documentLabel))
     .sort((a, b) => a.startTs - b.startTs);
 
   const barsByLane = new Map();
@@ -210,6 +213,13 @@ function buildUserGroups(segments, workloadVisibleRows) {
     const lane = toTimelineLane(segment.segmentType, segment.userName);
     if (lane === 'Idle') return;
     if (preferredUserSet.size > 0 && !preferredUserSet.has(lane)) return;
+
+    const durationSeconds = Number(segment.durationSeconds) || 0;
+    if (durationSeconds <= 0) return;
+
+    const activityLabel = toGanttSegmentTypeLabel(segment.segmentType);
+    if (shouldExcludeDetailActivity(activityLabel, segment.documentLabel)) return;
+
     if (!grouped.has(lane)) grouped.set(lane, []);
     grouped.get(lane).push(segment);
   });
@@ -253,6 +263,12 @@ function buildUserBreakdownGroups(segments, contributionRows) {
     const lane = toTimelineLane(segment.segmentType, segment.userName);
     if (!lane || lane === 'Idle' || lane === 'System') return;
 
+    const durationSeconds = Number(segment.durationSeconds) || 0;
+    if (durationSeconds <= 0) return;
+
+    const activityLabel = toGanttSegmentTypeLabel(segment.segmentType);
+    if (shouldExcludeDetailActivity(activityLabel, segment.documentLabel)) return;
+
     const drillGroup = toDrillGroup(segment.segmentType);
     const type = drillGroup === 'Review' || drillGroup === 'ReviewAutoClose'
       ? 'Review'
@@ -264,11 +280,11 @@ function buildUserBreakdownGroups(segments, contributionRows) {
     grouped.get(lane).push({
       id: segment.id || `${lane}-${segment.startTs}-${segment.segmentType}`,
       type,
-      activity: toGanttSegmentTypeLabel(segment.segmentType),
+      activity: activityLabel,
       start: segment.start,
       end: segment.end,
       startTs: segment.startTs,
-      durationSeconds: Number(segment.durationSeconds) || 0,
+      durationSeconds,
       documentLabel: segment.documentLabel,
     });
   });
@@ -335,11 +351,15 @@ function buildTimeBreakdownGroups(segments, selectedSegmentTypes, showProcessBre
   safeSegments.forEach((segment) => {
     const groupMeta = resolveGroupKey(segment);
     if (!groupMeta) return;
+
+    const durationSeconds = Number(segment.durationSeconds) || 0;
+    if (durationSeconds <= 0) return;
+
     const activityLabel = toGanttSegmentTypeLabel(segment.segmentType);
     if (shouldExcludeDetailActivity(activityLabel, segment.documentLabel)) return;
+
     if (!grouped.has(groupMeta.key)) grouped.set(groupMeta.key, { ...groupMeta, activities: [], totalSeconds: 0 });
     const entry = grouped.get(groupMeta.key);
-    const durationSeconds = Number(segment.durationSeconds) || 0;
     entry.activities.push({
       id: segment.id || `${groupMeta.key}-${segment.startTs}-${segment.segmentType}`,
       activity: activityLabel,

@@ -8,6 +8,8 @@ function isTransitionIdleSegment(segmentType) {
 function shouldExcludeTransitionActivity(activityLabel, documentLabel) {
   const haystack = `${String(activityLabel || '')} ${String(documentLabel || '')}`.toLowerCase();
   return haystack.includes('markup')
+    || haystack.includes('markdown')
+    || haystack.includes('mark down')
     || haystack.includes('timestamp')
     || haystack.includes('time stamp')
     || haystack.includes('time stam');
@@ -68,6 +70,7 @@ export function buildTransitionBreakdownGroups(segments, labels = {}) {
 
       const group = groups.get(groupKey);
       const durationSeconds = Number(curr.durationSeconds) || 0;
+      if (durationSeconds <= 0) continue;
       if (shouldExcludeTransitionActivity(curr.segmentType, curr.documentLabel)) continue;
       sheetTotals.set(groupKey, sheetTotals.get(groupKey) + durationSeconds);
       group.activities.push({
