@@ -1,6 +1,6 @@
 ﻿# Dashboard (Vercel + Supabase Ready) 
 
-## Project Structure  
+## Project Structure   
 
 ```text 
 .
