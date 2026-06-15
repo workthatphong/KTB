@@ -134,10 +134,10 @@ export function useDashboardData() {
     });
   };
 
-  const syncGSheet = async () => {
+  const syncGSheet = async (options = {}) => {
     setSyncing(true);
     try {
-      await triggerGSheetSync();
+      await triggerGSheetSync({ timeoutMs: options.timeoutMs });
     } finally {
       setSyncing(false);
     }
@@ -146,12 +146,14 @@ export function useDashboardData() {
   const refreshAll = async (options = {}) => {
     setLoading(true);
     try {
-      if (options.syncFirst !== false) await syncGSheet();
+      if (options.syncFirst !== false) {
+        await syncGSheet({ timeoutMs: options.syncTimeoutMs });
+      }
       await loadDashboardPayload(options);
       if (options.showRefreshPagePrompt) setShowRefreshPagePrompt(true);
 
       if (options.backgroundSync) {
-        syncGSheet()
+        syncGSheet({ timeoutMs: options.syncTimeoutMs })
           .then(() => loadDashboardPayload(options))
           .catch((error) => setBackendWarning(`Background sync error: ${error.message || 'Sync failed'}`));
       }

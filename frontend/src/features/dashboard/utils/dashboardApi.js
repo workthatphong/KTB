@@ -17,6 +17,9 @@ export async function fetchDashboardPayload(options = {}) {
   };
 }
 
-export async function triggerGSheetSync() {
-  return requestJson('/api/gsheet/sync', { method: 'POST' });
+export async function triggerGSheetSync(options = {}) {
+  return requestJson('/api/gsheet/sync', {
+    method: 'POST',
+    timeoutMs: options.timeoutMs,
+  });
 }
