@@ -139,7 +139,7 @@ export const GANTT_DRILL_GROUPS = [
   { key: 'EditAndComplete', label: 'Complete', color: oldvisualizcolor.ganttDrillGroupColors.EditAndComplete },
 ];
 
-export const GANTT_MIN_ZOOM_SCALE = 0.00000035;
+export const GANTT_MIN_ZOOM_SCALE = 0.035;
 export const GANTT_MAX_ZOOM_SCALE = 8000;
 export const GANTT_MAX_TIMELINE_WIDTH_PX = 120000000;
 
