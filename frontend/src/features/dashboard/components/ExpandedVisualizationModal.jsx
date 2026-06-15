@@ -1396,7 +1396,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 no-scrollbar min-w-0">
           <Suspense fallback={<ExpandedChartFallback />}>
             {visualizationId === 'gantt' && (
               <GanttTimelineChart

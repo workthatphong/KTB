@@ -157,15 +157,14 @@ export const DonutWorkloadChart = React.memo(({ rows, expanded = false }) => {
     : undefined;
 
   return (
-    <div className={`mt-2 grid grid-cols-1 ${expanded ? 'xl:grid-cols-[1fr_300px] gap-12' : 'lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-8'} items-start`}>
+    <div className={`mt-2 grid grid-cols-1 ${expanded ? 'lg:grid-cols-[1fr_300px] gap-8 xl:gap-12' : 'lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-8'} items-start`}>
       {/* SVG Visualization Container */}
-      <div className="relative flex justify-center items-center group min-w-0 py-4">
+      <div className={`relative flex justify-center items-center group min-w-0 py-4 ${expanded ? 'h-[40vh] min-h-[300px] max-h-[480px]' : ''}`}>
         <svg 
           ref={svgRef} 
-          width={size} 
-          height={size} 
           viewBox={`0 0 ${size} ${size}`}
-          className="drop-shadow-2xl overflow-visible max-w-full h-auto"
+          className={`drop-shadow-2xl overflow-visible max-w-full ${expanded ? 'w-full h-full' : `w-[${size}px] h-[${size}px]`}`}
+          style={!expanded ? { width: size, height: size } : undefined}
         >
           <g className="chart-group" transform={`translate(${size / 2}, ${size / 2})`}></g>
           
