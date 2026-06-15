@@ -6,6 +6,9 @@ export function SegmentDetailPopup({ segment, onClose }) {
   if (!segment) return null;
 
   const isSystem = segment.actorType === 'System' || (segment.userName || '').toLowerCase() === 'system';
+  const sourceLabel = segment.fileName || 'System Log';
+  const pageLabel = segment.pageName ? `${sourceLabel} / ${segment.pageName}` : sourceLabel;
+  const timeRangeLabel = `${toDisplayDate(segment.displayStart || segment.start)} - ${toDisplayDate(segment.displayEnd || segment.end)}`;
   
   // Decorative type label based on segment type
   const getTypeTag = () => {
@@ -32,7 +35,6 @@ export function SegmentDetailPopup({ segment, onClose }) {
               <h3 className="text-xl md:text-2xl font-bold text-[#17335f] leading-tight truncate">
                 {toGanttSegmentTypeLabel(segment.segmentType)}
               </h3>
-              <p className="text-slate-400 text-xs md:text-sm font-medium">Detailed activity metrics and context</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-all text-slate-400 hover:text-slate-600 shrink-0">
               <X className="w-5 h-5 md:w-6 md:h-6" />
@@ -40,67 +42,45 @@ export function SegmentDetailPopup({ segment, onClose }) {
           </div>
           
           <div className="space-y-4 md:space-y-6">
-            {/* Main Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               <div className="p-4 md:p-5 bg-slate-50/50 rounded-2xl border border-slate-100/80">
                 <div className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 md:mb-2 flex items-center gap-1.5">
                   <User className="w-3 h-3" />
-                  Responsible Actor
+                  Actor
                 </div>
                 <div className="text-sm md:text-base font-bold text-[#17335f] truncate">
                   {segment.userName || 'System Auto'}
                 </div>
-                <div className="text-[10px] md:text-xs text-slate-400 mt-0.5 font-medium">
-                  {isSystem ? 'Automated system task' : 'Manual user operation'}
+                <div className="text-[10px] md:text-xs text-slate-400 mt-0.5 font-medium">{isSystem ? 'System' : 'User'}</div>
+              </div>
+
+              <div className="p-4 md:p-5 bg-slate-50/50 rounded-2xl border border-slate-100/80">
+                <div className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 md:mb-2 flex items-center gap-1.5">
+                  <Clock className="w-3 h-3" />
+                  Duration
+                </div>
+                <div className="text-sm md:text-base font-bold text-[#00a4e4]">
+                  {formatDuration(segment.durationSeconds)}
+                </div>
+              </div>
+
+              <div className="p-4 md:p-5 bg-slate-50/50 rounded-2xl border border-slate-100/80">
+                <div className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 md:mb-2 flex items-center gap-1.5">
+                  <FileText className="w-3 h-3" />
+                  Source
+                </div>
+                <div className="text-sm md:text-base font-bold text-[#17335f] break-all line-clamp-2">
+                  {pageLabel}
                 </div>
               </div>
 
               <div className="p-4 md:p-5 bg-slate-50/50 rounded-2xl border border-slate-100/80">
                 <div className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 md:mb-2 flex items-center gap-1.5">
                   <Clock className="w-3 h-3" />
-                  Time Spent
+                  Time Range
                 </div>
-                <div className="text-sm md:text-base font-bold text-[#00a4e4]">
-                  {formatDuration(segment.durationSeconds)}
-                </div>
-                <div className="text-[10px] md:text-xs text-slate-400 mt-0.5 font-medium">
-                  Net processing duration
-                </div>
-              </div>
-            </div>
-
-            {/* Asset & Context Information */}
-            <div className="p-4 md:p-6 bg-[#fbfdff] rounded-2xl border border-[#eef8fd] space-y-4">
-              <div className="flex items-start gap-3 md:gap-4">
-                <div className="p-2.5 md:p-3 bg-white rounded-xl md:rounded-2xl shadow-sm border border-[#d7e8f6] shrink-0">
-                  <FileText className="w-5 h-5 md:w-6 md:h-6 text-[#3860be]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Source Document</div>
-                  <div className="text-sm md:text-base font-bold text-[#17335f] break-all line-clamp-2">
-                    {segment.fileName || 'System Log'}
-                  </div>
-                  {segment.pageName && (
-                    <div className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 bg-blue-50 text-[#3860be] text-[10px] md:text-[11px] font-bold rounded-md border border-blue-100/50">
-                      <FileText className="w-3 h-3" />
-                      Page/Sheet: {segment.pageName}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 md:gap-8 pt-4 md:pt-5 border-t border-[#eef8fd]">
-                <div>
-                  <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-1.5">Execution Start</div>
-                <div className="text-[11px] md:text-[13px] font-bold text-slate-700">
-                    {toDisplayDate(segment.displayStart || segment.start)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 md:mb-1.5">Execution End</div>
-                  <div className="text-[11px] md:text-[13px] font-bold text-slate-700">
-                    {toDisplayDate(segment.displayEnd || segment.end)}
-                  </div>
+                <div className="text-[11px] md:text-[13px] font-bold text-slate-700 break-words">
+                  {timeRangeLabel}
                 </div>
               </div>
             </div>

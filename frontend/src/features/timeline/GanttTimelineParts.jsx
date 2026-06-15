@@ -161,11 +161,15 @@ export const GanttTooltip = ({ hoveredSegment }) => {
           <span>Duration</span>
           <span className="text-[#00a4e4] text-[14px] font-bold">{formatDuration(hoveredSegment.durationSeconds)}</span>
         </div>
-        <div className="flex justify-between items-center">
-          <span>Time</span>
-          <span className="text-slate-600 font-medium">
-            {formatTimeTick(hoveredSegment.start)} - {formatTimeTick(hoveredSegment.end)}
-          </span>
+        <div className="space-y-1">
+          <div className="flex justify-between items-center">
+            <span>Start</span>
+            <span className="text-slate-600 font-medium">{formatTimeTick(hoveredSegment.start)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>End</span>
+            <span className="text-slate-600 font-medium">{formatTimeTick(hoveredSegment.end)}</span>
+          </div>
         </div>
       </div>
     </div>

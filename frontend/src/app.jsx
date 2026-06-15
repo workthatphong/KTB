@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useMemo } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { RefreshCw } from 'lucide-react';
 import { useAppController } from './hooks/useAppController.js';
@@ -9,13 +9,12 @@ const dashboardViewPromise = import('./features/dashboard/DashboardView.jsx').th
 const dataManagementViewPromise = import('./features/data-management/DataManagementView.jsx').then((module) => ({ default: module.DataManagementView }));
 const systemPerformanceViewPromise = import('./features/dashboard/views/SystemPerformanceView.jsx').then((module) => ({ default: module.SystemPerformanceView }));
 const expandedVisualizationModalPromise = import('./features/dashboard/components/ExpandedVisualizationModal.jsx').then((module) => ({ default: module.ExpandedVisualizationModal }));
-const segmentDetailPopupPromise = import('./features/dashboard/components/SegmentDetailPopup.jsx').then((module) => ({ default: module.SegmentDetailPopup }));
 
 const DashboardView = lazy(() => dashboardViewPromise);
 const DataManagementView = lazy(() => dataManagementViewPromise);
 const SystemPerformanceView = lazy(() => systemPerformanceViewPromise);
 const ExpandedVisualizationModal = lazy(() => expandedVisualizationModalPromise);
-const SegmentDetailPopup = lazy(() => segmentDetailPopupPromise);
+const noop = () => {};
 
 function PanelLoader() {
   return (
@@ -71,65 +70,12 @@ function App() {
     const shell = document.querySelector('.app-scroll-shell');
     if (!shell) return;
     
-    if (controller.selectedGanttSegment || controller.expandedVisualizationId) {
+    if (controller.expandedVisualizationId) {
       shell.style.overflow = 'hidden';
     } else {
       shell.style.overflow = 'auto';
     }
-  }, [controller.selectedGanttSegment, controller.expandedVisualizationId]);
-
-  const resolvedSelectedGanttSegment = useMemo(() => {
-    const selected = controller.selectedGanttSegment;
-    if (!selected) return null;
-
-    const latestMatch = (dashboard.ganttVisibleSegments || []).find((segment) =>
-      String(segment.fileName || '') === String(selected.fileName || '')
-      && String(segment.pageName || '') === String(selected.pageName || '')
-      && String(segment.start || '') === String(selected.start || '')
-      && String(segment.end || '') === String(selected.end || '')
-      && String(segment.userName || '') === String(selected.userName || '')
-    );
-
-    const resolved = latestMatch || selected;
-    if (!controller.ganttSingleLaneMode) return resolved;
-
-    const segmentType = String(resolved.segmentType || '');
-    if (!segmentType.startsWith('SYSTEM_SCHEDULED_REPROCESSING')) return resolved;
-
-    const selectedStartTs = Date.parse(String(resolved.start || ''));
-    const selectedEndTs = Date.parse(String(resolved.end || ''));
-    if (!Number.isFinite(selectedStartTs) || !Number.isFinite(selectedEndTs)) return resolved;
-
-    const sameSheetSegments = (dashboard.ganttVisibleSegments || []).filter((segment) =>
-      String(segment.fileName || '') === String(resolved.fileName || '')
-      && String(segment.pageName || '') === String(resolved.pageName || '')
-      && String(segment.userName || '').toLowerCase() === 'system'
-    );
-
-    const overlapSource = sameSheetSegments
-      .map((segment) => ({
-        ...segment,
-        startTs: Date.parse(String(segment.start || '')),
-        endTs: Date.parse(String(segment.end || '')),
-      }))
-      .filter((segment) =>
-        Number.isFinite(segment.startTs)
-        && Number.isFinite(segment.endTs)
-        && segment.segmentType === 'SYSTEM_INTERNAL_TRANSITION'
-        && segment.endTs <= selectedStartTs
-        && segment.endTs >= selectedStartTs - 1000
-      )
-      .sort((a, b) => b.startTs - a.startTs)[0];
-
-    if (!overlapSource) return resolved;
-
-    const mergedStartTs = Math.min(overlapSource.startTs, selectedStartTs);
-    return {
-      ...resolved,
-      start: new Date(mergedStartTs).toISOString(),
-      durationSeconds: Math.max(0, Math.round((selectedEndTs - mergedStartTs) / 1000)),
-    };
-  }, [controller.selectedGanttSegment, controller.ganttSingleLaneMode, dashboard.ganttVisibleSegments]);
+  }, [controller.expandedVisualizationId]);
 
   return (
     <>
@@ -171,7 +117,7 @@ function App() {
                 setGanttCollapseGaps={controller.setGanttCollapseGaps}
                 showGanttLegend={controller.showGanttLegend}
                 setShowGanttLegend={controller.setShowGanttLegend}
-                setSelectedGanttSegment={controller.setSelectedGanttSegment}
+                setSelectedGanttSegment={noop}
                 setExpandedVisualizationId={controller.setExpandedVisualizationId}
               />
             )}
@@ -219,12 +165,6 @@ function App() {
       ) : null}
 
       <Suspense fallback={null}>
-        {resolvedSelectedGanttSegment ? (
-          <SegmentDetailPopup
-            segment={resolvedSelectedGanttSegment}
-            onClose={() => controller.setSelectedGanttSegment(null)}
-          />
-        ) : null}
         {controller.expandedVisualizationId ? (
           <ExpandedVisualizationModal
             visualizationId={controller.expandedVisualizationId}
@@ -238,7 +178,7 @@ function App() {
               contributionRows: dashboard.contributionRows,
               mergeReviewAndEdit: controller.mergeReviewAndEdit,
               mergeSpread: controller.mergeSpread,
-              setSelectedGanttSegment: controller.setSelectedGanttSegment,
+              setSelectedGanttSegment: noop,
               timelineSettings: {
                 singleLane: controller.ganttSingleLaneMode,
                 showSystemLane: controller.showSystemLane,

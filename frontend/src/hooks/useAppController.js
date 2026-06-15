@@ -13,7 +13,6 @@ export function useAppController(dashboard) {
   const [activeView, setActiveView] = useState('dashboard');
   const [openDropdown, setOpenDropdown] = useState('');
   const [expandedVisualizationId, setExpandedVisualizationId] = useState('');
-  const [selectedGanttSegment, setSelectedGanttSegment] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = usePersistentState('sidebar_collapsed', false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -100,8 +99,6 @@ export function useAppController(dashboard) {
     setOpenDropdown,
     expandedVisualizationId,
     setExpandedVisualizationId,
-    selectedGanttSegment,
-    setSelectedGanttSegment,
     uploading,
     isSidebarCollapsed,
     setIsSidebarCollapsed,
