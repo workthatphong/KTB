@@ -70,7 +70,7 @@ export function useAppController(dashboard) {
   const handleDeleteSource = async (id) => {
     try {
       await requestJson(`/api/sources/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      await refreshAll();
+      await refreshAll({ syncFirst: false });
     } catch (error) {
       setErrorMessage(error.message, error);
     }
@@ -79,7 +79,7 @@ export function useAppController(dashboard) {
   const handleConnectGSheet = async (url) => {
     try {
       await requestJson('/api/gsheet/connect', { method: 'POST', body: JSON.stringify({ url }) });
-      await refreshAll();
+      await refreshAll({ syncFirst: false });
     } catch (error) {
       setErrorMessage(error.message, error);
     }
@@ -88,7 +88,7 @@ export function useAppController(dashboard) {
   const handleDisconnectGSheet = async (id) => {
     try {
       await requestJson(`/api/gsheet/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      await refreshAll();
+      await refreshAll({ syncFirst: false });
     } catch (error) {
       setErrorMessage(error.message, error);
     }
