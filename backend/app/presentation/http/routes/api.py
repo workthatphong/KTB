@@ -43,7 +43,17 @@ def api_dashboard():
         "true",
         "yes",
     }
-    return jsonify(dashboard_service.api_dashboard_payload(include_debug=include_debug))
+    refresh_snapshot = str(request.args.get("refreshSnapshot", "")).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    return jsonify(
+        dashboard_service.api_dashboard_payload(
+            include_debug=include_debug,
+            refresh_snapshot=refresh_snapshot,
+        )
+    )
 
 
 @api_bp.post("/upload")

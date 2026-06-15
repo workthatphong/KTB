@@ -56,6 +56,11 @@ def _write_cached_sheet_tabs(
         )
 
 
+def _clear_cached_sheet_tabs(spreadsheet_id: str) -> None:
+    with _GSHEET_TAB_CACHE_LOCK:
+        _GSHEET_TAB_CACHE.pop(spreadsheet_id, None)
+
+
 def utc_now_iso() -> str:
     return dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
@@ -126,12 +131,15 @@ def _download_single_gsheet_tab(
         return None
 
 
-def _discover_gsheet_gids(spreadsheet_id: str) -> list[tuple[str, int]]:
-    cached_tabs = _read_cached_sheet_tabs(spreadsheet_id)
+def _discover_gsheet_gids(
+    spreadsheet_id: str,
+    force_refresh: bool = False,
+) -> list[tuple[str, int]]:
+    cached_tabs = None if force_refresh else _read_cached_sheet_tabs(spreadsheet_id)
     if cached_tabs:
         return cached_tabs
 
-    stale_tabs = _read_cached_sheet_tabs(spreadsheet_id, allow_stale=True)
+    stale_tabs = None if force_refresh else _read_cached_sheet_tabs(spreadsheet_id, allow_stale=True)
     try:
         html_url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit?usp=sharing"
         html_bytes = _fetch_url_bytes(html_url, timeout=30)
@@ -181,9 +189,18 @@ def _discover_gsheet_gids(spreadsheet_id: str) -> list[tuple[str, int]]:
     return [("Sheet1", 0)]
 
 
-def _download_gsheet_pages(spreadsheet_id: str, preferred_gid: int | None = None) -> list[tuple[str, list[dict]]]:
+def _download_gsheet_pages(
+    spreadsheet_id: str,
+    preferred_gid: int | None = None,
+    force_tab_refresh: bool = False,
+) -> list[tuple[str, list[dict]]]:
     all_pages: list[tuple[str, list[dict]]] = []
-    discovered_tabs = _discover_gsheet_gids(spreadsheet_id)
+    if force_tab_refresh:
+        _clear_cached_sheet_tabs(spreadsheet_id)
+    discovered_tabs = _discover_gsheet_gids(
+        spreadsheet_id,
+        force_refresh=force_tab_refresh,
+    )
 
     gid_to_name: dict[int, str] = {}
     for sheet_name, gid in discovered_tabs:
@@ -304,7 +321,11 @@ def sync_all_gsheets() -> list[dict]:
         connection_id = row["connection_id"]
         try:
             preferred_gid = _extract_gsheet_gid(str(row["url"] or ""))
-            all_pages = _download_gsheet_pages(spreadsheet_id, preferred_gid=preferred_gid)
+            all_pages = _download_gsheet_pages(
+                spreadsheet_id,
+                preferred_gid=preferred_gid,
+                force_tab_refresh=True,
+            )
             if not all_pages:
                 results.append({"connection_id": connection_id, "status": "no_data"})
                 continue
