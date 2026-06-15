@@ -35,6 +35,12 @@ function shouldAutoSyncConnections(connections) {
   });
 }
 
+function normalizeUserErrorMessage(message) {
+  const trimmedMessage = String(message || '').trim();
+  if (!trimmedMessage) return 'Refresh failed';
+  return trimmedMessage;
+}
+
 export function useDashboardData() {
   const [sources, setSources] = useState([]);
   const [gsheetConnections, setGsheetConnections] = useState([]);
@@ -48,6 +54,13 @@ export function useDashboardData() {
   const [backendWarning, setBackendWarning] = useState('');
   const [debugFetchError, setDebugFetchError] = useState('');
   const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
+  const setUserErrorMessage = (message, errorLike = null) => {
+    if (errorLike?.isTimeout) {
+      setErrorMessage('');
+      return;
+    }
+    setErrorMessage(normalizeUserErrorMessage(message));
+  };
 
   const [datePreset, setDatePreset] = usePersistentState('filter_datePreset', 'all');
   const [dateStart, setDateStart] = usePersistentState('filter_dateStart', '');
@@ -171,7 +184,7 @@ export function useDashboardData() {
           .catch((error) => setBackendWarning(`Background sync error: ${error.message || 'Sync failed'}`));
       }
     } catch (error) {
-      setErrorMessage(error.message || 'Refresh failed');
+      setUserErrorMessage(error.message || 'Refresh failed', error);
     } finally {
       setLoading(false);
       if (!options.backgroundSync) setSyncing(false);
@@ -254,6 +267,6 @@ export function useDashboardData() {
     contributionRows,
     workloadContributors,
     refreshAll,
-    setErrorMessage,
+    setErrorMessage: setUserErrorMessage,
   };
 }

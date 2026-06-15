@@ -6,7 +6,7 @@ export async function requestJson(path, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
-  const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : 15000;
+  const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : 30000;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
 
@@ -29,7 +29,9 @@ export async function requestJson(path, options = {}) {
     return data;
   } catch (error) {
     if (error?.name === 'AbortError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms`);
+      const timeoutError = new Error(`Request timed out after ${timeoutMs}ms`);
+      timeoutError.isTimeout = true;
+      throw timeoutError;
     }
     throw error;
   } finally {

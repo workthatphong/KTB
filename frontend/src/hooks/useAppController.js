@@ -54,7 +54,7 @@ export function useAppController(dashboard) {
       await requestJson('/api/upload', { method: 'POST', body: JSON.stringify({ files: payloadFiles }) });
       uploadSucceeded = true;
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message, error);
     } finally {
       setUploading(false);
     }
@@ -62,7 +62,7 @@ export function useAppController(dashboard) {
     if (uploadSucceeded) {
       // Refresh UI after upload without blocking upload state on optional sheet sync.
       refreshAll({ syncFirst: false, backgroundSync: true }).catch((error) => {
-        setErrorMessage(error.message || 'Refresh failed');
+        setErrorMessage(error.message || 'Refresh failed', error);
       });
     }
   };
@@ -72,7 +72,7 @@ export function useAppController(dashboard) {
       await requestJson(`/api/sources/${encodeURIComponent(id)}`, { method: 'DELETE' });
       await refreshAll();
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message, error);
     }
   };
 
@@ -81,7 +81,7 @@ export function useAppController(dashboard) {
       await requestJson('/api/gsheet/connect', { method: 'POST', body: JSON.stringify({ url }) });
       await refreshAll();
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message, error);
     }
   };
 
@@ -90,7 +90,7 @@ export function useAppController(dashboard) {
       await requestJson(`/api/gsheet/${encodeURIComponent(id)}`, { method: 'DELETE' });
       await refreshAll();
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message, error);
     }
   };
 
