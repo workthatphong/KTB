@@ -51,8 +51,6 @@ export const DashboardView = React.memo(({
   workloadVisibleRows,
   showProcessBreakdownIdle,
   setShowProcessBreakdownIdle,
-  showProcessBreakdownLabels,
-  setShowProcessBreakdownLabels,
   mergeReviewAndEdit,
   setMergeReviewAndEdit,
   mergeSpread,
@@ -385,7 +383,6 @@ export const DashboardView = React.memo(({
                     <div className="space-y-3">
                       <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
                       <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
-                      <ToggleSetting checked={showProcessBreakdownLabels} onChange={() => setShowProcessBreakdownLabels(!showProcessBreakdownLabels)}>Show Bar Labels</ToggleSetting>
                     </div>
                   </div>
                 )}
@@ -396,7 +393,7 @@ export const DashboardView = React.memo(({
           <div className="flex-1 min-h-0">
             {chartBaseSegments.length === 0 ? <EmptyState icon={Clock} title="No Data" /> : (
               <Suspense fallback={<ChartPanelFallback />}>
-                <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels={showProcessBreakdownLabels} />
+                <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels />
               </Suspense>
             )}
           </div>
@@ -413,7 +410,7 @@ export const DashboardView = React.memo(({
           <div className="flex-1 min-h-0">
             {chartBaseSegments.length === 0 ? <EmptyState icon={Clock} title="No Data" /> : (
               <Suspense fallback={<ChartPanelFallback />}>
-                <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels={showProcessBreakdownLabels} />
+                <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />
               </Suspense>
             )}
           </div>

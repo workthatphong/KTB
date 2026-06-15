@@ -153,9 +153,16 @@ svg tspan.font-black {
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
+@keyframes confirmIconInSafe {
+  0% { transform: scale(0.88) rotate(-10deg); }
+  60% { transform: scale(1.06) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
 .confirm-overlay-enter { animation: confirmOverlayIn 200ms ease-out; }
 .confirm-panel-enter { animation: confirmPanelIn 380ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 .confirm-check-enter { animation: confirmCheckIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms both; }
+.confirm-icon-enter-safe { animation: confirmIconInSafe 360ms cubic-bezier(0.34, 1.56, 0.64, 1) 90ms both; }
 
 @keyframes refreshPopupOverlayIn {
   from { opacity: 0; }
@@ -245,6 +252,7 @@ svg tspan.font-black {
 .confirm-overlay-enter,
 .confirm-panel-enter,
 .confirm-check-enter,
+.confirm-icon-enter-safe,
 .refresh-popup-overlay-enter,
 .refresh-popup-panel-enter,
 .refresh-popup-icon-enter,
@@ -280,6 +288,7 @@ svg tspan.font-black {
   .confirm-overlay-enter,
   .confirm-panel-enter,
   .confirm-check-enter,
+  .confirm-icon-enter-safe,
   .refresh-popup-overlay-enter,
   .refresh-popup-panel-enter,
   .refresh-popup-icon-enter,

@@ -1260,7 +1260,6 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     chartBaseSegments,
     selectedSegmentTypes,
     showProcessBreakdownIdle,
-    showProcessBreakdownLabels,
     workloadVisibleRows,
     contributionRows,
     mergeReviewAndEdit,
@@ -1440,9 +1439,9 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             <KpiBreakdownView kpiId={kpiId} segments={chartBaseSegments || ganttVisibleSegments} expanded />
           )}
           <Suspense fallback={<ExpandedChartFallback />}>
-            {visualizationId === 'process-breakdown' && <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels={showProcessBreakdownLabels} />}
+            {visualizationId === 'process-breakdown' && <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels />}
             {visualizationId === 'contribution' && <UserContributionStackChart key={contributionAnimationKey} rows={contributionRows} expanded />}
-            {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels={showProcessBreakdownLabels} />}
+            {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />}
           </Suspense>
         </div>
       </div>

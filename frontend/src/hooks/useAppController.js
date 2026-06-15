@@ -22,7 +22,6 @@ export function useAppController(dashboard) {
   const [documentFileSearch, setDocumentFileSearch] = useState('');
   const [documentSheetSearch, setDocumentSheetSearch] = useState('');
   const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true);
-  const [showProcessBreakdownLabels, setShowProcessBreakdownLabels] = usePersistentState('filter_showProcessBreakdownLabels', true);
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true);
   const [mergeSpread, setMergeSpread] = usePersistentState('chart_mergeSpread', false);
   const [ganttSingleLaneMode, setGanttSingleLaneMode] = usePersistentState('filter_ganttSingleLaneMode', false);
@@ -118,8 +117,6 @@ export function useAppController(dashboard) {
     setDocumentSheetSearch,
     showProcessBreakdownIdle,
     setShowProcessBreakdownIdle,
-    showProcessBreakdownLabels,
-    setShowProcessBreakdownLabels,
     mergeReviewAndEdit,
     setMergeReviewAndEdit,
     mergeSpread,

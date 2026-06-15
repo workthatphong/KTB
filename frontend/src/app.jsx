@@ -158,8 +158,6 @@ function App() {
                 workloadVisibleRows={controller.workloadVisibleRows}
                 showProcessBreakdownIdle={controller.showProcessBreakdownIdle}
                 setShowProcessBreakdownIdle={controller.setShowProcessBreakdownIdle}
-                showProcessBreakdownLabels={controller.showProcessBreakdownLabels}
-                setShowProcessBreakdownLabels={controller.setShowProcessBreakdownLabels}
                 mergeReviewAndEdit={controller.mergeReviewAndEdit}
                 setMergeReviewAndEdit={controller.setMergeReviewAndEdit}
                 mergeSpread={controller.mergeSpread}
@@ -187,33 +185,33 @@ function App() {
           onClick={() => dashboard.setShowRefreshPagePrompt(false)}
         >
           <div
-            className="w-full max-w-md rounded-[2rem] border border-[#bfe8f8] bg-white p-8 shadow-[0_28px_80px_-32px_rgba(23,51,95,0.45)] refresh-popup-panel-enter"
+            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden refresh-popup-panel-enter"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-[#00a4e4] to-[#3860be] text-white refresh-popup-icon-enter">
-              <RefreshCw className="h-9 w-9" />
-            </div>
-            <div className="text-center">
-              <h2 className="text-2xl font-extrabold text-[#17335f]">Refresh สำเร็จ</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                ระบบอัปเดตข้อมูลเรียบร้อยแล้ว กรุณา Refresh หน้าเว็บเพื่อโหลดข้อมูลล่าสุด
+            <div className="p-10 text-center">
+              <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-[#00a4e4] to-[#3860be] text-white refresh-popup-icon-enter">
+                <RefreshCw className="h-12 w-12" />
+              </div>
+              <h2 className="text-3xl font-black text-[#17335f] mb-4">Refresh Complete</h2>
+              <p className="text-lg text-slate-500 mb-10 leading-relaxed px-4">
+                Data has been updated successfully. Please refresh the page to load the latest information.
               </p>
-            </div>
-            <div className="mt-7 flex gap-3">
-              <button
-                type="button"
-                onClick={() => dashboard.setShowRefreshPagePrompt(false)}
-                className="flex-1 rounded-2xl bg-slate-100 px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
-              >
-                ภายหลัง
-              </button>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                className="flex-1 rounded-2xl bg-gradient-to-r from-[#00a4e4] to-[#3860be] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-sky-100 transition-transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Refresh หน้าเว็บ
-              </button>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => dashboard.setShowRefreshPagePrompt(false)}
+                  className="flex-1 py-5 px-8 bg-slate-100 hover:bg-slate-200 text-slate-700 text-lg font-bold rounded-2xl transition-all active:scale-95"
+                >
+                  Later
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="flex-1 py-5 px-8 bg-gradient-to-r from-[#00a4e4] to-[#3860be] text-white text-lg font-bold rounded-2xl shadow-xl shadow-sky-100 transition-all active:scale-95"
+                >
+                  Refresh Page
+                </button>
+              </div>
             </div>
           </div>
         </div>,
@@ -236,7 +234,6 @@ function App() {
               chartBaseSegments: dashboard.chartBaseSegments,
               selectedSegmentTypes: dashboard.selectedSegmentTypes,
               showProcessBreakdownIdle: controller.showProcessBreakdownIdle,
-              showProcessBreakdownLabels: controller.showProcessBreakdownLabels,
               workloadVisibleRows: controller.workloadVisibleRows,
               contributionRows: dashboard.contributionRows,
               mergeReviewAndEdit: controller.mergeReviewAndEdit,

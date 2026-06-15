@@ -56,7 +56,7 @@ export const DataManagementView = ({ sources, onUploadFiles, onDeleteSource, onC
       <div className="max-w-[1600px] mx-auto space-y-6 animate-in fade-in duration-300">
         <div className="flex justify-between items-end mb-6">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-[#17335f]">Data Management</h1>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17335f]">Data Management</h1>
             <p className="text-slate-500 mt-1">Upload files or connect Google Sheets to consolidate all your data in one place.</p>
           </div>
         </div>
@@ -204,7 +204,7 @@ export const DataManagementView = ({ sources, onUploadFiles, onDeleteSource, onC
             onClick={e => e.stopPropagation()}
           >
             <div className="p-10 text-center">
-              <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 confirm-check-enter">
+              <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 confirm-icon-enter-safe">
                 <Trash2 className="w-12 h-12 text-red-500" />
               </div>
               <h3 className="text-3xl font-black text-[#17335f] mb-4">Delete Data Source?</h3>
@@ -241,7 +241,7 @@ export const DataManagementView = ({ sources, onUploadFiles, onDeleteSource, onC
             onClick={e => e.stopPropagation()}
           >
             <div className="p-10 text-center">
-              <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 confirm-check-enter">
+              <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 confirm-icon-enter-safe">
                 <Trash2 className="w-12 h-12 text-red-500" />
               </div>
               <h3 className="text-3xl font-black text-[#17335f] mb-4">Disconnect Google Sheet?</h3>
