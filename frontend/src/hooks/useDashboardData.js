@@ -54,6 +54,7 @@ export function useDashboardData() {
   const [backendWarning, setBackendWarning] = useState('');
   const [debugFetchError, setDebugFetchError] = useState('');
   const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
+  const [showRefreshPagePrompt, setShowRefreshPagePrompt] = useState(false);
   const setUserErrorMessage = (message, errorLike = null) => {
     if (errorLike?.isTimeout) {
       setErrorMessage('');
@@ -177,6 +178,7 @@ export function useDashboardData() {
     try {
       if (options.syncFirst !== false) await syncGSheet();
       await loadDashboardPayload(options);
+      if (options.showRefreshPagePrompt) setShowRefreshPagePrompt(true);
 
       if (options.backgroundSync) {
         syncGSheet()
@@ -222,6 +224,8 @@ export function useDashboardData() {
     backendWarning,
     debugFetchError,
     isInitialLoadDone,
+    showRefreshPagePrompt,
+    setShowRefreshPagePrompt,
     datePreset,
     setDatePreset,
     dateStart,

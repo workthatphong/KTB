@@ -1,4 +1,6 @@
 import React, { Suspense, lazy, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { RefreshCw } from 'lucide-react';
 import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
@@ -178,6 +180,45 @@ function App() {
           </Suspense>
         )}
       </DashboardLayout>
+
+      {dashboard.showRefreshPagePrompt ? createPortal(
+        <div
+          className="fixed inset-0 z-[550] bg-[#17335f]/35 backdrop-blur-sm flex items-center justify-center p-4 refresh-popup-overlay-enter"
+          onClick={() => dashboard.setShowRefreshPagePrompt(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-[2rem] border border-[#bfe8f8] bg-white p-8 shadow-[0_28px_80px_-32px_rgba(23,51,95,0.45)] refresh-popup-panel-enter"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-[#00a4e4] to-[#3860be] text-white refresh-popup-icon-enter">
+              <RefreshCw className="h-9 w-9" />
+            </div>
+            <div className="text-center">
+              <h2 className="text-2xl font-extrabold text-[#17335f]">Refresh สำเร็จ</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                ระบบอัปเดตข้อมูลเรียบร้อยแล้ว กรุณา Refresh หน้าเว็บเพื่อโหลดข้อมูลล่าสุด
+              </p>
+            </div>
+            <div className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={() => dashboard.setShowRefreshPagePrompt(false)}
+                className="flex-1 rounded-2xl bg-slate-100 px-5 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
+              >
+                ภายหลัง
+              </button>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="flex-1 rounded-2xl bg-gradient-to-r from-[#00a4e4] to-[#3860be] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-sky-100 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Refresh หน้าเว็บ
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      ) : null}
 
       <Suspense fallback={null}>
         {resolvedSelectedGanttSegment ? (
