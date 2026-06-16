@@ -5,17 +5,11 @@ import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
 
-const dashboardViewPromise = import('./features/dashboard/DashboardView.jsx').then((module) => ({ default: module.DashboardView }));
-const dataManagementViewPromise = import('./features/data-management/DataManagementView.jsx').then((module) => ({ default: module.DataManagementView }));
-const systemPerformanceViewPromise = import('./features/dashboard/views/SystemPerformanceView.jsx').then((module) => ({ default: module.SystemPerformanceView }));
-const sheetPerformanceViewPromise = import('./features/dashboard/views/SheetPerformanceView.jsx').then((module) => ({ default: module.SheetPerformanceView }));
-const expandedVisualizationModalPromise = import('./features/dashboard/components/ExpandedVisualizationModal.jsx').then((module) => ({ default: module.ExpandedVisualizationModal }));
-
-const DashboardView = lazy(() => dashboardViewPromise);
-const DataManagementView = lazy(() => dataManagementViewPromise);
-const SystemPerformanceView = lazy(() => systemPerformanceViewPromise);
-const SheetPerformanceView = lazy(() => sheetPerformanceViewPromise);
-const ExpandedVisualizationModal = lazy(() => expandedVisualizationModalPromise);
+const DashboardView = lazy(() => import('./features/dashboard/DashboardView.jsx').then(m => ({ default: m.DashboardView })));
+const DataManagementView = lazy(() => import('./features/data-management/DataManagementView.jsx').then(m => ({ default: m.DataManagementView })));
+const SystemPerformanceView = lazy(() => import('./features/dashboard/views/SystemPerformanceView.jsx').then(m => ({ default: m.SystemPerformanceView })));
+const SheetPerformanceView = lazy(() => import('./features/dashboard/views/SheetPerformanceView.jsx').then(m => ({ default: m.SheetPerformanceView })));
+const ExpandedVisualizationModal = lazy(() => import('./features/dashboard/components/ExpandedVisualizationModal.jsx').then(m => ({ default: m.ExpandedVisualizationModal })));
 const noop = () => {};
 
 function PanelLoader() {

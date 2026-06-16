@@ -239,25 +239,9 @@ export const DashboardView = React.memo(({
     setGanttCollapseGaps(!ganttCollapseGaps);
   };
 
-  const isKpiInteractive = React.useMemo(() => {
-    const { selectedFiles, selectedSheets } = dashboard;
-    const fileCount = (selectedFiles || []).length;
-    const sheetCount = (selectedSheets || []).length;
-    
-    // Condition: Many files, or multiple sheets, or a whole file (1 file, but not specifying only 1 sheet)
-    // If sheetCount is 1, it means exactly one page is selected.
-    // If sheetCount is 0, it depends on files. If fileCount > 0, it means all sheets in those files.
-    if (fileCount > 1) return true;
-    if (sheetCount > 1) return true;
-    if (fileCount === 1 && sheetCount === 0) return true; // Whole file selected
-    return false;
-  }, [dashboard.selectedFiles, dashboard.selectedSheets]);
-
   const handleKpiClick = (kpiId) => {
-    if (!isKpiInteractive) return;
-    setExpandedVisualizationId(`kpi-breakdown-${kpiId}`);
+    // KPI interaction removed as requested
   };
-
   return (
     <div className="max-w-[1600px] 2xl:max-w-[1760px] mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
@@ -269,12 +253,10 @@ export const DashboardView = React.memo(({
 
       <div className="grid grid-cols-5 gap-1 sm:gap-3 lg:gap-6 2xl:gap-8 mb-10">
         {kpiData.map((kpi, idx) => {
-          const isInteractive = isKpiInteractive; // Allow all KPI cards that meet the selection criteria to be clickable
           return (
             <div
               key={kpi.id}
-              onClick={() => handleKpiClick(kpi.id)}
-              className={`relative min-w-0 bg-white px-0.5 py-1.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#d7e8f6] shadow-ktb text-center sm:text-left animate-stagger-${Math.min(idx + 1, 5)} ${isInteractive ? 'cursor-pointer hover:border-[#00a4e4] hover:shadow-lg transition-all active:scale-[0.98]' : 'cursor-default'}`}
+              className={`relative min-w-0 bg-white px-0.5 py-1.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#d7e8f6] shadow-ktb text-center sm:text-left animate-stagger-${Math.min(idx + 1, 5)} cursor-default`}
             >
               <div className={`hidden sm:flex w-10 h-10 rounded-xl ${kpi.bg} items-center justify-center mb-4 relative z-10`}>
                 <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
@@ -284,11 +266,6 @@ export const DashboardView = React.memo(({
               <div className="hidden sm:block relative z-10 min-w-0">
                 <KpiSubtext text={kpi.subtext} />
               </div>
-              {isInteractive && (
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 sm:block hidden">
-                  <Maximize2 className="w-3 h-3 text-slate-300" />
-                </div>
-              )}
             </div>
           );
         })}
