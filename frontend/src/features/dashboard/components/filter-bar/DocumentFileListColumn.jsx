@@ -6,10 +6,12 @@ export function DocumentFileListColumn({
   filteredDocumentTree,
   documentFileSearch,
   setDocumentFileSearch,
-  selectedFileSet,
+  selectedFiles,
+  selectedSheets,
   activeDocumentFile,
   setActiveDocumentFile,
   fileDisplayNames,
+  getDocumentFileSelectionState,
   pinnedFileSet,
   onToggleFileSelection,
   onTogglePin,
@@ -18,6 +20,21 @@ export function DocumentFileListColumn({
 }) {
   const [editingFileName, setEditingFileName] = React.useState('');
   const [draftDisplayName, setDraftDisplayName] = React.useState('');
+  const checkboxRefs = React.useRef({});
+
+  React.useEffect(() => {
+    filteredDocumentTree.forEach((item) => {
+      const checkbox = checkboxRefs.current[item.fileName];
+      if (!checkbox) return;
+      const selectionState = getDocumentFileSelectionState({
+        fileName: item.fileName,
+        sheetCount: item.sheets.length,
+        selectedFiles,
+        selectedSheets,
+      });
+      checkbox.indeterminate = selectionState.indeterminate;
+    });
+  }, [filteredDocumentTree, getDocumentFileSelectionState, selectedFiles, selectedSheets]);
 
   const beginRename = (fileName) => {
     setEditingFileName(fileName);
@@ -52,6 +69,12 @@ export function DocumentFileListColumn({
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
         {filteredDocumentTree.map((item) => {
+          const selectionState = getDocumentFileSelectionState({
+            fileName: item.fileName,
+            sheetCount: item.sheets.length,
+            selectedFiles,
+            selectedSheets,
+          });
           const isPinned = pinnedFileSet.has(item.fileName);
           const displayName = fileDisplayNames?.[item.fileName] || item.fileName;
           const isEditing = editingFileName === item.fileName;
@@ -63,11 +86,14 @@ export function DocumentFileListColumn({
               className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${activeDocumentFile === item.fileName ? 'bg-blue-50/50' : 'hover:bg-slate-50'}`}
             >
               <input
+                ref={(node) => {
+                  checkboxRefs.current[item.fileName] = node;
+                }}
                 type="checkbox"
-                checked={selectedFileSet.has(item.fileName)}
+                checked={selectionState.checked}
                 onChange={(e) => {
                   e.stopPropagation();
-                  onToggleFileSelection(item.fileName, selectedFileSet.has(item.fileName));
+                  onToggleFileSelection(item.fileName, selectionState.checked || selectionState.indeterminate);
                 }}
                 className="h-4 w-4 accent-blue-600 rounded"
               />

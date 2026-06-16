@@ -115,3 +115,23 @@ export function getDocumentSummary(selectedFiles, selectedSheets) {
   if (selectedSheets.length > 0) return `${selectedSheets.length} Sheets`;
   return `${selectedFiles.length} Files`;
 }
+
+export function getDocumentFileSelectionState({
+  fileName,
+  sheetCount,
+  selectedFiles,
+  selectedSheets,
+}) {
+  const selectedSheetCount = selectedSheets.filter(
+    (sheetKey) => extractFileNameFromSheetKey(sheetKey) === fileName,
+  ).length;
+
+  const isWholeFileSelected = selectedFiles.includes(fileName) && selectedSheetCount === 0;
+  const isPartiallySelected = selectedSheetCount > 0 && selectedSheetCount < sheetCount;
+  const isAllSheetsSelectedIndividually = sheetCount > 0 && selectedSheetCount === sheetCount;
+
+  return {
+    checked: isWholeFileSelected || isAllSheetsSelectedIndividually,
+    indeterminate: isPartiallySelected,
+  };
+}

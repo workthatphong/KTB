@@ -4,6 +4,7 @@ import { FilterPopover } from '../../../../components/shared/FilterPopover.jsx';
 import { buildSheetKey } from '../../../../lib/utils.js';
 import {
   getDocumentSummary,
+  getDocumentFileSelectionState,
   getFilteredDocumentTree,
   getFilteredSheetsForActiveFile,
 } from './utils.js';
@@ -51,7 +52,6 @@ export const DocumentFilterPopover = React.memo(({
     [documentTree, activeDocumentFile, documentSheetSearch, pinnedSheets, pageDisplayNames],
   );
 
-  const selectedFileSet = useMemo(() => new Set(selectedFiles), [selectedFiles]);
   const selectedSheetSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
   const pinnedFileSet = useMemo(() => new Set(pinnedFiles), [pinnedFiles]);
   const pinnedSheetSet = useMemo(() => new Set(pinnedSheets), [pinnedSheets]);
@@ -81,10 +81,12 @@ export const DocumentFilterPopover = React.memo(({
           filteredDocumentTree={filteredDocumentTree}
           documentFileSearch={documentFileSearch}
           setDocumentFileSearch={setDocumentFileSearch}
-          selectedFileSet={selectedFileSet}
+          selectedFiles={selectedFiles}
+          selectedSheets={selectedSheets}
           activeDocumentFile={activeDocumentFile}
           setActiveDocumentFile={setActiveDocumentFile}
           fileDisplayNames={fileDisplayNames}
+          getDocumentFileSelectionState={getDocumentFileSelectionState}
           pinnedFileSet={pinnedFileSet}
           onToggleFileSelection={onToggleFileSelection}
           onTogglePin={onTogglePinnedFile}
