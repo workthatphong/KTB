@@ -24,7 +24,10 @@ export function DashboardLayout({
     setDocumentFileSearch,
     documentSheetSearch,
     setDocumentSheetSearch,
+    systemDocumentFileSearch,
+    setSystemDocumentFileSearch,
   } = controller;
+  const isSystemPerformanceView = activeView === 'sheet-performance';
 
   return (
     <div className="flex h-screen bg-[#fbfdff] font-sans text-slate-900 overflow-hidden">
@@ -40,16 +43,17 @@ export function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <FilterBar
           dashboard={dashboard}
+          filterMode={isSystemPerformanceView ? 'system-performance' : 'dashboard'}
           openDropdown={openDropdown}
           setOpenDropdown={setOpenDropdown}
           userSearchText={userSearchText}
           setUserSearchText={setUserSearchText}
           segmentTypeSearchText={segmentTypeSearchText}
           setSegmentTypeSearchText={setSegmentTypeSearchText}
-          documentFileSearch={documentFileSearch}
-          setDocumentFileSearch={setDocumentFileSearch}
-          documentSheetSearch={documentSheetSearch}
-          setDocumentSheetSearch={setDocumentSheetSearch}
+          documentFileSearch={isSystemPerformanceView ? systemDocumentFileSearch : documentFileSearch}
+          setDocumentFileSearch={isSystemPerformanceView ? setSystemDocumentFileSearch : setDocumentFileSearch}
+          documentSheetSearch={isSystemPerformanceView ? '' : documentSheetSearch}
+          setDocumentSheetSearch={isSystemPerformanceView ? (() => {}) : setDocumentSheetSearch}
           onMenuClick={() => setIsMobileSidebarOpen(true)}
         />
 

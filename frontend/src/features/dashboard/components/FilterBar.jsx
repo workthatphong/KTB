@@ -10,6 +10,7 @@ import {
 
 export const FilterBar = React.memo(({
   dashboard,
+  filterMode = 'dashboard',
   openDropdown,
   setOpenDropdown,
   documentFileSearch,
@@ -22,32 +23,33 @@ export const FilterBar = React.memo(({
     loading,
     syncing,
     refreshAll,
-    datePreset,
-    setDatePreset,
-    dateStart,
-    setDateStart,
-    dateEnd,
-    setDateEnd,
-    excludeWeekends,
-    setExcludeWeekends,
-    weekendExcludedCount,
-    selectedFiles,
-    setSelectedFiles,
-    selectedSheets,
-    setSelectedSheets,
-    pinnedFiles,
-    setPinnedFiles,
-    pinnedSheets,
-    setPinnedSheets,
-    activeDocumentFile,
-    setActiveDocumentFile,
     fileDisplayNames,
     setFileDisplayNames,
     pageDisplayNames,
     setPageDisplayNames,
-    documentTree,
     invalidSheetCounts,
   } = dashboard;
+  const isSystemFilterMode = filterMode === 'system-performance';
+  const datePreset = isSystemFilterMode ? dashboard.systemDatePreset : dashboard.datePreset;
+  const setDatePreset = isSystemFilterMode ? dashboard.setSystemDatePreset : dashboard.setDatePreset;
+  const dateStart = isSystemFilterMode ? dashboard.systemDateStart : dashboard.dateStart;
+  const setDateStart = isSystemFilterMode ? dashboard.setSystemDateStart : dashboard.setDateStart;
+  const dateEnd = isSystemFilterMode ? dashboard.systemDateEnd : dashboard.dateEnd;
+  const setDateEnd = isSystemFilterMode ? dashboard.setSystemDateEnd : dashboard.setDateEnd;
+  const excludeWeekends = isSystemFilterMode ? dashboard.systemExcludeWeekends : dashboard.excludeWeekends;
+  const setExcludeWeekends = isSystemFilterMode ? dashboard.setSystemExcludeWeekends : dashboard.setExcludeWeekends;
+  const weekendExcludedCount = isSystemFilterMode ? dashboard.systemWeekendExcludedCount : dashboard.weekendExcludedCount;
+  const selectedFiles = isSystemFilterMode ? dashboard.systemSelectedFiles : dashboard.selectedFiles;
+  const setSelectedFiles = isSystemFilterMode ? dashboard.setSystemSelectedFiles : dashboard.setSelectedFiles;
+  const selectedSheets = isSystemFilterMode ? [] : dashboard.selectedSheets;
+  const setSelectedSheets = isSystemFilterMode ? null : dashboard.setSelectedSheets;
+  const pinnedFiles = isSystemFilterMode ? dashboard.systemPinnedFiles : dashboard.pinnedFiles;
+  const setPinnedFiles = isSystemFilterMode ? dashboard.setSystemPinnedFiles : dashboard.setPinnedFiles;
+  const pinnedSheets = isSystemFilterMode ? [] : dashboard.pinnedSheets;
+  const setPinnedSheets = isSystemFilterMode ? null : dashboard.setPinnedSheets;
+  const activeDocumentFile = isSystemFilterMode ? dashboard.systemActiveDocumentFile : dashboard.activeDocumentFile;
+  const setActiveDocumentFile = isSystemFilterMode ? dashboard.setSystemActiveDocumentFile : dashboard.setActiveDocumentFile;
+  const documentTree = isSystemFilterMode ? dashboard.systemDocumentTree : dashboard.documentTree;
 
   const handleToggleFileSelection = (fileName, currentlyChecked = false) => {
     const { nextFiles, nextSheets } = updateSelectionForFile({
@@ -57,7 +59,7 @@ export const FilterBar = React.memo(({
       currentlyChecked,
     });
     setSelectedFiles(nextFiles);
-    setSelectedSheets(nextSheets);
+    if (setSelectedSheets) setSelectedSheets(nextSheets);
   };
 
   const handleToggleSheetSelection = (sheetName) => {
@@ -70,7 +72,7 @@ export const FilterBar = React.memo(({
       sheetName,
     });
     setSelectedFiles(nextFiles);
-    setSelectedSheets(nextSheets);
+    if (setSelectedSheets) setSelectedSheets(nextSheets);
   };
 
   const handleTogglePinnedFile = (fileName) => {
@@ -78,12 +80,12 @@ export const FilterBar = React.memo(({
   };
 
   const handleTogglePinnedSheet = (sheetKey) => {
-    setPinnedSheets((prev) => togglePinInList(prev, sheetKey));
+    if (setPinnedSheets) setPinnedSheets((prev) => togglePinInList(prev, sheetKey));
   };
 
   const handleClearDocumentSelection = () => {
     setSelectedFiles([]);
-    setSelectedSheets([]);
+    if (setSelectedSheets) setSelectedSheets([]);
   };
 
   const handleRenameFile = (fileName, nextDisplayName) => {
@@ -140,6 +142,7 @@ export const FilterBar = React.memo(({
           <DocumentFilterPopover
             openDropdown={openDropdown}
             setOpenDropdown={setOpenDropdown}
+            allowSheetSelection={!isSystemFilterMode}
             documentTree={documentTree}
             selectedFiles={selectedFiles}
             selectedSheets={selectedSheets}

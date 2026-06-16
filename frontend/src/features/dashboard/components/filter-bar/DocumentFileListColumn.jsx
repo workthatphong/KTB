@@ -17,6 +17,7 @@ export function DocumentFileListColumn({
   onTogglePin,
   onRenameFile,
   onClearSelection,
+  fullWidth = false,
 }) {
   const [editingFileName, setEditingFileName] = React.useState('');
   const [draftDisplayName, setDraftDisplayName] = React.useState('');
@@ -53,7 +54,7 @@ export function DocumentFileListColumn({
   };
 
   return (
-    <div className="w-1/2 flex flex-col">
+    <div className={`${fullWidth ? 'w-full' : 'w-1/2'} flex flex-col`}>
       <div className="p-3 border-b border-slate-50 space-y-2">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Source Files</div>

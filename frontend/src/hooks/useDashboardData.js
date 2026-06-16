@@ -39,6 +39,11 @@ export function useDashboardData() {
   const [excludeWeekends, setExcludeWeekends] = usePersistentState('filter_excludeWeekends', false);
   const [selectedFiles, setSelectedFiles] = usePersistentState('filter_selectedFiles', []);
   const [selectedSheets, setSelectedSheets] = usePersistentState('filter_selectedSheets', []);
+  const [systemDatePreset, setSystemDatePreset] = usePersistentState('system_filter_datePreset', 'all');
+  const [systemDateStart, setSystemDateStart] = usePersistentState('system_filter_dateStart', '');
+  const [systemDateEnd, setSystemDateEnd] = usePersistentState('system_filter_dateEnd', '');
+  const [systemExcludeWeekends, setSystemExcludeWeekends] = usePersistentState('system_filter_excludeWeekends', false);
+  const [systemSelectedFiles, setSystemSelectedFiles] = usePersistentState('system_filter_selectedFiles', []);
   const [selectedUsers, setSelectedUsers] = usePersistentState('filter_selectedUsers', []);
   const [selectedSegmentTypes, setSelectedSegmentTypes] = usePersistentState('filter_selectedSegmentTypes', []);
   const [showIdle, setShowIdle] = usePersistentState('filter_showIdle', false);
@@ -47,6 +52,8 @@ export function useDashboardData() {
   const [pinnedFiles, setPinnedFiles] = usePersistentState('filter_pinnedFiles', []);
   const [pinnedSheets, setPinnedSheets] = usePersistentState('filter_pinnedSheets', []);
   const [activeDocumentFile, setActiveDocumentFile] = usePersistentState('filter_activeDocumentFile', '');
+  const [systemPinnedFiles, setSystemPinnedFiles] = usePersistentState('system_filter_pinnedFiles', []);
+  const [systemActiveDocumentFile, setSystemActiveDocumentFile] = usePersistentState('system_filter_activeDocumentFile', '');
   const [fileDisplayNames, setFileDisplayNames] = usePersistentState('filter_fileDisplayNames', {});
   const [pageDisplayNames, setPageDisplayNames] = usePersistentState('filter_pageDisplayNames', {});
 
@@ -71,6 +78,23 @@ export function useDashboardData() {
     selectedSegmentTypes,
   });
 
+  const {
+    parsedSegments: systemParsedSegments,
+    documentTree: systemDocumentTree,
+    dateRangeBounds: systemDateRangeBounds,
+    weekendExcludedCount: systemWeekendExcludedCount,
+  } = useDashboardDerivedData({
+    sources,
+    performance,
+    datePreset: systemDatePreset,
+    dateStart: systemDateStart,
+    dateEnd: systemDateEnd,
+    excludeWeekends: systemExcludeWeekends,
+    selectedFiles: systemSelectedFiles,
+    selectedSheets: [],
+    selectedSegmentTypes: [],
+  });
+
   const { filteredBaseSegments, ganttVisibleSegments } = useDashboardFilters(parsedSegments, {
     selectedFiles,
     selectedSheets,
@@ -79,6 +103,16 @@ export function useDashboardData() {
     showIdle,
     dateRangeBounds,
     excludeWeekends,
+  });
+
+  const { filteredBaseSegments: systemFilteredBaseSegments } = useDashboardFilters(systemParsedSegments, {
+    selectedFiles: systemSelectedFiles,
+    selectedSheets: [],
+    selectedUsers: [],
+    selectedSegmentTypes: [],
+    showIdle: true,
+    dateRangeBounds: systemDateRangeBounds,
+    excludeWeekends: systemExcludeWeekends,
   });
 
   const {
@@ -91,6 +125,14 @@ export function useDashboardData() {
     filteredBaseSegments,
     showWorkloadIdle,
     selectedSegmentTypes: normalizedSelectedSegmentTypes,
+  });
+
+  const {
+    flowRows: systemFlowRows,
+  } = useDashboardMetrics({
+    filteredBaseSegments: systemFilteredBaseSegments,
+    showWorkloadIdle: true,
+    selectedSegmentTypes: [],
   });
 
   const buildSupabaseErrorMessage = (healthInfo) => {
@@ -193,10 +235,20 @@ export function useDashboardData() {
     setDateEnd,
     excludeWeekends,
     setExcludeWeekends,
+    systemDatePreset,
+    setSystemDatePreset,
+    systemDateStart,
+    setSystemDateStart,
+    systemDateEnd,
+    setSystemDateEnd,
+    systemExcludeWeekends,
+    setSystemExcludeWeekends,
     selectedFiles,
     setSelectedFiles,
     selectedSheets,
     setSelectedSheets,
+    systemSelectedFiles,
+    setSystemSelectedFiles,
     selectedUsers,
     setSelectedUsers,
     selectedSegmentTypes: normalizedSelectedSegmentTypes,
@@ -211,22 +263,30 @@ export function useDashboardData() {
     setPinnedFiles,
     pinnedSheets,
     setPinnedSheets,
+    systemPinnedFiles,
+    setSystemPinnedFiles,
     activeDocumentFile,
     setActiveDocumentFile,
+    systemActiveDocumentFile,
+    setSystemActiveDocumentFile,
     fileDisplayNames,
     setFileDisplayNames,
     pageDisplayNames,
     setPageDisplayNames,
     documentTree,
+    systemDocumentTree,
     userOptions,
     weekendExcludedCount,
+    systemWeekendExcludedCount,
     segmentTypeOptions,
     invalidSheetCounts,
     ganttVisibleSegments,
+    systemFilteredBaseSegments,
     chartBaseSegments,
     kpiData,
     filteredBaseSegments,
     flowRows,
+    systemFlowRows,
     contributionRows,
     workloadContributors,
     refreshAll,

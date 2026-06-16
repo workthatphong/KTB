@@ -93,9 +93,9 @@ function App() {
               healthInfo={dashboard.healthInfo}
             />
             ) : controller.activeView === 'system-performance' ? (
-              <SystemPerformanceView segments={dashboard.ganttVisibleSegments} flowRows={dashboard.flowRows} />
+              <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
             ) : controller.activeView === 'sheet-performance' ? (
-              <SheetPerformanceView />
+              <SheetPerformanceView segments={dashboard.systemFilteredBaseSegments} />
             ) : (
               <DashboardView
                 dashboard={dashboard}

@@ -14,6 +14,7 @@ import { DocumentSheetListColumn } from './DocumentSheetListColumn.jsx';
 export const DocumentFilterPopover = React.memo(({
   openDropdown,
   setOpenDropdown,
+  allowSheetSelection = true,
   documentTree,
   selectedFiles,
   selectedSheets,
@@ -68,15 +69,15 @@ export const DocumentFilterPopover = React.memo(({
     <FilterPopover
       id="document-file"
       title="Documents"
-      summary={getDocumentSummary(selectedFiles, selectedSheets)}
+      summary={getDocumentSummary(selectedFiles, selectedSheets, allowSheetSelection)}
       openDropdown={openDropdown}
       setOpenDropdown={setOpenDropdown}
       icon={FileText}
       active={selectedFiles.length > 0 || selectedSheets.length > 0}
       minWidthClass="min-w-[240px] max-sm:min-w-0"
-      panelClassName="w-[640px] max-w-[92vw]"
+      panelClassName={allowSheetSelection ? 'w-[640px] max-w-[92vw]' : 'w-[320px] max-w-[92vw]'}
     >
-      <div className="flex h-[420px] divide-x divide-slate-100">
+      <div className={`flex h-[420px] ${allowSheetSelection ? 'divide-x divide-slate-100' : ''}`}>
         <DocumentFileListColumn
           filteredDocumentTree={filteredDocumentTree}
           documentFileSearch={documentFileSearch}
@@ -92,21 +93,24 @@ export const DocumentFilterPopover = React.memo(({
           onTogglePin={onTogglePinnedFile}
           onRenameFile={onRenameFile}
           onClearSelection={onClearSelection}
+          fullWidth={!allowSheetSelection}
         />
 
-        <DocumentSheetListColumn
-          activeDocumentEntry={activeDocumentEntry}
-          filteredSheetsForActiveFile={sheetItems}
-          documentSheetSearch={documentSheetSearch}
-          setDocumentSheetSearch={setDocumentSheetSearch}
-          selectedSheetSet={selectedSheetSet}
-          pinnedSheetSet={pinnedSheetSet}
-          pageDisplayNames={pageDisplayNames}
-          invalidSheetCounts={invalidSheetCounts}
-          onToggleSheetSelection={onToggleSheetSelection}
-          onTogglePin={onTogglePinnedSheet}
-          onRenamePage={onRenamePage}
-        />
+        {allowSheetSelection ? (
+          <DocumentSheetListColumn
+            activeDocumentEntry={activeDocumentEntry}
+            filteredSheetsForActiveFile={sheetItems}
+            documentSheetSearch={documentSheetSearch}
+            setDocumentSheetSearch={setDocumentSheetSearch}
+            selectedSheetSet={selectedSheetSet}
+            pinnedSheetSet={pinnedSheetSet}
+            pageDisplayNames={pageDisplayNames}
+            invalidSheetCounts={invalidSheetCounts}
+            onToggleSheetSelection={onToggleSheetSelection}
+            onTogglePin={onTogglePinnedSheet}
+            onRenamePage={onRenamePage}
+          />
+        ) : null}
       </div>
     </FilterPopover>
   );

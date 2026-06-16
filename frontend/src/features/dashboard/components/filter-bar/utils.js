@@ -110,9 +110,9 @@ export function getDateRangeSummary(datePreset, dateStart, dateEnd) {
   return summary;
 }
 
-export function getDocumentSummary(selectedFiles, selectedSheets) {
+export function getDocumentSummary(selectedFiles, selectedSheets, allowSheetSelection = true) {
   if (selectedFiles.length === 0 && selectedSheets.length === 0) return 'Select Document';
-  if (selectedSheets.length > 0) return `${selectedSheets.length} Sheets`;
+  if (allowSheetSelection && selectedSheets.length > 0) return `${selectedSheets.length} Sheets`;
   return `${selectedFiles.length} Files`;
 }
 
