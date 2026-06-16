@@ -437,9 +437,42 @@ export const GanttTimelineChart = ({
     const resolvedStartTs = getLabelTs(segment.startTs);
     const resolvedEndTs = getLabelTs(segment.endTs);
     const displayLane = segment.origLane || lane;
+
+    // Tooltip dimensions and viewport boundaries
+    const tooltipWidth = 280;
+    const tooltipHeight = 160; 
+    const offset = 12;
+    const edgeBuffer = 10;
+
+    // Viewport-relative positions
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+
+    let vX = clientX + offset;
+    let vY = clientY + offset;
+
+    // Reflect horizontally if it would go off the right screen edge
+    if (vX + tooltipWidth > window.innerWidth - edgeBuffer) {
+      vX = clientX - tooltipWidth - offset;
+    }
+
+    // Reflect vertically if it would go off the bottom screen edge (e.g., Task Bar)
+    if (vY + tooltipHeight > window.innerHeight - edgeBuffer) {
+      vY = clientY - tooltipHeight - offset;
+    }
+
+    // Convert back to container-relative coordinates
+    let finalX = vX - rect.left;
+    let finalY = vY - rect.top;
+
+    // Clamp to container boundaries to avoid breaking layout if window is very small
+    finalX = Math.max(edgeBuffer, Math.min(finalX, rect.width - tooltipWidth - edgeBuffer));
+    // Vertical clamping is more relaxed because it can overlap header/legend if needed to stay on screen
+    finalY = Math.max(-rect.top + edgeBuffer, Math.min(finalY, rect.height - tooltipHeight - edgeBuffer));
+
     const nextHoveredSegment = {
-      x: Math.max(8, Math.min(x + 12, rect.width - 318)),
-      y: Math.max(8, Math.min(y + 12, rect.height - 132)),
+      x: finalX,
+      y: finalY,
       lane: displayLane,
       color,
       groupLabel: GANTT_DRILL_GROUP_LABELS[segment.drillGroup] || segment.drillGroup,
