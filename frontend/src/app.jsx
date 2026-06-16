@@ -8,11 +8,13 @@ import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
 const dashboardViewPromise = import('./features/dashboard/DashboardView.jsx').then((module) => ({ default: module.DashboardView }));
 const dataManagementViewPromise = import('./features/data-management/DataManagementView.jsx').then((module) => ({ default: module.DataManagementView }));
 const systemPerformanceViewPromise = import('./features/dashboard/views/SystemPerformanceView.jsx').then((module) => ({ default: module.SystemPerformanceView }));
+const sheetPerformanceViewPromise = import('./features/dashboard/views/SheetPerformanceView.jsx').then((module) => ({ default: module.SheetPerformanceView }));
 const expandedVisualizationModalPromise = import('./features/dashboard/components/ExpandedVisualizationModal.jsx').then((module) => ({ default: module.ExpandedVisualizationModal }));
 
 const DashboardView = lazy(() => dashboardViewPromise);
 const DataManagementView = lazy(() => dataManagementViewPromise);
 const SystemPerformanceView = lazy(() => systemPerformanceViewPromise);
+const SheetPerformanceView = lazy(() => sheetPerformanceViewPromise);
 const ExpandedVisualizationModal = lazy(() => expandedVisualizationModalPromise);
 const noop = () => {};
 
@@ -98,6 +100,8 @@ function App() {
             />
             ) : controller.activeView === 'system-performance' ? (
               <SystemPerformanceView segments={dashboard.ganttVisibleSegments} flowRows={dashboard.flowRows} />
+            ) : controller.activeView === 'sheet-performance' ? (
+              <SheetPerformanceView />
             ) : (
               <DashboardView
                 dashboard={dashboard}

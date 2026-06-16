@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
+  BarChart3,
 } from 'lucide-react';
 
 const navItemClass = (isActive, isCollapsed) => `flex items-center rounded-xl font-semibold transition-[padding,background-color,border-color,color,box-shadow] duration-300 group
@@ -89,6 +90,21 @@ const SidebarContent = ({
           <LayoutDashboard className={`w-5 h-5 flex-shrink-0 transition-colors ${activeView === 'dashboard' ? 'text-[#00a4e4]' : ''}`} />
           <span className={labelClass(isCollapsed)}>
             Dashboard Overview
+          </span>
+        </a>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            setActiveView('sheet-performance');
+            if (mobile) setMobileOpen(false);
+          }}
+          className={navItemClass(activeView === 'sheet-performance', isCollapsed)}
+          title="Sheet Performance"
+        >
+          <BarChart3 className={`w-5 h-5 flex-shrink-0 transition-colors ${activeView === 'sheet-performance' ? 'text-[#00a4e4]' : ''}`} />
+          <span className={labelClass(isCollapsed)}>
+            Sheet Performance
           </span>
         </a>
       </nav>
