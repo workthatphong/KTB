@@ -157,6 +157,18 @@ export const GanttTooltip = ({ hoveredSegment }) => {
           <span>Lane</span>
           <span className="text-[#17335f] text-[12px]">{hoveredSegment.lane}</span>
         </div>
+        {hoveredSegment.showSourceDetails ? (
+          <>
+            <div className="flex justify-between items-center gap-3 pb-1 border-b border-slate-50">
+              <span>File</span>
+              <span className="text-[#17335f] text-[12px] text-right break-all">{hoveredSegment.fileName || '-'}</span>
+            </div>
+            <div className="flex justify-between items-center gap-3 pb-1 border-b border-slate-50">
+              <span>Sheet</span>
+              <span className="text-[#17335f] text-[12px] text-right break-all">{hoveredSegment.sheetName || '-'}</span>
+            </div>
+          </>
+        ) : null}
         <div className="flex justify-between items-center pb-1 border-b border-slate-50">
           <span>Duration</span>
           <span className="text-[#00a4e4] text-[14px] font-bold">{formatDuration(hoveredSegment.durationSeconds)}</span>

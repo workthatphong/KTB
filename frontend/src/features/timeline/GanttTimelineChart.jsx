@@ -153,6 +153,12 @@ export const GanttTimelineChart = ({
     if (!showIdleLane && segment.origLane === 'Idle') return false;
     return true;
   }), [mapped, displayMinTs, displayMaxTs, showSystemLane, showIdleLane]);
+  const showTooltipSourceDetails = useMemo(() => {
+    const uniqueSheets = new Set(
+      visibleSegments.map((segment) => `${String(segment.fileName || '')}::${String(segment.pageName || '')}`)
+    );
+    return uniqueSheets.size > 1;
+  }, [visibleSegments]);
 
   const gapsInfo = useMemo(
     () => buildGanttGapInfo(collapseGaps, visibleSegments, displayMinTs, displayMaxTs),
@@ -440,7 +446,7 @@ export const GanttTimelineChart = ({
 
     // Tooltip dimensions and viewport boundaries
     const tooltipWidth = 280;
-    const tooltipHeight = 160; 
+    const tooltipHeight = showTooltipSourceDetails ? 220 : 160;
     const offset = 12;
     const edgeBuffer = 10;
 
@@ -475,8 +481,11 @@ export const GanttTimelineChart = ({
       y: finalY,
       lane: displayLane,
       color,
+      showSourceDetails: showTooltipSourceDetails,
       groupLabel: GANTT_DRILL_GROUP_LABELS[segment.drillGroup] || segment.drillGroup,
       segmentType: segment.segmentType,
+      fileName: segment.fileName || 'Unknown File',
+      sheetName: segment.pageName || '',
       start: new Date(resolvedStartTs).toISOString(),
       end: new Date(resolvedEndTs).toISOString(),
       durationSeconds: segment.durationSeconds,
@@ -491,7 +500,10 @@ export const GanttTimelineChart = ({
           prev.y === nextHoveredSegment.y &&
           prev.lane === nextHoveredSegment.lane &&
           prev.color === nextHoveredSegment.color &&
+          prev.showSourceDetails === nextHoveredSegment.showSourceDetails &&
           prev.segmentType === nextHoveredSegment.segmentType &&
+          prev.fileName === nextHoveredSegment.fileName &&
+          prev.sheetName === nextHoveredSegment.sheetName &&
           prev.start === nextHoveredSegment.start &&
           prev.end === nextHoveredSegment.end &&
           prev.durationSeconds === nextHoveredSegment.durationSeconds
