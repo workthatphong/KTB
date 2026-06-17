@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
 import { buildKpisFromSegments } from '../../../lib/kpiUtils.js';
@@ -56,13 +56,14 @@ function buildSheetPerformanceChartsData(segments) {
 
 export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = useState(false);
-  const [mergeSpread, setMergeSpread] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const settingsRef = React.useRef(null);
+  const [mergeEdit, setMergeEdit] = useState(true);
+  const [mergeSpread, setMergeSpread] = useState(true);
+  const [showMatrixFilter, setShowMatrixFilter] = useState(false);
+  const matrixFilterRef = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target)) setShowSettings(false);
+      if (matrixFilterRef.current && !matrixFilterRef.current.contains(event.target)) setShowMatrixFilter(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -76,24 +77,6 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17335f]">Sheet Performance</h1>
           <p className="text-slate-500 mt-1">Detailed performance analysis breakdown by individual sheets and pages.</p>
-        </div>
-        <div className="relative" ref={settingsRef}>
-          <button 
-            onClick={() => setShowSettings(!showSettings)} 
-            className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all font-bold text-sm ${showSettings ? 'bg-[#00a4e4] text-white border-[#00a4e4] shadow-lg' : 'bg-white text-slate-600 border-[#d7e8f6] hover:bg-slate-50'}`}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            <span>Process Settings</span>
-          </button>
-          {showSettings && (
-            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-[#d7e8f6] shadow-xl p-5 z-[100] dropdown-slide-enter">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Display Options</div>
-              <div className="space-y-4">
-                <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
-                <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -120,10 +103,28 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4 z-10">
+          <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4 ${showMatrixFilter ? 'z-[120]' : 'z-10'}`}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-[#17335f]">Sheet Process Breakdown</h2>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="relative" ref={matrixFilterRef}>
+                  <button 
+                    onClick={() => setShowMatrixFilter(!showMatrixFilter)} 
+                    className={`p-1.5 border rounded-md transition-colors bg-white ${showMatrixFilter ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                  </button>
+                  {showMatrixFilter && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[130] dropdown-slide-enter">
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Process Settings</div>
+                      <div className="space-y-3">
+                        <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
+                        <ToggleSetting checked={mergeEdit} onChange={() => setMergeEdit(!mergeEdit)}>Merge Edit</ToggleSetting>
+                        <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <button onClick={() => setExpandedVisualizationId('sheet-matrix')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white"><Maximize2 className="w-4 h-4" /></button>
               </div>
             </div>
@@ -132,6 +133,7 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
                 segments={segments} 
                 maxVisibleRows={4} 
                 externalMergeReviewAndEdit={mergeReviewAndEdit}
+                externalMergeEdit={mergeEdit}
                 externalMergeSpread={mergeSpread}
               />
             </div>
