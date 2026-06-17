@@ -217,7 +217,7 @@ export const SheetProcessMatrix = React.memo(({
                 <span className="font-bold text-[#17335f] truncate max-w-[75%]">{sheet.name}</span>
                 <span className="text-[12px] font-bold text-slate-500">{formatDuration(sheet.totalWorkSeconds)}</span>
               </div>
-              <div className="h-2.5 w-full rounded-full bg-slate-100/80 overflow-hidden shadow-inner flex">
+              <div className="h-5 w-full rounded-full bg-slate-100/80 overflow-hidden shadow-inner flex">
                 {(() => {
                   const itemsWithWidth = workItems.map(item => ({
                     ...item,
@@ -232,10 +232,12 @@ export const SheetProcessMatrix = React.memo(({
                       visualWidth = 0.5;
                     }
                     
+                    const portionPercent = (item.seconds / (sheet.totalWorkSeconds || 1)) * 100;
+                    
                     return (
                       <div
                         key={item.label}
-                        className="h-full cursor-pointer transition-all duration-300 hover:brightness-110 opacity-100"
+                        className="h-full cursor-pointer transition-all duration-300 hover:brightness-110 opacity-100 flex items-center justify-center overflow-hidden"
                         style={{ 
                           width: `${visualWidth}%`, 
                           backgroundColor: item.color
@@ -251,7 +253,13 @@ export const SheetProcessMatrix = React.memo(({
                           setHoveredSheet(null);
                           setHoveredType(null);
                         }}
-                      />
+                      >
+                        {visualWidth > 5 && portionPercent >= 1 && (
+                          <span className="text-[9px] text-white drop-shadow-sm whitespace-nowrap">
+                            {formatPercent(item.seconds / (sheet.totalWorkSeconds || 1))}
+                          </span>
+                        )}
+                      </div>
                     );
                   });
                 })()}
