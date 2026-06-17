@@ -85,22 +85,22 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-1 overflow-visible">
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-1 overflow-visible relative hover:z-50 transition-all">
               <h2 className="text-lg font-bold mb-0 text-[#17335f]">
 Total Time</h2>
               <SheetBreakdownChart data={chartData.totalTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-2 overflow-visible">
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-2 overflow-visible relative hover:z-50 transition-all">
               <h2 className="text-lg font-bold mb-0 text-[#17335f]">
 User Time</h2>
               <SheetBreakdownChart data={chartData.userTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-3 overflow-visible">
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-3 overflow-visible relative hover:z-50 transition-all">
               <h2 className="text-lg font-bold mb-0 text-[#17335f]">
 System Time</h2>
               <SheetBreakdownChart data={chartData.systemTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4 overflow-visible">
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4 overflow-visible relative hover:z-50 transition-all">
               <h2 className="text-lg font-bold mb-0 text-[#17335f]">
 Idle Time</h2>
               <SheetBreakdownChart data={chartData.idleTimeData} isDuration={true} />

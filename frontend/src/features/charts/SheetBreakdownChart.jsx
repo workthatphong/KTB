@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   BarChart,
   Bar,
@@ -19,9 +20,8 @@ function clampLabel(label, maxLength = 12) {
   return `${text.slice(0, maxLength - 1)}...`;
 }
 
-function DurationBarLabel({ x, y, width, height, value, index, data, isDuration }) {
+function DurationBarLabel({ x, y, width, height, value, index, data, isDuration, average }) {
   if (value === undefined || value === null || value === 0) return null;
-  const average = data.reduce((acc, curr) => acc + curr.value, 0) / data.length;
   
   if (value < average) return null;
 
@@ -38,27 +38,38 @@ function DurationBarLabel({ x, y, width, height, value, index, data, isDuration 
   );
 }
 
-const CustomTooltip = ({ active, payload, label, isDuration }) => {
-  if (active && payload && payload.length) {
+const CustomTooltip = ({ active, payload, label, isDuration, coordinate, containerRef }) => {
+  if (active && payload && payload.length && coordinate && containerRef.current) {
+    const rect = containerRef.current.getBoundingClientRect();
     const value = payload[0].value;
-    return (
-      <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-xl">
+    
+    const left = rect.left + coordinate.x + 10;
+    const top = rect.top + coordinate.y - 60;
+
+    return createPortal(
+      <div 
+        className="fixed pointer-events-none bg-white p-3 border border-slate-200 shadow-2xl rounded-xl z-[99999]"
+        style={{ left: `${left}px`, top: `${top}px` }}
+      >
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
         <p className="text-lg font-extrabold text-[#17335f]">
           {isDuration ? formatDuration(value) : value.toLocaleString()}
         </p>
-      </div>
+      </div>,
+      document.body
     );
   }
   return null;
 };
 
 export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
-  const chartId = React.useId();
+  const reactId = React.useId();
+  const containerRef = useRef(null);
+  
   if (!data || data.length === 0) return null;
 
-  const average = data.reduce((acc, curr) => acc + curr.value, 0) / data.length;
-  const maxVal = Math.max(...data.map(d => d.value), average, 1);
+  const average = data.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) / data.length;
+  const maxVal = Math.max(...data.map(d => Number(d.value) || 0), average, 1);
   const niceMax = maxVal * 1.25; 
 
   const barHeight = 40;
@@ -67,23 +78,23 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
   
   const yAxisWidth = 130;
   const chartMargin = { top: 10, right: 80, left: 10, bottom: 5 };
-  const syncId = `sheet-breakdown-${chartId}`;
+  // Sanitize ID for syncId
+  const syncId = `sheet-breakdown-${reactId.replace(/:/g, '_')}`;
 
   return (
-    <div className="w-full flex flex-col bg-white mt-4 relative hover:z-50 transition-all overflow-visible">
-      {/* Scrollable area for Bars and Y-Axis - Higher Z-index for tooltips */}
+    <div className="w-full flex flex-col bg-white mt-4 relative transition-all" ref={containerRef}>
+      {/* Scrollable area for Bars and Y-Axis */}
       <div 
-        className="w-full overflow-y-auto no-scrollbar overflow-x-visible relative z-20" 
+        className="w-full overflow-y-auto no-scrollbar relative z-10" 
         style={{ height: `${viewportHeight}px` }}
       >
-        <div style={{ height: `${totalContentHeight}px`, width: '100%', overflow: 'visible' }}>
-          <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+        <div style={{ height: `${totalContentHeight}px`, width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               layout="vertical"
               syncId={syncId}
               margin={{ ...chartMargin, top: 10, bottom: 5 }}
-              style={{ overflow: 'visible' }}
             >
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
               <XAxis type="number" domain={[0, niceMax]} hide />
@@ -100,10 +111,8 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
                 dx={-5}
               />
               <Tooltip 
-                content={<CustomTooltip isDuration={isDuration} />} 
+                content={<CustomTooltip isDuration={isDuration} containerRef={containerRef} />} 
                 cursor={{ fill: '#f8fafc' }} 
-                wrapperStyle={{ zIndex: 1000 }}
-                allowEscapeViewBox={{ x: true, y: true }}
               />
               <Bar
                 dataKey="value"
@@ -116,6 +125,7 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
                       {...props} 
                       data={data} 
                       isDuration={isDuration} 
+                      average={average}
                     />
                   )} 
                 />
@@ -137,15 +147,14 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
         </div>
       </div>
 
-      {/* Fixed X-Axis at the bottom - Matching YAxis space to align 0 point */}
-      <div className="w-full h-[50px] relative z-10 overflow-visible">
-        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+      {/* Fixed X-Axis at the bottom */}
+      <div className="w-full h-[50px] relative z-0">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             layout="vertical"
             syncId={syncId}
             margin={{ ...chartMargin, top: 0, bottom: 20 }}
-            style={{ overflow: 'visible' }}
           >
             <XAxis 
               type="number" 
@@ -156,7 +165,6 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
               axisLine={{ stroke: '#e2e8f0' }}
               tickLine={false}
             />
-            {/* Show YAxis line but hide everything else to maintain 0-point alignment */}
             <YAxis 
               type="category" 
               dataKey="name" 
