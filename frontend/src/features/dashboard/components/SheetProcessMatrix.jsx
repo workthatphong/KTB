@@ -16,9 +16,18 @@ function ToggleSetting({ checked, onChange, children }) {
   );
 }
 
-export const SheetProcessMatrix = React.memo(({ segments = [], maxVisibleRows = 6, expanded = false }) => {
-  const [mergeReviewAndEdit, setMergeReviewAndEdit] = useState(false);
-  const [mergeSpread, setMergeSpread] = useState(false);
+export const SheetProcessMatrix = React.memo(({ 
+  segments = [], 
+  maxVisibleRows = 6, 
+  expanded = false,
+  externalMergeReviewAndEdit = null,
+  externalMergeSpread = null
+}) => {
+  const [internalMergeReviewAndEdit, setInternalMergeReviewAndEdit] = useState(false);
+  const [internalMergeSpread, setInternalMergeSpread] = useState(false);
+  
+  const mergeReviewAndEdit = externalMergeReviewAndEdit !== null ? externalMergeReviewAndEdit : internalMergeReviewAndEdit;
+  const mergeSpread = externalMergeSpread !== null ? externalMergeSpread : internalMergeSpread;
   const [hoveredSheet, setHoveredSheet] = useState(null);
   const [hoveredType, setHoveredType] = useState(null);
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, sheet: '', type: '', duration: '', percent: '', color: '' });
@@ -66,18 +75,18 @@ export const SheetProcessMatrix = React.memo(({ segments = [], maxVisibleRows = 
         const mergedReviewEdit = t.Review + t.EditData + t.EditMeta;
         items.push({ label: 'Uploading', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
         if (mergeSpread) {
-          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Processing });
+          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: '#cbd5e1' });
         } else {
-          items.push({ label: 'First Spread', seconds: t.Processing, color: GANTT_DRILL_GROUP_COLORS.Processing });
+          items.push({ label: 'First Spread', seconds: t.Processing, color: '#cbd5e1' });
           items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
         }
         items.push({ label: 'Review & Edit', seconds: mergedReviewEdit, color: '#F59E0B' });
       } else {
         items.push({ label: 'Uploading', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
         if (mergeSpread) {
-          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Processing });
+          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: '#cbd5e1' });
         } else {
-          items.push({ label: 'First Spread', seconds: t.Processing, color: GANTT_DRILL_GROUP_COLORS.Processing });
+          items.push({ label: 'First Spread', seconds: t.Processing, color: '#cbd5e1' });
           items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
         }
         items.push({ label: 'Review', seconds: t.Review, color: GANTT_DRILL_GROUP_COLORS.Review });
@@ -144,7 +153,7 @@ export const SheetProcessMatrix = React.memo(({ segments = [], maxVisibleRows = 
           Upload
         </div>
         <div className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Processing }}></span>
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#cbd5e1' }}></span>
           {mergeSpread ? 'Spread' : 'First Spread'}
         </div>
         {!mergeSpread && (
@@ -195,31 +204,51 @@ export const SheetProcessMatrix = React.memo(({ segments = [], maxVisibleRows = 
                 <span className="text-[12px] font-bold text-slate-500">{formatDuration(sheet.totalWorkSeconds)}</span>
               </div>
               <div className="h-2.5 w-full rounded-full bg-slate-100/80 overflow-hidden shadow-inner flex">
-                {workItems.map((item, idx) => {
-                  const width = (item.seconds / (sheet.totalWorkSeconds || 1)) * 100;
-                  return (
-                    <div
-                      key={item.label}
-                      className="h-full cursor-pointer transition-all duration-300 hover:brightness-110"
-                      style={{ 
-                        width: `${width}%`, 
-                        backgroundColor: item.color,
-                        opacity: hoveredSheet === sheet.name && hoveredType !== null && hoveredType !== item.label ? 0.3 : 1
-                      }}
-                      onMouseEnter={(e) => {
-                        handleMouseMove(e, sheet.name, item.label, formatDuration(item.seconds), formatPercent(item.seconds / (sheet.totalWorkSeconds || 1)), item.color);
-                        setHoveredSheet(sheet.name);
-                        setHoveredType(item.label);
-                      }}
-                      onMouseMove={(e) => handleMouseMove(e, sheet.name, item.label, formatDuration(item.seconds), formatPercent(item.seconds / (sheet.totalWorkSeconds || 1)), item.color)}
-                      onMouseLeave={() => {
-                        setTooltip(prev => ({ ...prev, show: false }));
-                        setHoveredSheet(null);
-                        setHoveredType(null);
-                      }}
-                    />
-                  );
-                })}
+                {(() => {
+                  const itemsWithWidth = workItems.map(item => ({
+                    ...item,
+                    // Use square root scaling for a better balance than log scale
+                    // It boosts small values for visibility while maintaining a clearer 
+                    // hierarchy between large differences (e.g., 2h vs 10h)
+                    scaledValue: item.seconds > 0 ? Math.sqrt(item.seconds) : 0
+                  }));
+                  
+                  const totalScaledSum = itemsWithWidth.reduce((sum, it) => sum + it.scaledValue, 0) || 1;
+                  
+                  return itemsWithWidth.map((item, idx) => {
+                    // Calculate visual width based on square root scale
+                    let visualWidth = (item.scaledValue / totalScaledSum) * 100;
+                    
+                    // Ensure a minimum visibility of 0.5% if there's any duration
+                    // Reduced from 1% to allow more natural proportions
+                    if (item.seconds > 0 && visualWidth < 0.5) {
+                      visualWidth = 0.5;
+                    }
+                    
+                    return (
+                      <div
+                        key={item.label}
+                        className="h-full cursor-pointer transition-all duration-300 hover:brightness-110"
+                        style={{ 
+                          width: `${visualWidth}%`, 
+                          backgroundColor: item.color,
+                          opacity: hoveredSheet === sheet.name && hoveredType !== null && hoveredType !== item.label ? 0.3 : 1
+                        }}
+                        onMouseEnter={(e) => {
+                          handleMouseMove(e, sheet.name, item.label, formatDuration(item.seconds), formatPercent(item.seconds / (sheet.totalWorkSeconds || 1)), item.color);
+                          setHoveredSheet(sheet.name);
+                          setHoveredType(item.label);
+                        }}
+                        onMouseMove={(e) => handleMouseMove(e, sheet.name, item.label, formatDuration(item.seconds), formatPercent(item.seconds / (sheet.totalWorkSeconds || 1)), item.color)}
+                        onMouseLeave={() => {
+                          setTooltip(prev => ({ ...prev, show: false }));
+                          setHoveredSheet(null);
+                          setHoveredType(null);
+                        }}
+                      />
+                    );
+                  });
+                })()}
               </div>
             </div>
           );

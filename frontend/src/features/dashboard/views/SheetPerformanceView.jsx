@@ -1,9 +1,21 @@
-import React from 'react';
-import { LayoutDashboard, Maximize2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
 import { buildKpisFromSegments } from '../../../lib/kpiUtils.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 import { SheetProcessMatrix } from '../components/SheetProcessMatrix.jsx';
+
+function ToggleSetting({ checked, onChange, children }) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer group relative">
+      <div className={`w-8 h-4 rounded-full transition-colors relative ${checked ? 'bg-[#00a4e4]' : 'bg-slate-200'}`}>
+        <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${checked ? 'translate-x-4' : ''}`} />
+      </div>
+      <input type="checkbox" className="hidden" checked={checked} onChange={onChange} />
+      <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900">{children}</span>
+    </label>
+  );
+}
 
 function buildSheetPerformanceChartsData(segments) {
   const safeSegments = Array.isArray(segments) ? segments : [];
@@ -43,6 +55,19 @@ function buildSheetPerformanceChartsData(segments) {
 }
 
 export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
+  const [mergeReviewAndEdit, setMergeReviewAndEdit] = useState(false);
+  const [mergeSpread, setMergeSpread] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const settingsRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) setShowSettings(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const chartData = React.useMemo(() => buildSheetPerformanceChartsData(segments), [segments]);
 
   return (
@@ -51,6 +76,24 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17335f]">Sheet Performance</h1>
           <p className="text-slate-500 mt-1">Detailed performance analysis breakdown by individual sheets and pages.</p>
+        </div>
+        <div className="relative" ref={settingsRef}>
+          <button 
+            onClick={() => setShowSettings(!showSettings)} 
+            className={`flex items-center gap-2 px-4 py-2 border rounded-xl transition-all font-bold text-sm ${showSettings ? 'bg-[#00a4e4] text-white border-[#00a4e4] shadow-lg' : 'bg-white text-slate-600 border-[#d7e8f6] hover:bg-slate-50'}`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Process Settings</span>
+          </button>
+          {showSettings && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-[#d7e8f6] shadow-xl p-5 z-[100] dropdown-slide-enter">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-4">Display Options</div>
+              <div className="space-y-4">
+                <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
+                <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -85,7 +128,12 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
               </div>
             </div>
             <div className="flex-1 min-h-0">
-              <SheetProcessMatrix segments={segments} maxVisibleRows={4} />
+              <SheetProcessMatrix 
+                segments={segments} 
+                maxVisibleRows={4} 
+                externalMergeReviewAndEdit={mergeReviewAndEdit}
+                externalMergeSpread={mergeSpread}
+              />
             </div>
           </div>
         </>
