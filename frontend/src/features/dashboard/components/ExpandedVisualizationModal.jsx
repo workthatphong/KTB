@@ -22,11 +22,13 @@ const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx'
 const donutWorkloadChartPromise = import('../../charts/DonutWorkloadChart.jsx').then((module) => ({ default: module.DonutWorkloadChart }));
 const userContributionStackChartPromise = import('../../charts/UserContributionStackChart.jsx').then((module) => ({ default: module.UserContributionStackChart }));
 const processTimeBreakdownChartPromise = import('../../charts/ProcessTimeBreakdownChart.jsx').then((module) => ({ default: module.ProcessTimeBreakdownChart }));
+const sheetProcessMatrixPromise = import('./SheetProcessMatrix.jsx').then((module) => ({ default: module.SheetProcessMatrix }));
 
 const GanttTimelineChart = lazy(() => ganttTimelineChartPromise);
 const DonutWorkloadChart = lazy(() => donutWorkloadChartPromise);
 const UserContributionStackChart = lazy(() => userContributionStackChartPromise);
 const ProcessTimeBreakdownChart = lazy(() => processTimeBreakdownChartPromise);
+const SheetProcessMatrix = lazy(() => sheetProcessMatrixPromise);
 
 function ExpandedChartFallback() {
   return <div className="min-h-[420px] w-full rounded-[2rem] bg-slate-100 animate-pulse" />;
@@ -1250,28 +1252,32 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     : visualizationId === 'contribution-detail'
       ? 'User Breakdown Details'
       : visualizationId === 'process-breakdown-detail'
-        ? 'Time Breakdown Details'
-        : visualizationId === 'matrix-detail'
-          ? 'Average Transition Time Details'
+      ? 'Time Breakdown Details'
+      : visualizationId === 'matrix-detail'
+        ? 'Average Transition Time Details'
+      : visualizationId === 'sheet-matrix-detail'
+        ? 'Sheet Breakdown Details'
       : 'Full View Analysis';
-  const modalSubtitle = isKpiBreakdown
-    ? `Breakdown of ${
-        kpiId === '7' ? 'Lead Time' :
-        kpiId === '1' ? 'Active User Sessions' :
-        kpiId === '6' ? 'System Processing' :
-        kpiId === '8' ? 'Idle Waiting' :
-        kpiId === '2' ? 'Unique Contributors' : 'Selected Metric'
+      const modalSubtitle = isKpiBreakdown
+      ? `Breakdown of ${
+      kpiId === '7' ? 'Lead Time' :
+      kpiId === '1' ? 'Active User Sessions' :
+      kpiId === '6' ? 'System Processing' :
+      kpiId === '8' ? 'Idle Waiting' :
+      kpiId === '2' ? 'Unique Contributors' : 'Selected Metric'
       } By Sheet`
-    : visualizationId === 'gantt-detail'
-    ? 'Bars Counted From Interval Segments Only'
-    : visualizationId === 'donut-detail'
-    ? 'User Activity Timeline'
-    : visualizationId === 'contribution-detail'
+      : visualizationId === 'gantt-detail'
+      ? 'Bars Counted From Interval Segments Only'
+      : visualizationId === 'donut-detail'
+      ? 'User Activity Timeline'
+      : visualizationId === 'contribution-detail'
       ? 'Review And Edit Summary'
       : visualizationId === 'process-breakdown-detail'
-        ? 'Grouped By Y-Axis Labels'
-        : visualizationId === 'matrix-detail'
-          ? 'Average Transition Source Rows'
+      ? 'Grouped By Y-Axis Labels'
+      : visualizationId === 'matrix-detail'
+        ? 'Average Transition Source Rows'
+      : visualizationId === 'sheet-matrix-detail'
+        ? 'Individual Sheet Processing Summary'
       : 'Advanced Visualization';
 
   const {
@@ -1461,6 +1467,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'process-breakdown' && <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels />}
             {visualizationId === 'contribution' && <UserContributionStackChart key={contributionAnimationKey} rows={contributionRows} expanded />}
             {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />}
+            {visualizationId === 'sheet-matrix' && <SheetProcessMatrix segments={chartBaseSegments || ganttVisibleSegments} expanded />}
           </Suspense>
         </div>
       </div>

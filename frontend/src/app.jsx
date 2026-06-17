@@ -95,7 +95,10 @@ function App() {
             ) : controller.activeView === 'system-performance' ? (
               <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
             ) : controller.activeView === 'sheet-performance' ? (
-              <SheetPerformanceView segments={dashboard.systemFilteredBaseSegments} />
+              <SheetPerformanceView 
+                segments={dashboard.systemFilteredBaseSegments} 
+                setExpandedVisualizationId={controller.setExpandedVisualizationId}
+              />
             ) : (
               <DashboardView
                 dashboard={dashboard}

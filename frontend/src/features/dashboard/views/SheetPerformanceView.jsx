@@ -1,11 +1,12 @@
 import React from 'react';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, FileText, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
 import { KpiSubtext } from '../../../components/shared/KpiSubtext.jsx';
 import { buildKpisFromSegments } from '../../../lib/kpiUtils.js';
 import { formatDuration } from '../../../lib/durationFormatters.js';
 import { initialKpiData } from '../../../lib/constants.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
+import { SheetProcessMatrix } from '../components/SheetProcessMatrix.jsx';
 
 function buildAverageSheetKpiData(segments) {
   const safeSegments = Array.isArray(segments) ? segments : [];
@@ -105,7 +106,7 @@ function buildSheetPerformanceChartsData(segments) {
   };
 }
 
-export function SheetPerformanceView({ segments }) {
+export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
   const kpiData = React.useMemo(() => buildAverageSheetKpiData(segments), [segments]);
   const chartData = React.useMemo(() => buildSheetPerformanceChartsData(segments), [segments]);
 
@@ -156,6 +157,18 @@ export function SheetPerformanceView({ segments }) {
             <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4">
               <h2 className="text-lg font-bold mb-6 text-[#17335f]">Idle Time</h2>
               <SheetBreakdownChart data={chartData.idleTimeData} isDuration={true} />
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4 z-10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-[#17335f]">Sheet Process Breakdown</h2>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => setExpandedVisualizationId('sheet-matrix')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white"><Maximize2 className="w-4 h-4" /></button>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0">
+              <SheetProcessMatrix segments={segments} maxVisibleRows={4} />
             </div>
           </div>
         </>
