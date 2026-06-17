@@ -58,6 +58,7 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = useState(false);
   const [mergeEdit, setMergeEdit] = useState(true);
   const [mergeSpread, setMergeSpread] = useState(true);
+  const [isGrouping, setIsGrouping] = useState(false);
   const [showMatrixFilter, setShowMatrixFilter] = useState(false);
   const matrixFilterRef = useRef(null);
 
@@ -122,6 +123,8 @@ Idle Time</h2>
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[130] dropdown-slide-enter">
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Process Settings</div>
                       <div className="space-y-3">
+                        <ToggleSetting checked={isGrouping} onChange={() => setIsGrouping(!isGrouping)}>Grouping (User/System/Idle)</ToggleSetting>
+                        <div className="h-px bg-slate-100 my-1" />
                         <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
                         <ToggleSetting checked={mergeEdit} onChange={() => setMergeEdit(!mergeEdit)}>Merge Edit</ToggleSetting>
                         <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
@@ -139,6 +142,7 @@ Idle Time</h2>
                 externalMergeReviewAndEdit={mergeReviewAndEdit}
                 externalMergeEdit={mergeEdit}
                 externalMergeSpread={mergeSpread}
+                isGrouping={isGrouping}
               />
             </div>
           </div>
