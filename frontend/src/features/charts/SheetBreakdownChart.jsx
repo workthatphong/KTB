@@ -9,6 +9,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   Cell,
+  LabelList,
 } from 'recharts';
 import { formatDuration } from '../../lib/utils.js';
 
@@ -16,6 +17,25 @@ function clampLabel(label, maxLength = 12) {
   const text = String(label || '');
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength - 1)}...`;
+}
+
+function DurationBarLabel({ x, y, width, height, value, index, data, isDuration }) {
+  if (value === undefined || value === null || value === 0) return null;
+  const average = data.reduce((acc, curr) => acc + curr.value, 0) / data.length;
+  
+  if (value < average) return null;
+
+  return (
+    <text
+      x={x + width + 8}
+      y={y + height / 2 + 4}
+      textAnchor="start"
+      fill="#00a4e4"
+      className="text-[11px] font-bold"
+    >
+      {isDuration ? formatDuration(value) : value.toLocaleString()}
+    </text>
+  );
 }
 
 const CustomTooltip = ({ active, payload, label, isDuration }) => {
@@ -33,77 +53,120 @@ const CustomTooltip = ({ active, payload, label, isDuration }) => {
   return null;
 };
 
-export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expanded = false }) => {
+export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
+  const chartId = React.useId();
   if (!data || data.length === 0) return null;
 
   const average = data.reduce((acc, curr) => acc + curr.value, 0) / data.length;
-  const chartWidth = Math.max(100, data.length * 40);
-  const chartHeight = 300; // Consistent base height
-
-  // Calculate ticks for the fixed axis
   const maxVal = Math.max(...data.map(d => d.value), average, 1);
-  const getNiceMax = (m) => {
-    if (m <= 60) return 60;
-    if (m <= 300) return 300;
-    if (m <= 3600) return 3600;
-    return Math.ceil(m / 3600) * 3600;
-  };
-  const niceMax = getNiceMax(maxVal);
-  const ticks = [0, niceMax * 0.25, niceMax * 0.5, niceMax * 0.75, niceMax];
+  const niceMax = maxVal * 1.25; 
+
+  const barHeight = 40;
+  const viewportHeight = barHeight * 8; 
+  const totalContentHeight = data.length * barHeight;
+  
+  const yAxisWidth = 130;
+  const chartMargin = { top: 10, right: 80, left: 10, bottom: 5 };
+  const syncId = `sheet-breakdown-${chartId}`;
 
   return (
-    <div className="flex w-full h-[200px] sm:h-[250px] lg:h-[300px]">
-      {/* Fixed Y-Axis */}
-      <div className="w-[50px] shrink-0 border-r border-slate-100 bg-white/50 z-10 flex flex-col justify-between py-[40px] pr-2 text-right">
-        {ticks.reverse().map((tick) => (
-          <div key={tick} className="text-[10px] font-semibold text-slate-500 leading-none">
-            {isDuration ? formatDuration(tick) : tick.toLocaleString()}
-          </div>
-        ))}
-      </div>
-
-      {/* Scrollable Plot Area */}
-      <div className="flex-1 overflow-x-auto no-scrollbar">
-        <div style={{ width: data.length > 10 ? `${chartWidth}px` : '100%', height: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full flex flex-col bg-white mt-4 relative hover:z-50 transition-all overflow-visible">
+      {/* Scrollable area for Bars and Y-Axis - Higher Z-index for tooltips */}
+      <div 
+        className="w-full overflow-y-auto no-scrollbar overflow-x-visible relative z-20" 
+        style={{ height: `${viewportHeight}px` }}
+      >
+        <div style={{ height: `${totalContentHeight}px`, width: '100%', overflow: 'visible' }}>
+          <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
             <BarChart
               data={data}
-              margin={{ top: 20, right: 10, left: 0, bottom: 40 }}
+              layout="vertical"
+              syncId={syncId}
+              margin={{ ...chartMargin, top: 10, bottom: 5 }}
+              style={{ overflow: 'visible' }}
             >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+              <XAxis type="number" domain={[0, niceMax]} hide />
+              <YAxis 
                 dataKey="name"
-                axisLine={false}
+                type="category"
+                axisLine={{ stroke: '#e2e8f0' }}
                 tickLine={false}
-                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 500 }}
-                tickFormatter={(val) => clampLabel(val, 15)}
-                angle={-45}
-                textAnchor="end"
+                tick={{ fill: '#1e293b', fontSize: 12, fontWeight: 700 }}
+                tickFormatter={(val) => clampLabel(val, 20)}
+                width={yAxisWidth}
                 interval={0}
+                textAnchor="end"
+                dx={-5}
               />
-              <YAxis hide domain={[0, niceMax]} />
-              <Tooltip content={<CustomTooltip isDuration={isDuration} />} cursor={{ fill: '#f8fafc' }} />
+              <Tooltip 
+                content={<CustomTooltip isDuration={isDuration} />} 
+                cursor={{ fill: '#f8fafc' }} 
+                wrapperStyle={{ zIndex: 1000 }}
+                allowEscapeViewBox={{ x: true, y: true }}
+              />
               <Bar
                 dataKey="value"
-                radius={[4, 4, 0, 0]}
-                barSize={24}
+                radius={[0, 6, 6, 0]}
+                barSize={20}
               >
+                <LabelList 
+                  content={(props) => (
+                    <DurationBarLabel 
+                      {...props} 
+                      data={data} 
+                      isDuration={isDuration} 
+                    />
+                  )} 
+                />
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={entry.value >= average ? '#00a4e4' : '#94a3b8'} 
-                    fillOpacity={0.8}
                   />
                 ))}
               </Bar>
               <ReferenceLine
-                y={average}
+                x={average}
                 stroke="#ef4444"
-                strokeDasharray="5 5"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
               />
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Fixed X-Axis at the bottom - Matching YAxis space to align 0 point */}
+      <div className="w-full h-[50px] relative z-10 overflow-visible">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            syncId={syncId}
+            margin={{ ...chartMargin, top: 0, bottom: 20 }}
+            style={{ overflow: 'visible' }}
+          >
+            <XAxis 
+              type="number" 
+              domain={[0, niceMax]} 
+              orientation="bottom"
+              tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+              tickFormatter={(val) => isDuration ? formatDuration(val) : val.toLocaleString()}
+              axisLine={{ stroke: '#e2e8f0' }}
+              tickLine={false}
+            />
+            {/* Show YAxis line but hide everything else to maintain 0-point alignment */}
+            <YAxis 
+              type="category" 
+              dataKey="name" 
+              width={yAxisWidth} 
+              axisLine={{ stroke: '#e2e8f0' }}
+              tick={false}
+              tickLine={false}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
