@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef, useState, memo } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { FileText, LayoutDashboard, Maximize2, RefreshCw, Search, SlidersHorizontal, Users, Clock } from 'lucide-react';
 import { EmptyState } from '../../components/shared/EmptyState.jsx';
 import { KpiSubtext } from '../../components/shared/KpiSubtext.jsx';
