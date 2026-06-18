@@ -85,7 +85,7 @@ export const SheetBreakdownChart = React.memo(({
 
   const barHeight = 40;
   const totalContentHeight = data.length * barHeight;
-  const viewportHeight = expanded ? totalContentHeight : barHeight * 8;
+  const viewportHeight = expanded ? totalContentHeight : Math.min(totalContentHeight, barHeight * 8);
   
   const yAxisWidth = 130;
   const chartMargin = { top: 10, right: 80, left: 10, bottom: 5 };

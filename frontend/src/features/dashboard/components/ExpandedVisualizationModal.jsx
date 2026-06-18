@@ -34,13 +34,11 @@ const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx'
 const donutWorkloadChartPromise = import('../../charts/DonutWorkloadChart.jsx').then((module) => ({ default: module.DonutWorkloadChart }));
 const userContributionStackChartPromise = import('../../charts/UserContributionStackChart.jsx').then((module) => ({ default: module.UserContributionStackChart }));
 const processTimeBreakdownChartPromise = import('../../charts/ProcessTimeBreakdownChart.jsx').then((module) => ({ default: module.ProcessTimeBreakdownChart }));
-const sheetProcessMatrixPromise = import('./SheetProcessMatrix.jsx').then((module) => ({ default: module.SheetProcessMatrix }));
 
 const GanttTimelineChart = lazy(() => ganttTimelineChartPromise);
 const DonutWorkloadChart = lazy(() => donutWorkloadChartPromise);
 const UserContributionStackChart = lazy(() => userContributionStackChartPromise);
 const ProcessTimeBreakdownChart = lazy(() => processTimeBreakdownChartPromise);
-const SheetProcessMatrix = lazy(() => sheetProcessMatrixPromise);
 
 function ExpandedChartFallback() {
   return <div className="min-h-[420px] w-full rounded-[2rem] bg-slate-100 animate-pulse" />;
@@ -1271,8 +1269,6 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
       ? 'Time Breakdown Details'
       : visualizationId === 'matrix-detail'
         ? 'Average Transition Time Details'
-      : visualizationId === 'sheet-matrix-detail'
-        ? 'Sheet Breakdown Details'
       : visualizationId === 'sheet-total-time'
         ? 'Total Time By Sheet'
       : visualizationId === 'sheet-user-time'
@@ -1300,8 +1296,6 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
       ? 'Grouped By Y-Axis Labels'
       : visualizationId === 'matrix-detail'
         ? 'Average Transition Source Rows'
-      : visualizationId === 'sheet-matrix-detail'
-        ? 'Individual Sheet Processing Summary'
       : visualizationId === 'sheet-total-time'
         ? 'Expanded breakdown for all visible sheets'
       : visualizationId === 'sheet-user-time'
@@ -1537,7 +1531,6 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'process-breakdown' && <ProcessTimeBreakdownChart key={processBreakdownAnimationKey} data={processBreakdownData} showLabels />}
             {visualizationId === 'contribution' && <UserContributionStackChart key={contributionAnimationKey} rows={contributionRows} expanded />}
             {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />}
-            {visualizationId === 'sheet-matrix' && <SheetProcessMatrix segments={chartBaseSegments || ganttVisibleSegments} expanded />}
             {visualizationId === 'sheet-total-time' && (
               <SheetBreakdownChart
                 data={sortedSheetPerformanceChartData.totalTimeData}
