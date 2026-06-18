@@ -133,7 +133,7 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
         <>
           <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb mb-10 animate-stagger-1">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-[#17335f]">Edit Data Relationship</h2>
+              <h2 className="text-lg font-bold text-[#17335f]">Editing Risk</h2>
               <button onClick={() => setExpandedVisualizationId('sheet-edit-data-relationship')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view">
                 <Maximize2 className="w-4 h-4" />
               </button>

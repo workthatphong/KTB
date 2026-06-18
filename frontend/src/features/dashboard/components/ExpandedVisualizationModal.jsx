@@ -1281,7 +1281,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
       : visualizationId === 'sheet-idle-time'
         ? 'Idle Time By Sheet'
       : visualizationId === 'sheet-edit-data-relationship'
-        ? 'Edit Data Relationship By Sheet'
+        ? 'Editing Risk By Sheet'
       : 'Full View Analysis';
       const modalSubtitle = isKpiBreakdown
       ? `Breakdown of ${
