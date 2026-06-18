@@ -16,7 +16,18 @@ import {
 } from '../../../lib/utils.js';
 import { mapSegmentsToRows } from '../../timeline/timelineUtils.js';
 import { toSegmentGroup } from '../utils/segmentData.js';
-import { buildSheetPerformanceChartsData, getTotalTimeChartAppearance, getUserTimeChartAppearance, selectUserTimeChartData, sortSheetPerformanceChartData } from '../utils/sheetPerformanceCharts.js';
+import {
+  buildSheetPerformanceChartsData,
+  getTotalTimeChartAppearance,
+  getUserTimeChartAppearance,
+  getSystemTimeChartAppearance,
+  getIdleTimeChartAppearance,
+  selectUserTimeChartData,
+  selectTotalTimeChartData,
+  selectSystemTimeChartData,
+  selectIdleTimeChartData,
+  sortSheetPerformanceChartData
+} from '../utils/sheetPerformanceCharts.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 
 const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx').then((module) => ({ default: module.GanttTimelineChart }));
@@ -1321,11 +1332,12 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     [sheetPerformanceSegments]
   );
   const sortedSheetPerformanceChartData = React.useMemo(() => ({
-    totalTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.totalTimeData, sheetPerformanceChartSettings?.totalTime?.sortOrder),
+    totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(sheetPerformanceChartData.totalTimeData, sheetPerformanceChartSettings?.totalTime?.mode), sheetPerformanceChartSettings?.totalTime?.sortOrder),
     userTimeData: sortSheetPerformanceChartData(selectUserTimeChartData(sheetPerformanceChartData.userTimeData, sheetPerformanceChartSettings?.userTime?.mode), sheetPerformanceChartSettings?.userTime?.sortOrder),
-    systemTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.systemTimeData, sheetPerformanceChartSettings?.systemTime?.sortOrder),
-    idleTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.idleTimeData, sheetPerformanceChartSettings?.idleTime?.sortOrder),
+    systemTimeData: sortSheetPerformanceChartData(selectSystemTimeChartData(sheetPerformanceChartData.systemTimeData, sheetPerformanceChartSettings?.systemTime?.mode), sheetPerformanceChartSettings?.systemTime?.sortOrder),
+    idleTimeData: sortSheetPerformanceChartData(selectIdleTimeChartData(sheetPerformanceChartData.idleTimeData, sheetPerformanceChartSettings?.idleTime?.mode), sheetPerformanceChartSettings?.idleTime?.sortOrder),
   }), [sheetPerformanceChartData, sheetPerformanceChartSettings]);
+
   const userTimeAppearance = React.useMemo(
     () => sheetPerformanceChartSettings?.userTime?.mode && sheetPerformanceChartSettings.userTime.mode !== 'all'
       ? getUserTimeChartAppearance(sheetPerformanceChartSettings.userTime.mode)
@@ -1335,6 +1347,18 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
   const totalTimeAppearance = React.useMemo(
     () => sheetPerformanceChartSettings?.totalTime?.mode && sheetPerformanceChartSettings.totalTime.mode !== 'all'
       ? getTotalTimeChartAppearance(sheetPerformanceChartSettings.totalTime.mode)
+      : null,
+    [sheetPerformanceChartSettings]
+  );
+  const systemTimeAppearance = React.useMemo(
+    () => sheetPerformanceChartSettings?.systemTime?.mode && sheetPerformanceChartSettings.systemTime.mode !== 'all'
+      ? getSystemTimeChartAppearance(sheetPerformanceChartSettings.systemTime.mode)
+      : null,
+    [sheetPerformanceChartSettings]
+  );
+  const idleTimeAppearance = React.useMemo(
+    () => sheetPerformanceChartSettings?.idleTime?.mode && sheetPerformanceChartSettings.idleTime.mode !== 'all'
+      ? getIdleTimeChartAppearance(sheetPerformanceChartSettings.idleTime.mode)
       : null,
     [sheetPerformanceChartSettings]
   );
@@ -1536,8 +1560,28 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
                 valueLabelFill={userTimeAppearance?.valueLabelFill}
               />
             )}
-            {visualizationId === 'sheet-system-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.systemTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.systemTime?.showAverageLine !== false} />}
-            {visualizationId === 'sheet-idle-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.idleTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.idleTime?.showAverageLine !== false} />}
+            {visualizationId === 'sheet-system-time' && (
+              <SheetBreakdownChart
+                data={sortedSheetPerformanceChartData.systemTimeData}
+                isDuration
+                expanded
+                showAverageLine={sheetPerformanceChartSettings?.systemTime?.showAverageLine !== false}
+                activeFill={systemTimeAppearance?.activeFill}
+                inactiveFill={systemTimeAppearance?.inactiveFill}
+                valueLabelFill={systemTimeAppearance?.valueLabelFill}
+              />
+            )}
+            {visualizationId === 'sheet-idle-time' && (
+              <SheetBreakdownChart
+                data={sortedSheetPerformanceChartData.idleTimeData}
+                isDuration
+                expanded
+                showAverageLine={sheetPerformanceChartSettings?.idleTime?.showAverageLine !== false}
+                activeFill={idleTimeAppearance?.activeFill}
+                inactiveFill={idleTimeAppearance?.inactiveFill}
+                valueLabelFill={idleTimeAppearance?.valueLabelFill}
+              />
+            )}
           </Suspense>
         </div>
       </div>

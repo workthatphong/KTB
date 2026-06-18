@@ -8,9 +8,11 @@ import {
   getTotalTimeChartAppearance,
   getUserTimeChartAppearance,
   getSystemTimeChartAppearance,
+  getIdleTimeChartAppearance,
   selectUserTimeChartData,
   selectTotalTimeChartData,
   selectSystemTimeChartData,
+  selectIdleTimeChartData,
   sortSheetPerformanceChartData,
 } from '../utils/sheetPerformanceCharts.js';
 
@@ -50,7 +52,7 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
     totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(chartData.totalTimeData, chartSettings?.totalTime?.mode), chartSettings?.totalTime?.sortOrder),
     userTimeData: sortSheetPerformanceChartData(selectUserTimeChartData(chartData.userTimeData, chartSettings?.userTime?.mode), chartSettings?.userTime?.sortOrder),
     systemTimeData: sortSheetPerformanceChartData(selectSystemTimeChartData(chartData.systemTimeData, chartSettings?.systemTime?.mode), chartSettings?.systemTime?.sortOrder),
-    idleTimeData: sortSheetPerformanceChartData(chartData.idleTimeData, chartSettings?.idleTime?.sortOrder),
+    idleTimeData: sortSheetPerformanceChartData(selectIdleTimeChartData(chartData.idleTimeData, chartSettings?.idleTime?.mode), chartSettings?.idleTime?.sortOrder),
   }), [chartData, chartSettings]);
 
   const updateChartSetting = (chartId, patch) => {
@@ -80,6 +82,13 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
   const toggleSystemTimeMode = (mode) => {
     const currentMode = chartSettings?.systemTime?.mode || 'all';
     updateChartSetting('systemTime', {
+      mode: currentMode === mode ? 'all' : mode,
+    });
+  };
+
+  const toggleIdleTimeMode = (mode) => {
+    const currentMode = chartSettings?.idleTime?.mode || 'all';
+    updateChartSetting('idleTime', {
       mode: currentMode === mode ? 'all' : mode,
     });
   };
@@ -122,6 +131,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                 : null;
               const systemTimeAppearance = card.id === 'systemTime' && settings.mode !== 'all'
                 ? getSystemTimeChartAppearance(settings.mode)
+                : null;
+              const idleTimeAppearance = card.id === 'idleTime' && settings.mode !== 'all'
+                ? getIdleTimeChartAppearance(settings.mode)
                 : null;
               return (
                 <div key={card.id} className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-${index + 1} overflow-visible relative hover:z-50 transition-all group`}>
@@ -196,6 +208,22 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                                   </div>
                                 </div>
                               )}
+                              {card.id === 'idleTime' && (
+                                <div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Idle Time Filter</div>
+                                  <div className="space-y-3">
+                                    <ToggleSetting checked={settings.mode === 'firstSpread'} onChange={() => toggleIdleTimeMode('firstSpread')}>
+                                      First Spread Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'secondSpread'} onChange={() => toggleIdleTimeMode('secondSpread')}>
+                                      Second Spread Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'avgReviewEdit'} onChange={() => toggleIdleTimeMode('avgReviewEdit')}>
+                                      AVG review&edit only
+                                    </ToggleSetting>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -207,9 +235,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                     data={card.data}
                     isDuration={true}
                     showAverageLine={settings.showAverageLine}
-                    activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill ?? systemTimeAppearance?.activeFill}
-                    inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill ?? systemTimeAppearance?.inactiveFill}
-                    valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill ?? systemTimeAppearance?.valueLabelFill}
+                    activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill ?? systemTimeAppearance?.activeFill ?? idleTimeAppearance?.activeFill}
+                    inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill ?? systemTimeAppearance?.inactiveFill ?? idleTimeAppearance?.inactiveFill}
+                    valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill ?? systemTimeAppearance?.valueLabelFill ?? idleTimeAppearance?.valueLabelFill}
                   />
                 </div>
               );

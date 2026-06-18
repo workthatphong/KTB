@@ -14,9 +14,19 @@ export function createDefaultSheetPerformanceChartSettings() {
     totalTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
     userTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
     systemTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
-    idleTime: { showAverageLine: true, sortOrder: 'default' },
+    idleTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
   };
 }
+
+const USER_ACTION_TYPES = new Set([
+  'USER_REVIEW_COMMENT_CHECK',
+  'USER_REVIEW_AUTO_TIMEOUT',
+  'USER_EDITING_CORRECTION',
+  'USER_EDITING_METADATA_CORRECTION',
+  'USER_EDITING_CORRECTION_AND_COMPLETION_APPROVAL',
+  'USER_EDITING_METADATA_CORRECTION_AND_COMPLETION_APPROVAL',
+  'USER_COMPLETION_APPROVAL',
+]);
 
 export function buildSheetPerformanceChartsData(segments) {
   const safeSegments = Array.isArray(segments) ? segments : [];
@@ -56,6 +66,35 @@ export function buildSheetPerformanceChartsData(segments) {
       return totals;
     }, { firstSpreadSeconds: 0, secondSpreadSeconds: 0 });
 
+    const sorted = [...entry.segments].sort((a, b) => (Number(a.startTs) || 0) - (Number(b.startTs) || 0));
+    let firstSpreadIdle = 0;
+    let secondSpreadIdle = 0;
+    let reviewEditIdleSum = 0;
+    let reviewEditIdleCount = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+      const current = sorted[i];
+      const currentType = String(current.segmentType || '');
+      
+      if (currentType === 'SYSTEM_INITIAL_PROCESSING') {
+        const nextUser = sorted.find((s, idx) => idx > i && USER_ACTION_TYPES.has(s.segmentType));
+        if (nextUser) firstSpreadIdle = Math.max(0, (Number(nextUser.startTs) - Number(current.endTs)) / 1000);
+      }
+
+      if (currentType === 'SYSTEM_SCHEDULED_REPROCESSING_ROUND_2' || currentType === 'SYSTEM_SCHEDULED_REPROCESSING') {
+        const nextUser = sorted.find((s, idx) => idx > i && USER_ACTION_TYPES.has(s.segmentType));
+        if (nextUser) secondSpreadIdle = Math.max(0, (Number(nextUser.startTs) - Number(current.endTs)) / 1000);
+      }
+
+      if (USER_ACTION_TYPES.has(currentType)) {
+        const nextUser = sorted.find((s, idx) => idx > i && USER_ACTION_TYPES.has(s.segmentType));
+        if (nextUser) {
+          reviewEditIdleSum += Math.max(0, (Number(nextUser.startTs) - Number(current.endTs)) / 1000);
+          reviewEditIdleCount += 1;
+        }
+      }
+    }
+
     const completedSegments = entry.segments.filter(s => Boolean(toCompleteMarkerType(s)));
     const isCompleted = completedSegments.length > 0;
     
@@ -84,6 +123,9 @@ export function buildSheetPerformanceChartsData(segments) {
       editMetaSeconds: userBreakdown.editMetaSeconds,
       firstSpreadSeconds: systemBreakdown.firstSpreadSeconds,
       secondSpreadSeconds: systemBreakdown.secondSpreadSeconds,
+      firstSpreadIdleSeconds: firstSpreadIdle,
+      secondSpreadIdleSeconds: secondSpreadIdle,
+      avgReviewEditIdleSeconds: reviewEditIdleCount > 0 ? reviewEditIdleSum / reviewEditIdleCount : 0,
       isCompleted,
       timeToCompleteSeconds,
     };
@@ -110,8 +152,22 @@ export function buildSheetPerformanceChartsData(segments) {
       firstSpreadValue: entry.firstSpreadSeconds,
       secondSpreadValue: entry.secondSpreadSeconds
     })),
-    idleTimeData: entries.map((entry) => ({ name: entry.name, value: entry.idleWaitingSeconds })),
+    idleTimeData: entries.map((entry) => ({ 
+      name: entry.name, 
+      value: entry.idleWaitingSeconds,
+      firstSpreadIdleValue: entry.firstSpreadIdleSeconds,
+      secondSpreadIdleValue: entry.secondSpreadIdleSeconds,
+      avgReviewEditIdleValue: entry.avgReviewEditIdleSeconds,
+    })),
   };
+}
+
+export function selectIdleTimeChartData(data, mode = 'all') {
+  const safeData = Array.isArray(data) ? data : [];
+  if (mode === 'firstSpread') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.firstSpreadIdleValue) || 0 }));
+  if (mode === 'secondSpread') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.secondSpreadIdleValue) || 0 }));
+  if (mode === 'avgReviewEdit') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.avgReviewEditIdleValue) || 0 }));
+  return safeData.map((entry) => ({ name: entry.name, value: Number(entry.value) || 0 }));
 }
 
 export function selectSystemTimeChartData(data, mode = 'all') {
@@ -162,6 +218,17 @@ export function getSystemTimeChartAppearance(mode = 'all') {
       activeFill: GANTT_DRILL_GROUP_COLORS.Reprocessing,
       inactiveFill: '#94a3b8',
       valueLabelFill: GANTT_DRILL_GROUP_COLORS.Reprocessing,
+    };
+  }
+  return null;
+}
+
+export function getIdleTimeChartAppearance(mode = 'all') {
+  if (mode !== 'all' && mode !== 'default') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.Idle,
+      inactiveFill: '#cbd5e1',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.Idle,
     };
   }
   return null;
