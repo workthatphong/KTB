@@ -22,6 +22,7 @@ export function useAppController(dashboard) {
   const [documentFileSearch, setDocumentFileSearch] = useState('');
   const [documentSheetSearch, setDocumentSheetSearch] = useState('');
   const [systemDocumentFileSearch, setSystemDocumentFileSearch] = useState('');
+  const [systemDocumentSheetSearch, setSystemDocumentSheetSearch] = useState('');
   const [sheetPerformanceChartSettings, setSheetPerformanceChartSettings] = useState(() => createDefaultSheetPerformanceChartSettings());
   const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true);
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true);
@@ -117,6 +118,8 @@ export function useAppController(dashboard) {
     setDocumentSheetSearch,
     systemDocumentFileSearch,
     setSystemDocumentFileSearch,
+    systemDocumentSheetSearch,
+    setSystemDocumentSheetSearch,
     sheetPerformanceChartSettings,
     setSheetPerformanceChartSettings,
     showProcessBreakdownIdle,

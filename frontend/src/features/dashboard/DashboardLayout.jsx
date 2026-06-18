@@ -26,6 +26,8 @@ export function DashboardLayout({
     setDocumentSheetSearch,
     systemDocumentFileSearch,
     setSystemDocumentFileSearch,
+    systemDocumentSheetSearch,
+    setSystemDocumentSheetSearch,
   } = controller;
   const isSystemPerformanceView = activeView === 'sheet-performance';
 
@@ -52,8 +54,8 @@ export function DashboardLayout({
           setSegmentTypeSearchText={setSegmentTypeSearchText}
           documentFileSearch={isSystemPerformanceView ? systemDocumentFileSearch : documentFileSearch}
           setDocumentFileSearch={isSystemPerformanceView ? setSystemDocumentFileSearch : setDocumentFileSearch}
-          documentSheetSearch={isSystemPerformanceView ? '' : documentSheetSearch}
-          setDocumentSheetSearch={isSystemPerformanceView ? (() => {}) : setDocumentSheetSearch}
+          documentSheetSearch={isSystemPerformanceView ? systemDocumentSheetSearch : documentSheetSearch}
+          setDocumentSheetSearch={isSystemPerformanceView ? setSystemDocumentSheetSearch : setDocumentSheetSearch}
           onMenuClick={() => setIsMobileSidebarOpen(true)}
         />
 

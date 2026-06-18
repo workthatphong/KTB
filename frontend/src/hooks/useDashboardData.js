@@ -44,6 +44,7 @@ export function useDashboardData() {
   const [systemDateEnd, setSystemDateEnd] = usePersistentState('system_filter_dateEnd', '');
   const [systemExcludeWeekends, setSystemExcludeWeekends] = usePersistentState('system_filter_excludeWeekends', false);
   const [systemSelectedFiles, setSystemSelectedFiles] = usePersistentState('system_filter_selectedFiles', []);
+  const [systemSelectedSheets, setSystemSelectedSheets] = usePersistentState('system_filter_selectedSheets', []);
   const [selectedUsers, setSelectedUsers] = usePersistentState('filter_selectedUsers', []);
   const [selectedSegmentTypes, setSelectedSegmentTypes] = usePersistentState('filter_selectedSegmentTypes', []);
   const [showIdle, setShowIdle] = usePersistentState('filter_showIdle', false);
@@ -53,6 +54,7 @@ export function useDashboardData() {
   const [pinnedSheets, setPinnedSheets] = usePersistentState('filter_pinnedSheets', []);
   const [activeDocumentFile, setActiveDocumentFile] = usePersistentState('filter_activeDocumentFile', '');
   const [systemPinnedFiles, setSystemPinnedFiles] = usePersistentState('system_filter_pinnedFiles', []);
+  const [systemPinnedSheets, setSystemPinnedSheets] = usePersistentState('system_filter_pinnedSheets', []);
   const [systemActiveDocumentFile, setSystemActiveDocumentFile] = usePersistentState('system_filter_activeDocumentFile', '');
   const [fileDisplayNames, setFileDisplayNames] = usePersistentState('filter_fileDisplayNames', {});
   const [pageDisplayNames, setPageDisplayNames] = usePersistentState('filter_pageDisplayNames', {});
@@ -91,7 +93,7 @@ export function useDashboardData() {
     dateEnd: systemDateEnd,
     excludeWeekends: systemExcludeWeekends,
     selectedFiles: systemSelectedFiles,
-    selectedSheets: [],
+    selectedSheets: systemSelectedSheets,
     selectedSegmentTypes: [],
   });
 
@@ -106,6 +108,16 @@ export function useDashboardData() {
   });
 
   const { filteredBaseSegments: systemFilteredBaseSegments } = useDashboardFilters(systemParsedSegments, {
+    selectedFiles: systemSelectedFiles,
+    selectedSheets: systemSelectedSheets,
+    selectedUsers: [],
+    selectedSegmentTypes: [],
+    showIdle: true,
+    dateRangeBounds: systemDateRangeBounds,
+    excludeWeekends: systemExcludeWeekends,
+  });
+
+  const { filteredBaseSegments: systemFileLevelSegments } = useDashboardFilters(systemParsedSegments, {
     selectedFiles: systemSelectedFiles,
     selectedSheets: [],
     selectedUsers: [],
@@ -249,6 +261,8 @@ export function useDashboardData() {
     setSelectedSheets,
     systemSelectedFiles,
     setSystemSelectedFiles,
+    systemSelectedSheets,
+    setSystemSelectedSheets,
     selectedUsers,
     setSelectedUsers,
     selectedSegmentTypes: normalizedSelectedSegmentTypes,
@@ -265,6 +279,8 @@ export function useDashboardData() {
     setPinnedSheets,
     systemPinnedFiles,
     setSystemPinnedFiles,
+    systemPinnedSheets,
+    setSystemPinnedSheets,
     activeDocumentFile,
     setActiveDocumentFile,
     systemActiveDocumentFile,
@@ -282,6 +298,7 @@ export function useDashboardData() {
     invalidSheetCounts,
     ganttVisibleSegments,
     systemFilteredBaseSegments,
+    systemFileLevelSegments,
     chartBaseSegments,
     kpiData,
     filteredBaseSegments,

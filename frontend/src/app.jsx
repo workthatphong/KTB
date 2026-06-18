@@ -97,6 +97,7 @@ function App() {
             ) : controller.activeView === 'sheet-performance' ? (
               <SheetPerformanceView 
                 segments={dashboard.systemFilteredBaseSegments} 
+                unfilteredSegments={dashboard.systemFileLevelSegments}
                 setExpandedVisualizationId={controller.setExpandedVisualizationId}
                 chartSettings={controller.sheetPerformanceChartSettings}
                 setChartSettings={controller.setSheetPerformanceChartSettings}

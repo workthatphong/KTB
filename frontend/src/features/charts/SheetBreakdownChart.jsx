@@ -67,6 +67,7 @@ export const SheetBreakdownChart = React.memo(({
   isDuration = true,
   expanded = false,
   showAverageLine = true,
+  forcedAverage = null,
   activeFill = '#00a4e4',
   inactiveFill = '#94a3b8',
   valueLabelFill = '#00a4e4',
@@ -78,7 +79,7 @@ export const SheetBreakdownChart = React.memo(({
   
   if (!data || data.length === 0) return null;
 
-  const average = data.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) / data.length;
+  const average = forcedAverage !== null ? forcedAverage : (data.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) / data.length);
   const maxVal = Math.max(...data.map(d => Number(d.value) || 0), average, 1);
   const niceMax = maxVal * 1.25; 
 
@@ -174,7 +175,7 @@ export const SheetBreakdownChart = React.memo(({
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.value >= average ? activeFill : inactiveFill} 
+                    fill={(Number(entry.value) >= average) ? activeFill : inactiveFill} 
                   />
                 ))}
               </Bar>

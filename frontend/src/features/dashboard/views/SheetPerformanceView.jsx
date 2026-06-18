@@ -28,7 +28,7 @@ function ToggleSetting({ checked, onChange, children }) {
   );
 }
 
-export function SheetPerformanceView({ segments, setExpandedVisualizationId, chartSettings, setChartSettings }) {
+export function SheetPerformanceView({ segments, unfilteredSegments, setExpandedVisualizationId, chartSettings, setChartSettings }) {
   const [mergeSpread, setMergeSpread] = useState(true);
   const [showIdleTime, setShowIdleTime] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
@@ -48,6 +48,23 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
   }, []);
 
   const chartData = React.useMemo(() => buildSheetPerformanceChartsData(segments), [segments]);
+  const unfilteredChartData = React.useMemo(() => buildSheetPerformanceChartsData(unfilteredSegments), [unfilteredSegments]);
+
+  const fileLevelAverages = React.useMemo(() => {
+    const calcAvg = (data, selectFn, mode) => {
+      const selected = selectFn(data, mode);
+      if (selected.length === 0) return 0;
+      return selected.reduce((sum, item) => sum + (Number(item.value) || 0), 0) / selected.length;
+    };
+
+    return {
+      totalTime: calcAvg(unfilteredChartData.totalTimeData, selectTotalTimeChartData, chartSettings?.totalTime?.mode),
+      userTime: calcAvg(unfilteredChartData.userTimeData, selectUserTimeChartData, chartSettings?.userTime?.mode),
+      systemTime: calcAvg(unfilteredChartData.systemTimeData, selectSystemTimeChartData, chartSettings?.systemTime?.mode),
+      idleTime: calcAvg(unfilteredChartData.idleTimeData, selectIdleTimeChartData, chartSettings?.idleTime?.mode),
+    };
+  }, [unfilteredChartData, chartSettings]);
+
   const displayedChartData = React.useMemo(() => ({
     totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(chartData.totalTimeData, chartSettings?.totalTime?.mode), chartSettings?.totalTime?.sortOrder),
     userTimeData: sortSheetPerformanceChartData(selectUserTimeChartData(chartData.userTimeData, chartSettings?.userTime?.mode), chartSettings?.userTime?.sortOrder),
@@ -101,10 +118,10 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
   };
 
   const chartCards = [
-    { id: 'totalTime', title: 'Total Time', expandedId: 'sheet-total-time', data: displayedChartData.totalTimeData },
-    { id: 'userTime', title: 'User Time', expandedId: 'sheet-user-time', data: displayedChartData.userTimeData },
-    { id: 'systemTime', title: 'System Time', expandedId: 'sheet-system-time', data: displayedChartData.systemTimeData },
-    { id: 'idleTime', title: 'Idle Time', expandedId: 'sheet-idle-time', data: displayedChartData.idleTimeData },
+    { id: 'totalTime', title: 'Total Time', expandedId: 'sheet-total-time', data: displayedChartData.totalTimeData, forcedAverage: fileLevelAverages.totalTime },
+    { id: 'userTime', title: 'User Time', expandedId: 'sheet-user-time', data: displayedChartData.userTimeData, forcedAverage: fileLevelAverages.userTime },
+    { id: 'systemTime', title: 'System Time', expandedId: 'sheet-system-time', data: displayedChartData.systemTimeData, forcedAverage: fileLevelAverages.systemTime },
+    { id: 'idleTime', title: 'Idle Time', expandedId: 'sheet-idle-time', data: displayedChartData.idleTimeData, forcedAverage: fileLevelAverages.idleTime },
   ];
 
   return (
@@ -235,6 +252,7 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                     data={card.data}
                     isDuration={true}
                     showAverageLine={settings.showAverageLine}
+                    forcedAverage={card.forcedAverage}
                     activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill ?? systemTimeAppearance?.activeFill ?? idleTimeAppearance?.activeFill}
                     inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill ?? systemTimeAppearance?.inactiveFill ?? idleTimeAppearance?.inactiveFill}
                     valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill ?? systemTimeAppearance?.valueLabelFill ?? idleTimeAppearance?.valueLabelFill}
