@@ -16,7 +16,7 @@ import {
 } from '../../../lib/utils.js';
 import { mapSegmentsToRows } from '../../timeline/timelineUtils.js';
 import { toSegmentGroup } from '../utils/segmentData.js';
-import { buildSheetPerformanceChartsData } from '../utils/sheetPerformanceCharts.js';
+import { buildSheetPerformanceChartsData, sortSheetPerformanceChartData } from '../utils/sheetPerformanceCharts.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 
 const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx').then((module) => ({ default: module.GanttTimelineChart }));
@@ -1311,6 +1311,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     mergeReviewAndEdit,
     mergeSpread,
     sheetPerformanceSegments,
+    sheetPerformanceChartSettings,
     setSelectedGanttSegment,
     timelineSettings,
   } = data;
@@ -1319,6 +1320,12 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     () => buildSheetPerformanceChartsData(sheetPerformanceSegments),
     [sheetPerformanceSegments]
   );
+  const sortedSheetPerformanceChartData = React.useMemo(() => ({
+    totalTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.totalTimeData, sheetPerformanceChartSettings?.totalTime?.sortOrder),
+    userTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.userTimeData, sheetPerformanceChartSettings?.userTime?.sortOrder),
+    systemTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.systemTimeData, sheetPerformanceChartSettings?.systemTime?.sortOrder),
+    idleTimeData: sortSheetPerformanceChartData(sheetPerformanceChartData.idleTimeData, sheetPerformanceChartSettings?.idleTime?.sortOrder),
+  }), [sheetPerformanceChartData, sheetPerformanceChartSettings]);
 
   const processBreakdownData = React.useMemo(() => {
     const totals = {
@@ -1495,10 +1502,10 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'contribution' && <UserContributionStackChart key={contributionAnimationKey} rows={contributionRows} expanded />}
             {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />}
             {visualizationId === 'sheet-matrix' && <SheetProcessMatrix segments={chartBaseSegments || ganttVisibleSegments} expanded />}
-            {visualizationId === 'sheet-total-time' && <SheetBreakdownChart data={sheetPerformanceChartData.totalTimeData} isDuration expanded />}
-            {visualizationId === 'sheet-user-time' && <SheetBreakdownChart data={sheetPerformanceChartData.userTimeData} isDuration expanded />}
-            {visualizationId === 'sheet-system-time' && <SheetBreakdownChart data={sheetPerformanceChartData.systemTimeData} isDuration expanded />}
-            {visualizationId === 'sheet-idle-time' && <SheetBreakdownChart data={sheetPerformanceChartData.idleTimeData} isDuration expanded />}
+            {visualizationId === 'sheet-total-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.totalTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.totalTime?.showAverageLine !== false} />}
+            {visualizationId === 'sheet-user-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.userTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.userTime?.showAverageLine !== false} />}
+            {visualizationId === 'sheet-system-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.systemTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.systemTime?.showAverageLine !== false} />}
+            {visualizationId === 'sheet-idle-time' && <SheetBreakdownChart data={sortedSheetPerformanceChartData.idleTimeData} isDuration expanded showAverageLine={sheetPerformanceChartSettings?.idleTime?.showAverageLine !== false} />}
           </Suspense>
         </div>
       </div>

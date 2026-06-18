@@ -98,6 +98,8 @@ function App() {
               <SheetPerformanceView 
                 segments={dashboard.systemFilteredBaseSegments} 
                 setExpandedVisualizationId={controller.setExpandedVisualizationId}
+                chartSettings={controller.sheetPerformanceChartSettings}
+                setChartSettings={controller.setSheetPerformanceChartSettings}
               />
             ) : (
               <DashboardView
@@ -180,6 +182,7 @@ function App() {
               mergeReviewAndEdit: controller.mergeReviewAndEdit,
               mergeSpread: controller.mergeSpread,
               sheetPerformanceSegments: dashboard.systemFilteredBaseSegments,
+              sheetPerformanceChartSettings: controller.sheetPerformanceChartSettings,
               setSelectedGanttSegment: noop,
               timelineSettings: {
                 singleLane: controller.ganttSingleLaneMode,

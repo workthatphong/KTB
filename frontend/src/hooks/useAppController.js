@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { usePersistentState } from './usePersistentState.js';
 import { requestJson } from '../lib/api.js';
+import { createDefaultSheetPerformanceChartSettings } from '../features/dashboard/utils/sheetPerformanceCharts.js';
 
 export function useAppController(dashboard) {
   const {
@@ -21,6 +22,7 @@ export function useAppController(dashboard) {
   const [documentFileSearch, setDocumentFileSearch] = useState('');
   const [documentSheetSearch, setDocumentSheetSearch] = useState('');
   const [systemDocumentFileSearch, setSystemDocumentFileSearch] = useState('');
+  const [sheetPerformanceChartSettings, setSheetPerformanceChartSettings] = useState(() => createDefaultSheetPerformanceChartSettings());
   const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true);
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true);
   const [mergeSpread, setMergeSpread] = usePersistentState('chart_mergeSpread', false);
@@ -115,6 +117,8 @@ export function useAppController(dashboard) {
     setDocumentSheetSearch,
     systemDocumentFileSearch,
     setSystemDocumentFileSearch,
+    sheetPerformanceChartSettings,
+    setSheetPerformanceChartSettings,
     showProcessBreakdownIdle,
     setShowProcessBreakdownIdle,
     mergeReviewAndEdit,

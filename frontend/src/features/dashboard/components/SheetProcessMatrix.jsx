@@ -20,16 +20,19 @@ export const SheetProcessMatrix = React.memo(({
   segments = [], 
   maxVisibleRows = 6, 
   expanded = false,
-  externalSplitUserTime = null,
-  externalSplitSystemTime = null,
+  externalMergeEdit = null,
+  externalMergeSpread = null,
+  externalShowUpload = null,
   externalShowIdleTime = null
 }) => {
-  const [internalSplitUserTime, setInternalSplitUserTime] = useState(false);
-  const [internalSplitSystemTime, setInternalSplitSystemTime] = useState(false);
+  const [internalMergeEdit, setInternalMergeEdit] = useState(false);
+  const [internalMergeSpread, setInternalMergeSpread] = useState(false);
+  const [internalShowUpload, setInternalShowUpload] = useState(true);
   const [internalShowIdleTime, setInternalShowIdleTime] = useState(true);
   
-  const splitUserTime = externalSplitUserTime !== null ? externalSplitUserTime : internalSplitUserTime;
-  const splitSystemTime = externalSplitSystemTime !== null ? externalSplitSystemTime : internalSplitSystemTime;
+  const mergeEdit = externalMergeEdit !== null ? externalMergeEdit : internalMergeEdit;
+  const mergeSpread = externalMergeSpread !== null ? externalMergeSpread : internalMergeSpread;
+  const showUpload = externalShowUpload !== null ? externalShowUpload : internalShowUpload;
   const showIdleTime = externalShowIdleTime !== null ? externalShowIdleTime : internalShowIdleTime;
 
   const [hoveredSheet, setHoveredSheet] = useState(null);
@@ -75,20 +78,21 @@ export const SheetProcessMatrix = React.memo(({
       const items = [];
       const t = sheet.totals;
 
-      if (splitSystemTime) {
-        items.push({ label: 'Upload', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
+      if (mergeSpread) {
+        if (showUpload) items.push({ label: 'Upload', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
+        items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
+      } else {
+        if (showUpload) items.push({ label: 'Upload', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
         items.push({ label: 'First Spread', seconds: t.Processing, color: '#64748B' });
         items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
-      } else {
-        items.push({ label: 'System Time', seconds: t.Uploading + t.Processing + t.Reprocessing, color: '#334155' });
       }
 
-      if (splitUserTime) {
-        items.push({ label: 'Review', seconds: t.Review, color: GANTT_DRILL_GROUP_COLORS.Review });
+      items.push({ label: 'Review', seconds: t.Review, color: GANTT_DRILL_GROUP_COLORS.Review });
+      if (mergeEdit) {
+        items.push({ label: 'Edit', seconds: t.EditData + t.EditMeta, color: GANTT_DRILL_GROUP_COLORS.EditData });
+      } else {
         items.push({ label: 'Edit Data', seconds: t.EditData, color: GANTT_DRILL_GROUP_COLORS.EditData });
         items.push({ label: 'Edit Meta', seconds: t.EditMeta, color: GANTT_DRILL_GROUP_COLORS.EditMeta });
-      } else {
-        items.push({ label: 'User Time', seconds: t.Review + t.EditData + t.EditMeta, color: '#F59E0B' });
       }
 
       if (showIdleTime) {
@@ -106,7 +110,7 @@ export const SheetProcessMatrix = React.memo(({
         totalWorkSeconds
       };
     }).sort((a, b) => b.totalWorkSeconds - a.totalWorkSeconds);
-  }, [segments, splitUserTime, splitSystemTime, showIdleTime]);
+  }, [segments, mergeEdit, mergeSpread, showUpload, showIdleTime]);
 
   const maxTotalWork = useMemo(() => {
     if (sheetsData.length === 0) return 1;
@@ -147,12 +151,27 @@ export const SheetProcessMatrix = React.memo(({
     <div className="space-y-4 relative" ref={containerRef}>
       {/* Legend - Matching UserContributionStackChart style */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 py-1 text-[10px] sm:text-xs text-slate-600 mb-1 font-bold">
-        {splitSystemTime ? (
+        {mergeSpread ? (
           <>
+            {showUpload && (
+              <div className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Uploading }}></span>
+                Upload
+              </div>
+            )}
             <div className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Uploading }}></span>
-              Upload
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Reprocessing }}></span>
+              Spread
             </div>
+          </>
+        ) : (
+          <>
+            {showUpload && (
+              <div className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Uploading }}></span>
+                Upload
+              </div>
+            )}
             <div className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#64748B]"></span>
               First Spread
@@ -162,34 +181,31 @@ export const SheetProcessMatrix = React.memo(({
               Second Spread
             </div>
           </>
-        ) : (
-          <div className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#334155]"></span>
-            System Time
-          </div>
         )}
         
-        {splitUserTime ? (
-          <>
-            <div className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Review }}></span>
-              Review
-            </div>
+        <>
+          <div className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Review }}></span>
+            Review
+          </div>
+          {mergeEdit ? (
             <div className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditData }}></span>
-              Edit Data
+              Edit
             </div>
-            <div className="inline-flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditMeta }}></span>
-              Edit Meta
-            </div>
-          </>
-        ) : (
-          <div className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
-            User Time
-          </div>
-        )}
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditData }}></span>
+                Edit Data
+              </div>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditMeta }}></span>
+                Edit Meta
+              </div>
+            </>
+          )}
+        </>
 
         {showIdleTime && (
           <div className="inline-flex items-center gap-1.5">

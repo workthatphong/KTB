@@ -3,7 +3,10 @@ import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 import { SheetProcessMatrix } from '../components/SheetProcessMatrix.jsx';
-import { buildSheetPerformanceChartsData } from '../utils/sheetPerformanceCharts.js';
+import {
+  buildSheetPerformanceChartsData,
+  sortSheetPerformanceChartData,
+} from '../utils/sheetPerformanceCharts.js';
 
 function ToggleSetting({ checked, onChange, children }) {
   return (
@@ -17,22 +20,56 @@ function ToggleSetting({ checked, onChange, children }) {
   );
 }
 
-export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
-  const [splitUserTime, setSplitUserTime] = useState(false);
-  const [splitSystemTime, setSplitSystemTime] = useState(false);
-  const [showIdleTime, setShowIdleTime] = useState(true);
+export function SheetPerformanceView({ segments, setExpandedVisualizationId, chartSettings, setChartSettings }) {
+  const [mergeSpread, setMergeSpread] = useState(true);
+  const [showIdleTime, setShowIdleTime] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [mergeEdit, setMergeEdit] = useState(true);
   const [showMatrixFilter, setShowMatrixFilter] = useState(false);
+  const [openChartFilterId, setOpenChartFilterId] = useState('');
   const matrixFilterRef = useRef(null);
+  const chartFilterRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (matrixFilterRef.current && !matrixFilterRef.current.contains(event.target)) setShowMatrixFilter(false);
+      if (chartFilterRef.current && !chartFilterRef.current.contains(event.target)) setOpenChartFilterId('');
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const chartData = React.useMemo(() => buildSheetPerformanceChartsData(segments), [segments]);
+  const displayedChartData = React.useMemo(() => ({
+    totalTimeData: sortSheetPerformanceChartData(chartData.totalTimeData, chartSettings?.totalTime?.sortOrder),
+    userTimeData: sortSheetPerformanceChartData(chartData.userTimeData, chartSettings?.userTime?.sortOrder),
+    systemTimeData: sortSheetPerformanceChartData(chartData.systemTimeData, chartSettings?.systemTime?.sortOrder),
+    idleTimeData: sortSheetPerformanceChartData(chartData.idleTimeData, chartSettings?.idleTime?.sortOrder),
+  }), [chartData, chartSettings]);
+
+  const updateChartSetting = (chartId, patch) => {
+    setChartSettings((current) => ({
+      ...current,
+      [chartId]: {
+        ...current[chartId],
+        ...patch,
+      },
+    }));
+  };
+
+  const toggleChartSortOrder = (chartId, sortOrder) => {
+    const currentSortOrder = chartSettings?.[chartId]?.sortOrder || 'default';
+    updateChartSetting(chartId, {
+      sortOrder: currentSortOrder === sortOrder ? 'default' : sortOrder,
+    });
+  };
+
+  const chartCards = [
+    { id: 'totalTime', title: 'Total Time', expandedId: 'sheet-total-time', data: displayedChartData.totalTimeData },
+    { id: 'userTime', title: 'User Time', expandedId: 'sheet-user-time', data: displayedChartData.userTimeData },
+    { id: 'systemTime', title: 'System Time', expandedId: 'sheet-system-time', data: displayedChartData.systemTimeData },
+    { id: 'idleTime', title: 'Idle Time', expandedId: 'sheet-idle-time', data: displayedChartData.idleTimeData },
+  ];
 
   return (
     <div className="max-w-[1600px] 2xl:max-w-[1760px] mx-auto space-y-6">
@@ -48,42 +85,50 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-1 overflow-visible relative hover:z-50 transition-all group">
-              <div className="mb-0 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-[#17335f]">Total Time</h2>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setExpandedVisualizationId('sheet-total-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+            {chartCards.map((card, index) => {
+              const settings = chartSettings?.[card.id] || { showAverageLine: true, sortOrder: 'default' };
+              return (
+                <div key={card.id} className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-${index + 1} overflow-visible relative hover:z-50 transition-all group`}>
+                  <div className="mb-0 flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-bold text-[#17335f]">{card.title}</h2>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="relative" ref={openChartFilterId === card.id ? chartFilterRef : null}>
+                        <button
+                          onClick={() => setOpenChartFilterId((current) => current === card.id ? '' : card.id)}
+                          className={`p-1.5 border rounded-md transition-colors bg-white ${openChartFilterId === card.id ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`}
+                          title="Filter"
+                        >
+                          <SlidersHorizontal className="w-4 h-4" />
+                        </button>
+                        {openChartFilterId === card.id && (
+                          <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[130] dropdown-slide-enter">
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Chart Settings</div>
+                            <div className="space-y-4">
+                              <ToggleSetting checked={settings.showAverageLine} onChange={() => updateChartSetting(card.id, { showAverageLine: !settings.showAverageLine })}>
+                                Show Avg Line
+                              </ToggleSetting>
+                              <div>
+                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Sort Order</div>
+                                <div className="space-y-3">
+                                  <ToggleSetting checked={settings.sortOrder === 'desc'} onChange={() => toggleChartSortOrder(card.id, 'desc')}>
+                                    High to Low
+                                  </ToggleSetting>
+                                  <ToggleSetting checked={settings.sortOrder === 'asc'} onChange={() => toggleChartSortOrder(card.id, 'asc')}>
+                                    Low to High
+                                  </ToggleSetting>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <button onClick={() => setExpandedVisualizationId(card.expandedId)} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                  <SheetBreakdownChart data={card.data} isDuration={true} showAverageLine={settings.showAverageLine} />
                 </div>
-              </div>
-              <SheetBreakdownChart data={chartData.totalTimeData} isDuration={true} />
-            </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-2 overflow-visible relative hover:z-50 transition-all group">
-              <div className="mb-0 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-[#17335f]">User Time</h2>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setExpandedVisualizationId('sheet-user-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
-                </div>
-              </div>
-              <SheetBreakdownChart data={chartData.userTimeData} isDuration={true} />
-            </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-3 overflow-visible relative hover:z-50 transition-all group">
-              <div className="mb-0 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-[#17335f]">System Time</h2>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setExpandedVisualizationId('sheet-system-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
-                </div>
-              </div>
-              <SheetBreakdownChart data={chartData.systemTimeData} isDuration={true} />
-            </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4 overflow-visible relative hover:z-50 transition-all group">
-              <div className="mb-0 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-bold text-[#17335f]">Idle Time</h2>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setExpandedVisualizationId('sheet-idle-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
-                </div>
-              </div>
-              <SheetBreakdownChart data={chartData.idleTimeData} isDuration={true} />
-            </div>
+              );
+            })}
           </div>
 
           <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4 ${showMatrixFilter ? 'z-[120]' : 'z-10'}`}>
@@ -101,8 +146,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[130] dropdown-slide-enter">
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Process Settings</div>
                       <div className="space-y-3">
-                        <ToggleSetting checked={splitUserTime} onChange={() => setSplitUserTime(!splitUserTime)}>Split User Time</ToggleSetting>
-                        <ToggleSetting checked={splitSystemTime} onChange={() => setSplitSystemTime(!splitSystemTime)}>Split System Time</ToggleSetting>
+                        <ToggleSetting checked={mergeEdit} onChange={() => setMergeEdit(!mergeEdit)}>Merge Edit</ToggleSetting>
+                        <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
+                        <ToggleSetting checked={showUpload} onChange={() => setShowUpload(!showUpload)}>Show Upload</ToggleSetting>
                         <ToggleSetting checked={showIdleTime} onChange={() => setShowIdleTime(!showIdleTime)}>Show Idle Time</ToggleSetting>
                       </div>
                     </div>
@@ -115,8 +161,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
               <SheetProcessMatrix 
                 segments={segments} 
                 maxVisibleRows={4} 
-                externalSplitUserTime={splitUserTime}
-                externalSplitSystemTime={splitSystemTime}
+                externalMergeEdit={mergeEdit}
+                externalMergeSpread={mergeSpread}
+                externalShowUpload={showUpload}
                 externalShowIdleTime={showIdleTime}
               />
             </div>

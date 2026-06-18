@@ -1,5 +1,21 @@
 import { buildKpisFromSegments } from '../../../lib/kpiUtils.js';
 
+export const SHEET_PERFORMANCE_CHART_IDS = [
+  'totalTime',
+  'userTime',
+  'systemTime',
+  'idleTime',
+];
+
+export function createDefaultSheetPerformanceChartSettings() {
+  return {
+    totalTime: { showAverageLine: true, sortOrder: 'default' },
+    userTime: { showAverageLine: true, sortOrder: 'default' },
+    systemTime: { showAverageLine: true, sortOrder: 'default' },
+    idleTime: { showAverageLine: true, sortOrder: 'default' },
+  };
+}
+
 export function buildSheetPerformanceChartsData(segments) {
   const safeSegments = Array.isArray(segments) ? segments : [];
   const segmentsBySheet = new Map();
@@ -35,4 +51,15 @@ export function buildSheetPerformanceChartsData(segments) {
     systemTimeData: entries.map((entry) => ({ name: entry.name, value: entry.systemTimeSeconds })),
     idleTimeData: entries.map((entry) => ({ name: entry.name, value: entry.idleWaitingSeconds })),
   };
+}
+
+export function sortSheetPerformanceChartData(data, sortOrder = 'desc') {
+  const safeData = Array.isArray(data) ? data : [];
+  if (sortOrder !== 'asc' && sortOrder !== 'desc') return safeData;
+  const direction = sortOrder === 'asc' ? 1 : -1;
+  return safeData.slice().sort((a, b) => {
+    const diff = (Number(a?.value) || 0) - (Number(b?.value) || 0);
+    if (diff !== 0) return diff * direction;
+    return String(a?.name || '').localeCompare(String(b?.name || ''), 'th');
+  });
 }

@@ -62,7 +62,7 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, contain
   return null;
 };
 
-export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expanded = false }) => {
+export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expanded = false, showAverageLine = true }) => {
   const reactId = React.useId();
   const containerRef = useRef(null);
   const scrollAreaRef = useRef(null);
@@ -105,7 +105,7 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expand
       className={`w-full flex flex-col bg-white relative transition-all ${expanded ? 'h-[min(70vh,640px)]' : 'mt-4'}`}
       ref={containerRef}
     >
-      {scrollAreaWidth > 0 && (
+      {showAverageLine && scrollAreaWidth > 0 && (
         <div className="relative z-20 h-4 pointer-events-none overflow-visible">
           <div
             className="absolute -translate-x-1/2 text-[10px] font-bold text-red-500"
@@ -169,12 +169,14 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expand
                   />
                 ))}
               </Bar>
-              <ReferenceLine
-                x={average}
-                stroke="#ef4444"
-                strokeDasharray="4 4"
-                strokeWidth={1.5}
-              />
+              {showAverageLine && (
+                <ReferenceLine
+                  x={average}
+                  stroke="#ef4444"
+                  strokeDasharray="4 4"
+                  strokeWidth={1.5}
+                />
+              )}
             </BarChart>
           </ResponsiveContainer>
         </div>
