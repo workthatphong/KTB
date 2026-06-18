@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
-import { buildKpisFromSegments } from '../../../lib/kpiUtils.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 import { SheetProcessMatrix } from '../components/SheetProcessMatrix.jsx';
+import { buildSheetPerformanceChartsData } from '../utils/sheetPerformanceCharts.js';
 
 function ToggleSetting({ checked, onChange, children }) {
   return (
@@ -17,47 +17,10 @@ function ToggleSetting({ checked, onChange, children }) {
   );
 }
 
-function buildSheetPerformanceChartsData(segments) {
-  const safeSegments = Array.isArray(segments) ? segments : [];
-  const segmentsBySheet = new Map();
-
-  safeSegments.forEach((segment) => {
-    const fileName = String(segment.fileName || 'Unknown File');
-    const sheetName = String(segment.pageName || '');
-    const sheetKey = String(segment.sheetKey || segment.documentId || `${fileName}::${sheetName}`).trim();
-    if (!sheetKey) return;
-    if (!segmentsBySheet.has(sheetKey)) {
-      segmentsBySheet.set(sheetKey, {
-        name: sheetName || fileName,
-        segments: [],
-      });
-    }
-    segmentsBySheet.get(sheetKey).segments.push(segment);
-  });
-
-  const entries = Array.from(segmentsBySheet.values()).map((entry) => {
-    const kpis = buildKpisFromSegments(entry.segments);
-    return {
-      name: entry.name,
-      totalLeadTimeSeconds: Number(kpis.totalLeadTimeSeconds) || 0,
-      activeUserTimeSeconds: Number(kpis.activeUserTimeSeconds) || 0,
-      systemTimeSeconds: Number(kpis.systemTimeSeconds) || 0,
-      idleWaitingSeconds: Number(kpis.idleWaitingSeconds) || 0,
-    };
-  }).sort((a, b) => a.name.localeCompare(b.name, 'th'));
-
-  return {
-    totalTimeData: entries.map(e => ({ name: e.name, value: e.totalLeadTimeSeconds })),
-    userTimeData: entries.map(e => ({ name: e.name, value: e.activeUserTimeSeconds })),
-    systemTimeData: entries.map(e => ({ name: e.name, value: e.systemTimeSeconds })),
-    idleTimeData: entries.map(e => ({ name: e.name, value: e.idleWaitingSeconds })),
-  };
-}
-
 export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
-  const [mergeReviewAndEdit, setMergeReviewAndEdit] = useState(false);
-  const [mergeEdit, setMergeEdit] = useState(true);
-  const [mergeSpread, setMergeSpread] = useState(true);
+  const [splitUserTime, setSplitUserTime] = useState(false);
+  const [splitSystemTime, setSplitSystemTime] = useState(false);
+  const [showIdleTime, setShowIdleTime] = useState(true);
   const [showMatrixFilter, setShowMatrixFilter] = useState(false);
   const matrixFilterRef = useRef(null);
 
@@ -85,24 +48,40 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId }) {
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-1 overflow-visible relative hover:z-50 transition-all">
-              <h2 className="text-lg font-bold mb-0 text-[#17335f]">
-Total Time</h2>
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-1 overflow-visible relative hover:z-50 transition-all group">
+              <div className="mb-0 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-[#17335f]">Total Time</h2>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setExpandedVisualizationId('sheet-total-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+                </div>
+              </div>
               <SheetBreakdownChart data={chartData.totalTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-2 overflow-visible relative hover:z-50 transition-all">
-              <h2 className="text-lg font-bold mb-0 text-[#17335f]">
-User Time</h2>
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-2 overflow-visible relative hover:z-50 transition-all group">
+              <div className="mb-0 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-[#17335f]">User Time</h2>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setExpandedVisualizationId('sheet-user-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+                </div>
+              </div>
               <SheetBreakdownChart data={chartData.userTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-3 overflow-visible relative hover:z-50 transition-all">
-              <h2 className="text-lg font-bold mb-0 text-[#17335f]">
-System Time</h2>
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-3 overflow-visible relative hover:z-50 transition-all group">
+              <div className="mb-0 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-[#17335f]">System Time</h2>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setExpandedVisualizationId('sheet-system-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+                </div>
+              </div>
               <SheetBreakdownChart data={chartData.systemTimeData} isDuration={true} />
             </div>
-            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4 overflow-visible relative hover:z-50 transition-all">
-              <h2 className="text-lg font-bold mb-0 text-[#17335f]">
-Idle Time</h2>
+            <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-4 overflow-visible relative hover:z-50 transition-all group">
+              <div className="mb-0 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold text-[#17335f]">Idle Time</h2>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setExpandedVisualizationId('sheet-idle-time')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
+                </div>
+              </div>
               <SheetBreakdownChart data={chartData.idleTimeData} isDuration={true} />
             </div>
           </div>
@@ -122,9 +101,9 @@ Idle Time</h2>
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[130] dropdown-slide-enter">
                       <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Process Settings</div>
                       <div className="space-y-3">
-                        <ToggleSetting checked={mergeReviewAndEdit} onChange={() => setMergeReviewAndEdit(!mergeReviewAndEdit)}>Merge Review & Edit</ToggleSetting>
-                        <ToggleSetting checked={mergeEdit} onChange={() => setMergeEdit(!mergeEdit)}>Merge Edit</ToggleSetting>
-                        <ToggleSetting checked={mergeSpread} onChange={() => setMergeSpread(!mergeSpread)}>Merge Spread</ToggleSetting>
+                        <ToggleSetting checked={splitUserTime} onChange={() => setSplitUserTime(!splitUserTime)}>Split User Time</ToggleSetting>
+                        <ToggleSetting checked={splitSystemTime} onChange={() => setSplitSystemTime(!splitSystemTime)}>Split System Time</ToggleSetting>
+                        <ToggleSetting checked={showIdleTime} onChange={() => setShowIdleTime(!showIdleTime)}>Show Idle Time</ToggleSetting>
                       </div>
                     </div>
                   )}
@@ -136,9 +115,9 @@ Idle Time</h2>
               <SheetProcessMatrix 
                 segments={segments} 
                 maxVisibleRows={4} 
-                externalMergeReviewAndEdit={mergeReviewAndEdit}
-                externalMergeEdit={mergeEdit}
-                externalMergeSpread={mergeSpread}
+                externalSplitUserTime={splitUserTime}
+                externalSplitSystemTime={splitSystemTime}
+                externalShowIdleTime={showIdleTime}
               />
             </div>
           </div>
@@ -147,4 +126,3 @@ Idle Time</h2>
     </div>
   );
 }
-

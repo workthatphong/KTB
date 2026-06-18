@@ -62,9 +62,11 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, contain
   return null;
 };
 
-export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
+export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expanded = false }) => {
   const reactId = React.useId();
   const containerRef = useRef(null);
+  const scrollAreaRef = useRef(null);
+  const [scrollAreaWidth, setScrollAreaWidth] = useState(0);
   
   if (!data || data.length === 0) return null;
 
@@ -73,20 +75,51 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
   const niceMax = maxVal * 1.25; 
 
   const barHeight = 40;
-  const viewportHeight = barHeight * 8; 
   const totalContentHeight = data.length * barHeight;
+  const viewportHeight = expanded ? totalContentHeight : barHeight * 8;
   
   const yAxisWidth = 130;
   const chartMargin = { top: 10, right: 80, left: 10, bottom: 5 };
+  const plotWidth = Math.max(scrollAreaWidth - yAxisWidth - chartMargin.left - chartMargin.right, 0);
+  const averageLabelLeft = yAxisWidth + chartMargin.left + (niceMax > 0 ? (average / niceMax) * plotWidth : 0);
   // Sanitize ID for syncId
   const syncId = `sheet-breakdown-${reactId.replace(/:/g, '_')}`;
 
+  useEffect(() => {
+    if (!scrollAreaRef.current) return undefined;
+
+    const updateWidth = () => {
+      setScrollAreaWidth(scrollAreaRef.current?.clientWidth || 0);
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(scrollAreaRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="w-full flex flex-col bg-white mt-4 relative transition-all" ref={containerRef}>
+    <div
+      className={`w-full flex flex-col bg-white relative transition-all ${expanded ? 'h-[min(70vh,640px)]' : 'mt-4'}`}
+      ref={containerRef}
+    >
+      {scrollAreaWidth > 0 && (
+        <div className="relative z-20 h-4 pointer-events-none overflow-visible">
+          <div
+            className="absolute -translate-x-1/2 text-[10px] font-bold text-red-500"
+            style={{ left: `${averageLabelLeft}px`, top: '0px' }}
+          >
+            {`Avg ${isDuration ? formatDuration(average) : average.toLocaleString()}`}
+          </div>
+        </div>
+      )}
       {/* Scrollable area for Bars and Y-Axis */}
       <div 
-        className="w-full overflow-y-auto no-scrollbar relative z-10" 
-        style={{ height: `${viewportHeight}px` }}
+        className={`w-full overflow-y-auto no-scrollbar relative z-10 ${expanded ? 'flex-1 min-h-0' : ''}`}
+        ref={scrollAreaRef}
+        style={expanded ? undefined : { height: `${viewportHeight}px` }}
       >
         <div style={{ height: `${totalContentHeight}px`, width: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -148,7 +181,7 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true }) => {
       </div>
 
       {/* Fixed X-Axis at the bottom */}
-      <div className="w-full h-[50px] relative z-0">
+      <div className="w-full h-[50px] relative z-0 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

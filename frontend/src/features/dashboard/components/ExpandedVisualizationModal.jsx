@@ -16,6 +16,7 @@ import {
 } from '../../../lib/utils.js';
 import { mapSegmentsToRows } from '../../timeline/timelineUtils.js';
 import { toSegmentGroup } from '../utils/segmentData.js';
+import { buildSheetPerformanceChartsData } from '../utils/sheetPerformanceCharts.js';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 
 const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx').then((module) => ({ default: module.GanttTimelineChart }));
@@ -1235,6 +1236,10 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
   if (!visualizationId) return null;
 
   const isKpiBreakdown = visualizationId.startsWith('kpi-breakdown-');
+  const isSheetBreakdownFullView = visualizationId === 'sheet-total-time'
+    || visualizationId === 'sheet-user-time'
+    || visualizationId === 'sheet-system-time'
+    || visualizationId === 'sheet-idle-time';
   const kpiId = isKpiBreakdown ? visualizationId.replace('kpi-breakdown-', '') : '';
 
   const modalTitle = isKpiBreakdown
@@ -1257,6 +1262,14 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
         ? 'Average Transition Time Details'
       : visualizationId === 'sheet-matrix-detail'
         ? 'Sheet Breakdown Details'
+      : visualizationId === 'sheet-total-time'
+        ? 'Total Time By Sheet'
+      : visualizationId === 'sheet-user-time'
+        ? 'User Time By Sheet'
+      : visualizationId === 'sheet-system-time'
+        ? 'System Time By Sheet'
+      : visualizationId === 'sheet-idle-time'
+        ? 'Idle Time By Sheet'
       : 'Full View Analysis';
       const modalSubtitle = isKpiBreakdown
       ? `Breakdown of ${
@@ -1278,6 +1291,14 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
         ? 'Average Transition Source Rows'
       : visualizationId === 'sheet-matrix-detail'
         ? 'Individual Sheet Processing Summary'
+      : visualizationId === 'sheet-total-time'
+        ? 'Expanded breakdown for all visible sheets'
+      : visualizationId === 'sheet-user-time'
+        ? 'Expanded breakdown for all visible sheets'
+      : visualizationId === 'sheet-system-time'
+        ? 'Expanded breakdown for all visible sheets'
+      : visualizationId === 'sheet-idle-time'
+        ? 'Expanded breakdown for all visible sheets'
       : 'Advanced Visualization';
 
   const {
@@ -1289,9 +1310,15 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     contributionRows,
     mergeReviewAndEdit,
     mergeSpread,
+    sheetPerformanceSegments,
     setSelectedGanttSegment,
     timelineSettings,
   } = data;
+
+  const sheetPerformanceChartData = React.useMemo(
+    () => buildSheetPerformanceChartsData(sheetPerformanceSegments),
+    [sheetPerformanceSegments]
+  );
 
   const processBreakdownData = React.useMemo(() => {
     const totals = {
@@ -1407,7 +1434,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
   );
 
   return (
-    <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-8 viz-overlay-enter" onClick={onClose}>
+    <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-md flex items-start justify-center p-0 sm:p-4 md:p-8 viz-overlay-enter overflow-y-auto" onClick={onClose}>
       <div 
         className="bg-white w-full h-full sm:max-w-[95vw] sm:h-[92vh] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden viz-panel-enter"
         onClick={e => e.stopPropagation()}
@@ -1421,7 +1448,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 no-scrollbar min-w-0">
+        <div className={`flex-1 overflow-y-auto no-scrollbar min-w-0 ${isSheetBreakdownFullView ? 'p-3 sm:px-6 sm:pb-6 sm:pt-4 md:px-8 md:pb-8 md:pt-4' : 'p-4 sm:p-6 md:p-10'}`}>
           <Suspense fallback={<ExpandedChartFallback />}>
             {visualizationId === 'gantt' && (
               <GanttTimelineChart
@@ -1468,6 +1495,10 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'contribution' && <UserContributionStackChart key={contributionAnimationKey} rows={contributionRows} expanded />}
             {visualizationId === 'matrix' && <ProcessTimeBreakdownChart key={transitionAnimationKey} data={transitionTimeData} showLabels />}
             {visualizationId === 'sheet-matrix' && <SheetProcessMatrix segments={chartBaseSegments || ganttVisibleSegments} expanded />}
+            {visualizationId === 'sheet-total-time' && <SheetBreakdownChart data={sheetPerformanceChartData.totalTimeData} isDuration expanded />}
+            {visualizationId === 'sheet-user-time' && <SheetBreakdownChart data={sheetPerformanceChartData.userTimeData} isDuration expanded />}
+            {visualizationId === 'sheet-system-time' && <SheetBreakdownChart data={sheetPerformanceChartData.systemTimeData} isDuration expanded />}
+            {visualizationId === 'sheet-idle-time' && <SheetBreakdownChart data={sheetPerformanceChartData.idleTimeData} isDuration expanded />}
           </Suspense>
         </div>
       </div>

@@ -179,6 +179,7 @@ function App() {
               contributionRows: dashboard.contributionRows,
               mergeReviewAndEdit: controller.mergeReviewAndEdit,
               mergeSpread: controller.mergeSpread,
+              sheetPerformanceSegments: dashboard.systemFilteredBaseSegments,
               setSelectedGanttSegment: noop,
               timelineSettings: {
                 singleLane: controller.ganttSingleLaneMode,

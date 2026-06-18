@@ -20,17 +20,17 @@ export const SheetProcessMatrix = React.memo(({
   segments = [], 
   maxVisibleRows = 6, 
   expanded = false,
-  externalMergeReviewAndEdit = null,
-  externalMergeEdit = null,
-  externalMergeSpread = null
+  externalSplitUserTime = null,
+  externalSplitSystemTime = null,
+  externalShowIdleTime = null
 }) => {
-  const [internalMergeReviewAndEdit, setInternalMergeReviewAndEdit] = useState(false);
-  const [internalMergeEdit, setInternalMergeEdit] = useState(false);
-  const [internalMergeSpread, setInternalMergeSpread] = useState(false);
+  const [internalSplitUserTime, setInternalSplitUserTime] = useState(false);
+  const [internalSplitSystemTime, setInternalSplitSystemTime] = useState(false);
+  const [internalShowIdleTime, setInternalShowIdleTime] = useState(true);
   
-  const mergeReviewAndEdit = externalMergeReviewAndEdit !== null ? externalMergeReviewAndEdit : internalMergeReviewAndEdit;
-  const mergeEdit = externalMergeEdit !== null ? externalMergeEdit : internalMergeEdit;
-  const mergeSpread = externalMergeSpread !== null ? externalMergeSpread : internalMergeSpread;
+  const splitUserTime = externalSplitUserTime !== null ? externalSplitUserTime : internalSplitUserTime;
+  const splitSystemTime = externalSplitSystemTime !== null ? externalSplitSystemTime : internalSplitSystemTime;
+  const showIdleTime = externalShowIdleTime !== null ? externalShowIdleTime : internalShowIdleTime;
 
   const [hoveredSheet, setHoveredSheet] = useState(null);
   const [hoveredType, setHoveredType] = useState(null);
@@ -75,31 +75,24 @@ export const SheetProcessMatrix = React.memo(({
       const items = [];
       const t = sheet.totals;
 
-      if (mergeReviewAndEdit) {
-        const mergedReviewEdit = t.Review + t.EditData + t.EditMeta;
-        items.push({ label: 'Uploading', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
-        if (mergeSpread) {
-          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
-        } else {
-          items.push({ label: 'First Spread', seconds: t.Processing, color: '#94A3B8' });
-          items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
-        }
-        items.push({ label: 'Review & Edit', seconds: mergedReviewEdit, color: '#F59E0B' });
+      if (splitSystemTime) {
+        items.push({ label: 'Upload', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
+        items.push({ label: 'First Spread', seconds: t.Processing, color: '#64748B' });
+        items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
       } else {
-        items.push({ label: 'Uploading', seconds: t.Uploading, color: GANTT_DRILL_GROUP_COLORS.Uploading });
-        if (mergeSpread) {
-          items.push({ label: 'Spread', seconds: t.Processing + t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
-        } else {
-          items.push({ label: 'First Spread', seconds: t.Processing, color: '#94A3B8' });
-          items.push({ label: 'Second Spread', seconds: t.Reprocessing, color: GANTT_DRILL_GROUP_COLORS.Reprocessing });
-        }
+        items.push({ label: 'System Time', seconds: t.Uploading + t.Processing + t.Reprocessing, color: '#334155' });
+      }
+
+      if (splitUserTime) {
         items.push({ label: 'Review', seconds: t.Review, color: GANTT_DRILL_GROUP_COLORS.Review });
-        if (mergeEdit) {
-          items.push({ label: 'Edit', seconds: t.EditData + t.EditMeta, color: GANTT_DRILL_GROUP_COLORS.EditData });
-        } else {
-          items.push({ label: 'Edit Data', seconds: t.EditData, color: GANTT_DRILL_GROUP_COLORS.EditData });
-          items.push({ label: 'Edit Meta', seconds: t.EditMeta, color: GANTT_DRILL_GROUP_COLORS.EditMeta });
-        }
+        items.push({ label: 'Edit Data', seconds: t.EditData, color: GANTT_DRILL_GROUP_COLORS.EditData });
+        items.push({ label: 'Edit Meta', seconds: t.EditMeta, color: GANTT_DRILL_GROUP_COLORS.EditMeta });
+      } else {
+        items.push({ label: 'User Time', seconds: t.Review + t.EditData + t.EditMeta, color: '#F59E0B' });
+      }
+
+      if (showIdleTime) {
+        items.push({ label: 'Idle Time', seconds: t.Idle, color: '#94A3B8' });
       }
 
       const totalWorkSeconds = items.reduce((sum, item) => sum + item.seconds, 0);
@@ -113,7 +106,7 @@ export const SheetProcessMatrix = React.memo(({
         totalWorkSeconds
       };
     }).sort((a, b) => b.totalWorkSeconds - a.totalWorkSeconds);
-  }, [segments, mergeReviewAndEdit, mergeEdit, mergeSpread]);
+  }, [segments, splitUserTime, splitSystemTime, showIdleTime]);
 
   const maxTotalWork = useMemo(() => {
     if (sheetsData.length === 0) return 1;
@@ -154,49 +147,55 @@ export const SheetProcessMatrix = React.memo(({
     <div className="space-y-4 relative" ref={containerRef}>
       {/* Legend - Matching UserContributionStackChart style */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 py-1 text-[10px] sm:text-xs text-slate-600 mb-1 font-bold">
-        <div className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Uploading }}></span>
-          Upload
-        </div>
-        <div className="inline-flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: mergeSpread ? GANTT_DRILL_GROUP_COLORS.Reprocessing : '#94A3B8' }}></span>
-          {mergeSpread ? 'Spread' : 'First Spread'}
-        </div>
-        {!mergeSpread && (
+        {splitSystemTime ? (
+          <>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Uploading }}></span>
+              Upload
+            </div>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#64748B]"></span>
+              First Spread
+            </div>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Reprocessing }}></span>
+              Second Spread
+            </div>
+          </>
+        ) : (
           <div className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Reprocessing }}></span>
-            Second Spread
+            <span className="w-2.5 h-2.5 rounded-full bg-[#334155]"></span>
+            System Time
           </div>
         )}
-        {mergeReviewAndEdit ? (
-          <div className="inline-flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
-            Review & Edit
-          </div>
-        ) : (
+        
+        {splitUserTime ? (
           <>
             <div className="inline-flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.Review }}></span>
               Review
             </div>
-            {mergeEdit ? (
-              <div className="inline-flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditData }}></span>
-                Edit
-              </div>
-            ) : (
-              <>
-                <div className="inline-flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditData }}></span>
-                  Edit Data
-                </div>
-                <div className="inline-flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditMeta }}></span>
-                  Edit Meta
-                </div>
-              </>
-            )}
+            <div className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditData }}></span>
+              Edit Data
+            </div>
+            <div className="inline-flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: GANTT_DRILL_GROUP_COLORS.EditMeta }}></span>
+              Edit Meta
+            </div>
           </>
+        ) : (
+          <div className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]"></span>
+            User Time
+          </div>
+        )}
+
+        {showIdleTime && (
+          <div className="inline-flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#94A3B8]"></span>
+            Idle Time
+          </div>
         )}
       </div>
 
