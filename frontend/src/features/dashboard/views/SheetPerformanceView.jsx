@@ -5,6 +5,10 @@ import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 import { SheetProcessMatrix } from '../components/SheetProcessMatrix.jsx';
 import {
   buildSheetPerformanceChartsData,
+  getTotalTimeChartAppearance,
+  getUserTimeChartAppearance,
+  selectUserTimeChartData,
+  selectTotalTimeChartData,
   sortSheetPerformanceChartData,
 } from '../utils/sheetPerformanceCharts.js';
 
@@ -41,8 +45,8 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
 
   const chartData = React.useMemo(() => buildSheetPerformanceChartsData(segments), [segments]);
   const displayedChartData = React.useMemo(() => ({
-    totalTimeData: sortSheetPerformanceChartData(chartData.totalTimeData, chartSettings?.totalTime?.sortOrder),
-    userTimeData: sortSheetPerformanceChartData(chartData.userTimeData, chartSettings?.userTime?.sortOrder),
+    totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(chartData.totalTimeData, chartSettings?.totalTime?.mode), chartSettings?.totalTime?.sortOrder),
+    userTimeData: sortSheetPerformanceChartData(selectUserTimeChartData(chartData.userTimeData, chartSettings?.userTime?.mode), chartSettings?.userTime?.sortOrder),
     systemTimeData: sortSheetPerformanceChartData(chartData.systemTimeData, chartSettings?.systemTime?.sortOrder),
     idleTimeData: sortSheetPerformanceChartData(chartData.idleTimeData, chartSettings?.idleTime?.sortOrder),
   }), [chartData, chartSettings]);
@@ -61,6 +65,20 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
     const currentSortOrder = chartSettings?.[chartId]?.sortOrder || 'default';
     updateChartSetting(chartId, {
       sortOrder: currentSortOrder === sortOrder ? 'default' : sortOrder,
+    });
+  };
+
+  const toggleUserTimeMode = (mode) => {
+    const currentMode = chartSettings?.userTime?.mode || 'all';
+    updateChartSetting('userTime', {
+      mode: currentMode === mode ? 'all' : mode,
+    });
+  };
+
+  const toggleTotalTimeMode = (mode) => {
+    const currentMode = chartSettings?.totalTime?.mode || 'all';
+    updateChartSetting('totalTime', {
+      mode: currentMode === mode ? 'all' : mode,
     });
   };
 
@@ -86,7 +104,13 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             {chartCards.map((card, index) => {
-              const settings = chartSettings?.[card.id] || { showAverageLine: true, sortOrder: 'default' };
+              const settings = chartSettings?.[card.id] || { showAverageLine: true, sortOrder: 'default', mode: 'all' };
+              const totalTimeAppearance = card.id === 'totalTime' && settings.mode !== 'all'
+                ? getTotalTimeChartAppearance(settings.mode)
+                : null;
+              const userTimeAppearance = card.id === 'userTime' && settings.mode !== 'all'
+                ? getUserTimeChartAppearance(settings.mode)
+                : null;
               return (
                 <div key={card.id} className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-${index + 1} overflow-visible relative hover:z-50 transition-all group`}>
                   <div className="mb-0 flex items-center justify-between gap-3">
@@ -118,6 +142,35 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                                   </ToggleSetting>
                                 </div>
                               </div>
+                              {card.id === 'totalTime' && (
+                                <div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Total Time Filter</div>
+                                  <div className="space-y-3">
+                                    <ToggleSetting checked={settings.mode === 'complete'} onChange={() => toggleTotalTimeMode('complete')}>
+                                      Complete Only
+                                    </ToggleSetting>
+                                  </div>
+                                </div>
+                              )}
+                              {card.id === 'userTime' && (
+                                <div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">User Time Filter</div>
+                                  <div className="space-y-3">
+                                    <ToggleSetting checked={settings.mode === 'review'} onChange={() => toggleUserTimeMode('review')}>
+                                      Review Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'upload'} onChange={() => toggleUserTimeMode('upload')}>
+                                      Upload Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'editData'} onChange={() => toggleUserTimeMode('editData')}>
+                                      Edit Data Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'editMeta'} onChange={() => toggleUserTimeMode('editMeta')}>
+                                      Edit Meta Only
+                                    </ToggleSetting>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -125,7 +178,14 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                       <button onClick={() => setExpandedVisualizationId(card.expandedId)} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view"><Maximize2 className="w-4 h-4" /></button>
                     </div>
                   </div>
-                  <SheetBreakdownChart data={card.data} isDuration={true} showAverageLine={settings.showAverageLine} />
+                  <SheetBreakdownChart
+                    data={card.data}
+                    isDuration={true}
+                    showAverageLine={settings.showAverageLine}
+                    activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill}
+                    inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill}
+                    valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill}
+                  />
                 </div>
               );
             })}

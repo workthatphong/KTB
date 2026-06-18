@@ -20,7 +20,7 @@ function clampLabel(label, maxLength = 12) {
   return `${text.slice(0, maxLength - 1)}...`;
 }
 
-function DurationBarLabel({ x, y, width, height, value, index, data, isDuration, average }) {
+function DurationBarLabel({ x, y, width, height, value, index, data, isDuration, average, fillColor }) {
   if (value === undefined || value === null || value === 0) return null;
   
   if (value < average) return null;
@@ -30,7 +30,7 @@ function DurationBarLabel({ x, y, width, height, value, index, data, isDuration,
       x={x + width + 8}
       y={y + height / 2 + 4}
       textAnchor="start"
-      fill="#00a4e4"
+      fill={fillColor}
       className="text-[11px] font-bold"
     >
       {isDuration ? formatDuration(value) : value.toLocaleString()}
@@ -62,7 +62,15 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, contain
   return null;
 };
 
-export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expanded = false, showAverageLine = true }) => {
+export const SheetBreakdownChart = React.memo(({
+  data,
+  isDuration = true,
+  expanded = false,
+  showAverageLine = true,
+  activeFill = '#00a4e4',
+  inactiveFill = '#94a3b8',
+  valueLabelFill = '#00a4e4',
+}) => {
   const reactId = React.useId();
   const containerRef = useRef(null);
   const scrollAreaRef = useRef(null);
@@ -159,13 +167,14 @@ export const SheetBreakdownChart = React.memo(({ data, isDuration = true, expand
                       data={data} 
                       isDuration={isDuration} 
                       average={average}
+                      fillColor={valueLabelFill}
                     />
                   )} 
                 />
                 {data.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.value >= average ? '#00a4e4' : '#94a3b8'} 
+                    fill={entry.value >= average ? activeFill : inactiveFill} 
                   />
                 ))}
               </Bar>

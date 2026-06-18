@@ -143,7 +143,7 @@ export const SheetProcessMatrix = React.memo(({
 
   if (sheetsData.length === 0) return null;
 
-  const rowSlotHeight = 72; // Adjusted for padding/margins
+  const rowSlotHeight = 84; // Includes row content plus vertical gap between rows
   const useScroll = !expanded && sheetsData.length > maxVisibleRows;
   const wrapperStyle = useScroll ? { maxHeight: `${maxVisibleRows * rowSlotHeight}px` } : undefined;
 
