@@ -7,8 +7,10 @@ import {
   buildSheetPerformanceChartsData,
   getTotalTimeChartAppearance,
   getUserTimeChartAppearance,
+  getSystemTimeChartAppearance,
   selectUserTimeChartData,
   selectTotalTimeChartData,
+  selectSystemTimeChartData,
   sortSheetPerformanceChartData,
 } from '../utils/sheetPerformanceCharts.js';
 
@@ -47,7 +49,7 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
   const displayedChartData = React.useMemo(() => ({
     totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(chartData.totalTimeData, chartSettings?.totalTime?.mode), chartSettings?.totalTime?.sortOrder),
     userTimeData: sortSheetPerformanceChartData(selectUserTimeChartData(chartData.userTimeData, chartSettings?.userTime?.mode), chartSettings?.userTime?.sortOrder),
-    systemTimeData: sortSheetPerformanceChartData(chartData.systemTimeData, chartSettings?.systemTime?.sortOrder),
+    systemTimeData: sortSheetPerformanceChartData(selectSystemTimeChartData(chartData.systemTimeData, chartSettings?.systemTime?.mode), chartSettings?.systemTime?.sortOrder),
     idleTimeData: sortSheetPerformanceChartData(chartData.idleTimeData, chartSettings?.idleTime?.sortOrder),
   }), [chartData, chartSettings]);
 
@@ -71,6 +73,13 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
   const toggleUserTimeMode = (mode) => {
     const currentMode = chartSettings?.userTime?.mode || 'all';
     updateChartSetting('userTime', {
+      mode: currentMode === mode ? 'all' : mode,
+    });
+  };
+
+  const toggleSystemTimeMode = (mode) => {
+    const currentMode = chartSettings?.systemTime?.mode || 'all';
+    updateChartSetting('systemTime', {
       mode: currentMode === mode ? 'all' : mode,
     });
   };
@@ -110,6 +119,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                 : null;
               const userTimeAppearance = card.id === 'userTime' && settings.mode !== 'all'
                 ? getUserTimeChartAppearance(settings.mode)
+                : null;
+              const systemTimeAppearance = card.id === 'systemTime' && settings.mode !== 'all'
+                ? getSystemTimeChartAppearance(settings.mode)
                 : null;
               return (
                 <div key={card.id} className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb animate-stagger-${index + 1} overflow-visible relative hover:z-50 transition-all group`}>
@@ -171,6 +183,19 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                                   </div>
                                 </div>
                               )}
+                              {card.id === 'systemTime' && (
+                                <div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">System Time Filter</div>
+                                  <div className="space-y-3">
+                                    <ToggleSetting checked={settings.mode === 'firstSpread'} onChange={() => toggleSystemTimeMode('firstSpread')}>
+                                      First Spread Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'secondSpread'} onChange={() => toggleSystemTimeMode('secondSpread')}>
+                                      Second Spread Only
+                                    </ToggleSetting>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -182,9 +207,9 @@ export function SheetPerformanceView({ segments, setExpandedVisualizationId, cha
                     data={card.data}
                     isDuration={true}
                     showAverageLine={settings.showAverageLine}
-                    activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill}
-                    inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill}
-                    valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill}
+                    activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill ?? systemTimeAppearance?.activeFill}
+                    inactiveFill={totalTimeAppearance?.inactiveFill ?? userTimeAppearance?.inactiveFill ?? systemTimeAppearance?.inactiveFill}
+                    valueLabelFill={totalTimeAppearance?.valueLabelFill ?? userTimeAppearance?.valueLabelFill ?? systemTimeAppearance?.valueLabelFill}
                   />
                 </div>
               );

@@ -13,7 +13,7 @@ export function createDefaultSheetPerformanceChartSettings() {
   return {
     totalTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
     userTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
-    systemTime: { showAverageLine: true, sortOrder: 'default' },
+    systemTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
     idleTime: { showAverageLine: true, sortOrder: 'default' },
   };
 }
@@ -48,6 +48,14 @@ export function buildSheetPerformanceChartsData(segments) {
       return totals;
     }, { uploadSeconds: 0, reviewSeconds: 0, editDataSeconds: 0, editMetaSeconds: 0 });
 
+    const systemBreakdown = entry.segments.reduce((totals, segment) => {
+      const drillGroup = toDrillGroup(segment.segmentType);
+      const duration = Number(segment.durationSeconds) || 0;
+      if (drillGroup === 'Processing') totals.firstSpreadSeconds += duration;
+      else if (drillGroup === 'Reprocessing') totals.secondSpreadSeconds += duration;
+      return totals;
+    }, { firstSpreadSeconds: 0, secondSpreadSeconds: 0 });
+
     const completedSegments = entry.segments.filter(s => Boolean(toCompleteMarkerType(s)));
     const isCompleted = completedSegments.length > 0;
     
@@ -74,6 +82,8 @@ export function buildSheetPerformanceChartsData(segments) {
       reviewSeconds: userBreakdown.reviewSeconds,
       editDataSeconds: userBreakdown.editDataSeconds,
       editMetaSeconds: userBreakdown.editMetaSeconds,
+      firstSpreadSeconds: systemBreakdown.firstSpreadSeconds,
+      secondSpreadSeconds: systemBreakdown.secondSpreadSeconds,
       isCompleted,
       timeToCompleteSeconds,
     };
@@ -94,9 +104,21 @@ export function buildSheetPerformanceChartsData(segments) {
       editDataValue: entry.editDataSeconds,
       editMetaValue: entry.editMetaSeconds,
     })),
-    systemTimeData: entries.map((entry) => ({ name: entry.name, value: entry.systemTimeSeconds })),
+    systemTimeData: entries.map((entry) => ({ 
+      name: entry.name, 
+      value: entry.systemTimeSeconds,
+      firstSpreadValue: entry.firstSpreadSeconds,
+      secondSpreadValue: entry.secondSpreadSeconds
+    })),
     idleTimeData: entries.map((entry) => ({ name: entry.name, value: entry.idleWaitingSeconds })),
   };
+}
+
+export function selectSystemTimeChartData(data, mode = 'all') {
+  const safeData = Array.isArray(data) ? data : [];
+  if (mode === 'firstSpread') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.firstSpreadValue) || 0 }));
+  if (mode === 'secondSpread') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.secondSpreadValue) || 0 }));
+  return safeData.map((entry) => ({ name: entry.name, value: Number(entry.value) || 0 }));
 }
 
 export function selectUserTimeChartData(data, mode = 'all') {
@@ -122,6 +144,24 @@ export function getTotalTimeChartAppearance(mode = 'all') {
       activeFill: '#16A34A',
       inactiveFill: '#94a3b8',
       valueLabelFill: '#16A34A',
+    };
+  }
+  return null;
+}
+
+export function getSystemTimeChartAppearance(mode = 'all') {
+  if (mode === 'firstSpread') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.Processing,
+      inactiveFill: '#94a3b8',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.Processing,
+    };
+  }
+  if (mode === 'secondSpread') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.Reprocessing,
+      inactiveFill: '#94a3b8',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.Reprocessing,
     };
   }
   return null;
