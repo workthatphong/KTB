@@ -9,6 +9,12 @@ export const SHEET_PERFORMANCE_CHART_IDS = [
   'idleTime',
 ];
 
+export const USER_TIME_COUNT_MODES = new Set([
+  'reviewCount',
+  'editDataCount',
+  'editMetaCount',
+]);
+
 export function createDefaultSheetPerformanceChartSettings() {
   return {
     totalTime: { showAverageLine: true, sortOrder: 'default', mode: 'all' },
@@ -51,12 +57,29 @@ export function buildSheetPerformanceChartsData(segments) {
     const userBreakdown = entry.segments.reduce((totals, segment) => {
       const drillGroup = toDrillGroup(segment.segmentType);
       const duration = Number(segment.durationSeconds) || 0;
+      const editDataItemCount = Number(segment.editDataItemCount) || 0;
+      const editMetaItemCount = Number(segment.editMetaItemCount) || 0;
       if (drillGroup === 'Uploading') totals.uploadSeconds += duration;
-      else if (drillGroup === 'Review' || drillGroup === 'ReviewAutoClose') totals.reviewSeconds += duration;
-      else if (drillGroup === 'EditData') totals.editDataSeconds += duration;
-      else if (drillGroup === 'EditMeta') totals.editMetaSeconds += duration;
+      else if (drillGroup === 'Review' || drillGroup === 'ReviewAutoClose') {
+        totals.reviewSeconds += duration;
+        totals.reviewCount += 1;
+      } else if (drillGroup === 'EditData') {
+        totals.editDataSeconds += duration;
+        totals.editDataCount += editDataItemCount || 1;
+      } else if (drillGroup === 'EditMeta') {
+        totals.editMetaSeconds += duration;
+        totals.editMetaCount += editMetaItemCount || 1;
+      }
       return totals;
-    }, { uploadSeconds: 0, reviewSeconds: 0, editDataSeconds: 0, editMetaSeconds: 0 });
+    }, {
+      uploadSeconds: 0,
+      reviewSeconds: 0,
+      editDataSeconds: 0,
+      editMetaSeconds: 0,
+      reviewCount: 0,
+      editDataCount: 0,
+      editMetaCount: 0,
+    });
 
     const systemBreakdown = entry.segments.reduce((totals, segment) => {
       const drillGroup = toDrillGroup(segment.segmentType);
@@ -121,6 +144,9 @@ export function buildSheetPerformanceChartsData(segments) {
       reviewSeconds: userBreakdown.reviewSeconds,
       editDataSeconds: userBreakdown.editDataSeconds,
       editMetaSeconds: userBreakdown.editMetaSeconds,
+      reviewCount: userBreakdown.reviewCount,
+      editDataCount: userBreakdown.editDataCount,
+      editMetaCount: userBreakdown.editMetaCount,
       firstSpreadSeconds: systemBreakdown.firstSpreadSeconds,
       secondSpreadSeconds: systemBreakdown.secondSpreadSeconds,
       firstSpreadIdleSeconds: firstSpreadIdle,
@@ -132,6 +158,12 @@ export function buildSheetPerformanceChartsData(segments) {
   }).sort((a, b) => a.name.localeCompare(b.name, 'th'));
 
   return {
+    editDataBubbleData: entries.map((entry) => ({
+      name: entry.name,
+      x: entry.editDataSeconds,
+      y: entry.editDataCount,
+      z: entry.reviewCount,
+    })),
     totalTimeData: entries.map((entry) => ({ 
       name: entry.name, 
       value: entry.totalLeadTimeSeconds, 
@@ -145,6 +177,9 @@ export function buildSheetPerformanceChartsData(segments) {
       reviewValue: entry.reviewSeconds,
       editDataValue: entry.editDataSeconds,
       editMetaValue: entry.editMetaSeconds,
+      reviewCountValue: entry.reviewCount,
+      editDataCountValue: entry.editDataCount,
+      editMetaCountValue: entry.editMetaCount,
     })),
     systemTimeData: entries.map((entry) => ({ 
       name: entry.name, 
@@ -183,6 +218,9 @@ export function selectUserTimeChartData(data, mode = 'all') {
   if (mode === 'review') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.reviewValue) || 0 }));
   if (mode === 'editData') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.editDataValue) || 0 }));
   if (mode === 'editMeta') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.editMetaValue) || 0 }));
+  if (mode === 'reviewCount') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.reviewCountValue) || 0 }));
+  if (mode === 'editDataCount') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.editDataCountValue) || 0 }));
+  if (mode === 'editMetaCount') return safeData.map((entry) => ({ name: entry.name, value: Number(entry.editMetaCountValue) || 0 }));
   return safeData.map((entry) => ({ name: entry.name, value: Number(entry.value) || 0 }));
 }
 
@@ -249,7 +287,21 @@ export function getUserTimeChartAppearance(mode = 'all') {
       valueLabelFill: GANTT_DRILL_GROUP_COLORS.Review,
     };
   }
+  if (mode === 'reviewCount') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.Review,
+      inactiveFill: '#94a3b8',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.Review,
+    };
+  }
   if (mode === 'editData') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.EditData,
+      inactiveFill: '#94a3b8',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.EditData,
+    };
+  }
+  if (mode === 'editDataCount') {
     return {
       activeFill: GANTT_DRILL_GROUP_COLORS.EditData,
       inactiveFill: '#94a3b8',
@@ -263,7 +315,18 @@ export function getUserTimeChartAppearance(mode = 'all') {
       valueLabelFill: GANTT_DRILL_GROUP_COLORS.EditMeta,
     };
   }
+  if (mode === 'editMetaCount') {
+    return {
+      activeFill: GANTT_DRILL_GROUP_COLORS.EditMeta,
+      inactiveFill: '#94a3b8',
+      valueLabelFill: GANTT_DRILL_GROUP_COLORS.EditMeta,
+    };
+  }
   return null;
+}
+
+export function isUserTimeCountMode(mode = 'all') {
+  return USER_TIME_COUNT_MODES.has(mode);
 }
 
 export function sortSheetPerformanceChartData(data, sortOrder = 'desc') {

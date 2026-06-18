@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
 import { EmptyState } from '../../../components/shared/EmptyState.jsx';
+import { EditDataBubbleChart } from '../../charts/EditDataBubbleChart.jsx';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 import {
   buildSheetPerformanceChartsData,
@@ -8,6 +9,7 @@ import {
   getUserTimeChartAppearance,
   getSystemTimeChartAppearance,
   getIdleTimeChartAppearance,
+  isUserTimeCountMode,
   selectUserTimeChartData,
   selectTotalTimeChartData,
   selectSystemTimeChartData,
@@ -129,6 +131,16 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
         <EmptyState icon={LayoutDashboard} title="No Data" subtitle="No sheet performance data available for the current filters." />
       ) : (
         <>
+          <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb mb-10 animate-stagger-1">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-bold text-[#17335f]">Edit Data Relationship</h2>
+              <button onClick={() => setExpandedVisualizationId('sheet-edit-data-relationship')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="Full view">
+                <Maximize2 className="w-4 h-4" />
+              </button>
+            </div>
+            <EditDataBubbleChart data={chartData.editDataBubbleData} />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             {chartCards.map((card, index) => {
               const settings = chartSettings?.[card.id] || { showAverageLine: true, sortOrder: 'default', mode: 'all' };
@@ -138,6 +150,7 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
               const userTimeAppearance = card.id === 'userTime' && settings.mode !== 'all'
                 ? getUserTimeChartAppearance(settings.mode)
                 : null;
+              const isUserTimeCount = card.id === 'userTime' && isUserTimeCountMode(settings.mode);
               const systemTimeAppearance = card.id === 'systemTime' && settings.mode !== 'all'
                 ? getSystemTimeChartAppearance(settings.mode)
                 : null;
@@ -192,14 +205,23 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
                                     <ToggleSetting checked={settings.mode === 'review'} onChange={() => toggleUserTimeMode('review')}>
                                       Review Only
                                     </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'reviewCount'} onChange={() => toggleUserTimeMode('reviewCount')}>
+                                      Review Count Only
+                                    </ToggleSetting>
                                     <ToggleSetting checked={settings.mode === 'upload'} onChange={() => toggleUserTimeMode('upload')}>
                                       Upload Only
                                     </ToggleSetting>
                                     <ToggleSetting checked={settings.mode === 'editData'} onChange={() => toggleUserTimeMode('editData')}>
                                       Edit Data Only
                                     </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'editDataCount'} onChange={() => toggleUserTimeMode('editDataCount')}>
+                                      Edit Data Count Only
+                                    </ToggleSetting>
                                     <ToggleSetting checked={settings.mode === 'editMeta'} onChange={() => toggleUserTimeMode('editMeta')}>
                                       Edit Meta Only
+                                    </ToggleSetting>
+                                    <ToggleSetting checked={settings.mode === 'editMetaCount'} onChange={() => toggleUserTimeMode('editMetaCount')}>
+                                      Edit Meta Count Only
                                     </ToggleSetting>
                                   </div>
                                 </div>
@@ -242,7 +264,7 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
                   </div>
                   <SheetBreakdownChart
                     data={card.data}
-                    isDuration={true}
+                    isDuration={!isUserTimeCount}
                     showAverageLine={settings.showAverageLine}
                     forcedAverage={card.forcedAverage}
                     activeFill={totalTimeAppearance?.activeFill ?? userTimeAppearance?.activeFill ?? systemTimeAppearance?.activeFill ?? idleTimeAppearance?.activeFill}

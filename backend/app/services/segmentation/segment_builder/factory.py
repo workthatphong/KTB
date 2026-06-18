@@ -1,7 +1,55 @@
 from __future__ import annotations
 
 from ..engine_utils import assign_time_group, seconds_between
+from ....config.constants.constants_workflow import (
+    USER_EDIT_CHANGE_TYPES,
+    USER_METADATA_EDIT_CHANGE_TYPES,
+)
 from .helpers import calculate_effective_user_duration
+
+
+def _count_segment_edit_items(
+    interval: dict,
+    segment_type: str,
+    start_event: dict,
+    end_event: dict,
+    actor_name: str | None,
+) -> tuple[int, int]:
+    if segment_type not in {
+        "USER_EDITING_CORRECTION",
+        "USER_EDITING_CORRECTION_AND_COMPLETION_APPROVAL",
+        "USER_EDITING_METADATA_CORRECTION",
+        "USER_EDITING_METADATA_CORRECTION_AND_COMPLETION_APPROVAL",
+    }:
+        return 0, 0
+
+    start_index = min(
+        int(start_event.get("order_index", 0)),
+        int(end_event.get("order_index", 0)),
+    )
+    end_index = max(
+        int(start_event.get("order_index", 0)),
+        int(end_event.get("order_index", 0)),
+    )
+    normalized_actor_name = str(actor_name or "").strip().lower()
+
+    edit_data_count = 0
+    edit_meta_count = 0
+    for event in interval.get("inner_events", []):
+        event_index = int(event.get("order_index", -1))
+        if event_index < start_index or event_index > end_index:
+            continue
+        if event.get("actor_type") != "User" or event.get("is_status_event"):
+            continue
+        event_actor_name = str(event.get("actor_name") or "").strip().lower()
+        if normalized_actor_name and event_actor_name != normalized_actor_name:
+            continue
+        if event.get("change_type") in USER_EDIT_CHANGE_TYPES:
+            edit_data_count += 1
+        if event.get("change_type") in USER_METADATA_EDIT_CHANGE_TYPES:
+            edit_meta_count += 1
+
+    return edit_data_count, edit_meta_count
 
 
 def build_segment(
@@ -47,6 +95,14 @@ def build_segment(
         else:
             user_name = "Unknown User"
 
+    edit_data_item_count, edit_meta_item_count = _count_segment_edit_items(
+        interval,
+        segment_type,
+        start_event,
+        end_event,
+        actor_name,
+    )
+
     return {
         "id": (
             f"{interval['document_id']}|{segment_type}|"
@@ -74,6 +130,8 @@ def build_segment(
         "fileName": start_event["file_name"],
         "pageName": start_event["page_name"],
         "autoTimeout": is_auto_timeout,
+        "editDataItemCount": edit_data_item_count,
+        "editMetaItemCount": edit_meta_item_count,
         "__start_dt": start_time,
         "__end_dt": end_time,
     }

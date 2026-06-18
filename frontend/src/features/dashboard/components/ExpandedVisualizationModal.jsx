@@ -22,12 +22,14 @@ import {
   getUserTimeChartAppearance,
   getSystemTimeChartAppearance,
   getIdleTimeChartAppearance,
+  isUserTimeCountMode,
   selectUserTimeChartData,
   selectTotalTimeChartData,
   selectSystemTimeChartData,
   selectIdleTimeChartData,
   sortSheetPerformanceChartData
 } from '../utils/sheetPerformanceCharts.js';
+import { EditDataBubbleChart } from '../../charts/EditDataBubbleChart.jsx';
 import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
 
 const ganttTimelineChartPromise = import('../../timeline/GanttTimelineChart.jsx').then((module) => ({ default: module.GanttTimelineChart }));
@@ -1248,7 +1250,8 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
   const isSheetBreakdownFullView = visualizationId === 'sheet-total-time'
     || visualizationId === 'sheet-user-time'
     || visualizationId === 'sheet-system-time'
-    || visualizationId === 'sheet-idle-time';
+    || visualizationId === 'sheet-idle-time'
+    || visualizationId === 'sheet-edit-data-relationship';
   const kpiId = isKpiBreakdown ? visualizationId.replace('kpi-breakdown-', '') : '';
 
   const modalTitle = isKpiBreakdown
@@ -1277,6 +1280,8 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
         ? 'System Time By Sheet'
       : visualizationId === 'sheet-idle-time'
         ? 'Idle Time By Sheet'
+      : visualizationId === 'sheet-edit-data-relationship'
+        ? 'Edit Data Relationship By Sheet'
       : 'Full View Analysis';
       const modalSubtitle = isKpiBreakdown
       ? `Breakdown of ${
@@ -1304,6 +1309,8 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
         ? 'Expanded breakdown for all visible sheets'
       : visualizationId === 'sheet-idle-time'
         ? 'Expanded breakdown for all visible sheets'
+      : visualizationId === 'sheet-edit-data-relationship'
+        ? 'X = Edit Data Time, Y = Edit Data Items, Bubble Size = Review Count'
       : 'Advanced Visualization';
 
   const {
@@ -1336,6 +1343,10 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     () => sheetPerformanceChartSettings?.userTime?.mode && sheetPerformanceChartSettings.userTime.mode !== 'all'
       ? getUserTimeChartAppearance(sheetPerformanceChartSettings.userTime.mode)
       : null,
+    [sheetPerformanceChartSettings]
+  );
+  const isSheetUserTimeCountMode = React.useMemo(
+    () => isUserTimeCountMode(sheetPerformanceChartSettings?.userTime?.mode),
     [sheetPerformanceChartSettings]
   );
   const totalTimeAppearance = React.useMemo(
@@ -1545,7 +1556,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'sheet-user-time' && (
               <SheetBreakdownChart
                 data={sortedSheetPerformanceChartData.userTimeData}
-                isDuration
+                isDuration={!isSheetUserTimeCountMode}
                 expanded
                 showAverageLine={sheetPerformanceChartSettings?.userTime?.showAverageLine !== false}
                 activeFill={userTimeAppearance?.activeFill}
@@ -1573,6 +1584,12 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
                 activeFill={idleTimeAppearance?.activeFill}
                 inactiveFill={idleTimeAppearance?.inactiveFill}
                 valueLabelFill={idleTimeAppearance?.valueLabelFill}
+              />
+            )}
+            {visualizationId === 'sheet-edit-data-relationship' && (
+              <EditDataBubbleChart
+                data={sheetPerformanceChartData.editDataBubbleData}
+                expanded
               />
             )}
           </Suspense>

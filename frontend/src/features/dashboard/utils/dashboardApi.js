@@ -3,7 +3,7 @@ import { requestJson } from '../../../lib/api.js';
 export async function fetchDashboardPayload(options = {}) {
   const params = new URLSearchParams();
   if (options.includeDebug) params.set('includeDebug', '1');
-  if (options.refreshSnapshot) params.set('refreshSnapshot', '1');
+  if (options.refreshSnapshot !== false) params.set('refreshSnapshot', '1');
   const query = params.size > 0 ? `?${params.toString()}` : '';
   const payload = await requestJson(`/api/dashboard${query}`);
 
