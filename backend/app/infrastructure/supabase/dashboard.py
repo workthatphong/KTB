@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import gzip
 import json
 import time
 from datetime import datetime, timezone
@@ -99,6 +101,13 @@ def fetch_dashboard_snapshot_state() -> dict[str, Any] | None:
         snapshot_payload = raw_snapshot
     elif isinstance(raw_snapshot, str) and raw_snapshot.strip():
         try:
+            # Check if it's base64-gzipped (starts with standard gzip magic bytes in base64)
+            if raw_snapshot.startswith("H4sI"):
+                try:
+                    raw_snapshot = gzip.decompress(base64.b64decode(raw_snapshot)).decode("utf-8")
+                except Exception as exc:
+                    print(f"Warning: Failed to decompress payload: {exc}")
+            
             decoded = json.loads(raw_snapshot)
             if isinstance(decoded, dict):
                 snapshot_payload = decoded
@@ -138,7 +147,9 @@ def sync_dashboard_snapshot_to_supabase(snapshot_payload: dict[str, Any]) -> boo
                     "algorithm_version": str(
                         snapshot_meta.get("algorithmVersion") or ALGORITHM_VERSION
                     ),
-                    "payload_json": json.dumps(snapshot_payload, ensure_ascii=False),
+                    "payload_json": base64.b64encode(
+                        gzip.compress(json.dumps(snapshot_payload, ensure_ascii=False).encode("utf-8"))
+                    ).decode("ascii"),
                 }
             ],
             prefer="resolution=merge-duplicates,return=minimal",

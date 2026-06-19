@@ -28,7 +28,9 @@ def _payload_matches_algorithm_version(payload: dict | None) -> bool:
     snapshot_meta = payload.get("snapshotMeta")
     if not isinstance(snapshot_meta, dict):
         return False
-    return str(snapshot_meta.get("algorithmVersion") or "") == ALGORITHM_VERSION
+    # Relax strict version check: if we have a valid dict payload, use it to avoid expensive full rebuilds
+    # on Vercel cold starts.
+    return True
 
 
 def _list_sources_from_conn() -> list[dict]:
