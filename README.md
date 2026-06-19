@@ -6,7 +6,6 @@
 .
 |- api/                # Vercel function entrypoint
 |- backend/            # Python backend source
-|  |- requirements.txt # Python dependencies
 |  `- app/
 |     |- presentation/ # HTTP layer (Flask app, routes, auth, upload validation)
 |     |- application/  # Use-cases / orchestration
@@ -23,13 +22,14 @@
 |     |- hooks/        # App-level hooks
 |     `- lib/          # Shared utilities/constants
 |- scripts/            # Scripts (startup, refactoring, etc.)
+|- requirements.txt    # Python dependencies
 `- vercel.json         # Vercel config
 ```
 
 ## Local Run
 
 1. Install dependencies:
-   Backend: `pip install -r backend/requirements.txt`
+   Backend: `pip install -r requirements.txt`
    Frontend: `npm --prefix frontend install`
    (Or `cd frontend && npm install`)
 2. Build frontend:
