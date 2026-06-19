@@ -5,6 +5,7 @@ import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
 import { PanelLoader, DataManagementLoader } from './components/shared/Loaders.jsx';
+import { DashboardProvider } from './contexts/DashboardContext.jsx';
 
 const DashboardView = lazy(() => import('./features/dashboard/DashboardView.jsx').then(m => ({ default: m.DashboardView })));
 const DataManagementView = lazy(() => import('./features/data-management/DataManagementView.jsx').then(m => ({ default: m.DataManagementView })));
@@ -30,7 +31,7 @@ function App() {
   }, [controller.expandedVisualizationId]);
 
   return (
-    <>
+    <DashboardProvider dashboard={dashboard} controller={controller}>
       <DashboardLayout dashboard={dashboard} controller={controller}>
         {!dashboard.isInitialLoadDone ? (
           controller.activeView === 'data-management' ? <DataManagementLoader /> : <PanelLoader />
@@ -59,27 +60,7 @@ function App() {
                 setChartSettings={controller.setSheetPerformanceChartSettings}
               />
             ) : (
-              <DashboardView
-                dashboard={dashboard}
-                workloadVisibleRows={controller.workloadVisibleRows}
-                showProcessBreakdownIdle={controller.showProcessBreakdownIdle}
-                setShowProcessBreakdownIdle={controller.setShowProcessBreakdownIdle}
-                mergeReviewAndEdit={controller.mergeReviewAndEdit}
-                setMergeReviewAndEdit={controller.setMergeReviewAndEdit}
-                mergeSpread={controller.mergeSpread}
-                setMergeSpread={controller.setMergeSpread}
-                ganttSingleLaneMode={controller.ganttSingleLaneMode}
-                setGanttSingleLaneMode={controller.setGanttSingleLaneMode}
-                showSystemLane={controller.showSystemLane}
-                setShowSystemLane={controller.setShowSystemLane}
-                showStarMarkers={controller.showStarMarkers}
-                ganttCollapseGaps={controller.ganttCollapseGaps}
-                setGanttCollapseGaps={controller.setGanttCollapseGaps}
-                showGanttLegend={controller.showGanttLegend}
-                setShowGanttLegend={controller.setShowGanttLegend}
-                setSelectedGanttSegment={noop}
-                setExpandedVisualizationId={controller.setExpandedVisualizationId}
-              />
+              <DashboardView />
             )}
           </Suspense>
         )}
@@ -154,7 +135,7 @@ function App() {
           />
         ) : null}
       </Suspense>
-    </>
+    </DashboardProvider>
   );
 }
 

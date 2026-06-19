@@ -2,6 +2,7 @@ import React, { Suspense, useRef, useEffect, useState } from 'react';
 import { FileText, LayoutDashboard, Maximize2, SlidersHorizontal, Users, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
 import { KpiSubtext } from '@/components/shared/KpiSubtext.jsx';
+import { useDashboardContext } from '@/contexts/DashboardContext.jsx';
 
 const donutWorkloadChartPromise = import('../../../charts/DonutWorkloadChart.jsx').then((m) => ({ default: m.DonutWorkloadChart }));
 const userContributionStackChartPromise = import('../../../charts/UserContributionStackChart.jsx').then((m) => ({ default: m.UserContributionStackChart }));
@@ -56,17 +57,18 @@ export const KpiGridPanel = React.memo(({ kpiData }) => {
   );
 });
 
-export const TimelinePanel = React.memo(({
-  ganttVisibleSegments,
-  ganttSingleLaneMode, setGanttSingleLaneMode,
-  showSystemLane, setShowSystemLane,
-  showIdle, setShowIdle,
-  showStarMarkers,
-  ganttCollapseGaps, setGanttCollapseGaps,
-  showGanttLegend, setShowGanttLegend,
-  setSelectedGanttSegment,
-  setExpandedVisualizationId,
-}) => {
+export const TimelinePanel = React.memo(() => {
+  const { dashboard, controller } = useDashboardContext();
+  const { ganttVisibleSegments, showIdle, setShowIdle } = dashboard;
+  const { 
+    ganttSingleLaneMode, setGanttSingleLaneMode,
+    showSystemLane, setShowSystemLane,
+    showStarMarkers,
+    ganttCollapseGaps, setGanttCollapseGaps,
+    showGanttLegend, setShowGanttLegend,
+    setExpandedVisualizationId
+  } = controller;
+
   const [showTimelineFilterMenu, setShowTimelineFilterMenu] = useState(false);
   const [timelineNotice, setTimelineNotice] = useState('');
   const timelineFilterRef = useRef(null);
@@ -131,7 +133,7 @@ export const TimelinePanel = React.memo(({
         <Suspense fallback={<ChartPanelFallback height="h-[28rem]" />}>
           <GanttTimelineChart
             segments={ganttVisibleSegments}
-            onSelectSegment={setSelectedGanttSegment}
+            onSelectSegment={() => {}}
             singleLane={ganttSingleLaneMode}
             showSystemLane={showSystemLane}
             showIdleLane={showIdle}
@@ -145,9 +147,13 @@ export const TimelinePanel = React.memo(({
   );
 });
 
-export const UserSharePanel = React.memo(({ workloadVisibleRows, setExpandedVisualizationId, donutAnimationKey }) => (
-  <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-3">
-    <div className="absolute right-4 top-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+export const UserSharePanel = React.memo(({ donutAnimationKey }) => {
+  const { controller } = useDashboardContext();
+  const { workloadVisibleRows, setExpandedVisualizationId } = controller;
+
+  return (
+    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-3">
+      <div className="absolute right-4 top-4 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <button onClick={() => setExpandedVisualizationId('donut-detail')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="View details">
         <FileText className="w-4 h-4" />
       </button>
@@ -162,11 +168,17 @@ export const UserSharePanel = React.memo(({ workloadVisibleRows, setExpandedVisu
       )}
     </div>
   </div>
-));
+  );
+});
 
-export const UserBreakdownPanel = React.memo(({ contributionRows, setExpandedVisualizationId, contributionAnimationKey }) => (
-  <div className="lg:col-span-3 bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-3">
-    <div className="flex items-center justify-between mb-4">
+export const UserBreakdownPanel = React.memo(({ contributionAnimationKey }) => {
+  const { dashboard, controller } = useDashboardContext();
+  const { contributionRows } = dashboard;
+  const { setExpandedVisualizationId } = controller;
+
+  return (
+    <div className="lg:col-span-3 bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-3">
+      <div className="flex items-center justify-between mb-4">
       <h2 className="text-lg font-bold text-[#17335f]">User Breakdown</h2>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button onClick={() => setExpandedVisualizationId('contribution-detail')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="View details">
@@ -183,16 +195,21 @@ export const UserBreakdownPanel = React.memo(({ contributionRows, setExpandedVis
       )}
     </div>
   </div>
-));
+  );
+});
 
 export const ProcessTimePanel = React.memo(({
-  chartBaseSegments,
   processBreakdownData,
   processBreakdownAnimationKey,
-  mergeReviewAndEdit, setMergeReviewAndEdit,
-  mergeSpread, setMergeSpread,
-  setExpandedVisualizationId
 }) => {
+  const { dashboard, controller } = useDashboardContext();
+  const { chartBaseSegments } = dashboard;
+  const { 
+    mergeReviewAndEdit, setMergeReviewAndEdit,
+    mergeSpread, setMergeSpread,
+    setExpandedVisualizationId
+  } = controller;
+
   const [showProcessFilterMenu, setShowProcessFilterMenu] = useState(false);
   const processFilterRef = useRef(null);
 
@@ -236,9 +253,14 @@ export const ProcessTimePanel = React.memo(({
   );
 });
 
-export const TransitionTimePanel = React.memo(({ chartBaseSegments, transitionTimeData, transitionAnimationKey, setExpandedVisualizationId }) => (
-  <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4">
-    <div className="flex items-center justify-between mb-6">
+export const TransitionTimePanel = React.memo(({ transitionTimeData, transitionAnimationKey }) => {
+  const { dashboard, controller } = useDashboardContext();
+  const { chartBaseSegments } = dashboard;
+  const { setExpandedVisualizationId } = controller;
+
+  return (
+    <div className="bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col min-h-[400px] relative group animate-stagger-4">
+      <div className="flex items-center justify-between mb-6">
       <h2 className="text-lg font-bold text-[#17335f] whitespace-nowrap tracking-tighter sm:tracking-normal">Average Transition Time Breakdown</h2>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button onClick={() => setExpandedVisualizationId('matrix-detail')} className="p-1.5 border rounded-md text-slate-400 hover:text-slate-600 bg-white" title="View details"><FileText className="w-4 h-4" /></button>
@@ -253,4 +275,5 @@ export const TransitionTimePanel = React.memo(({ chartBaseSegments, transitionTi
       )}
     </div>
   </div>
-));
+  );
+});

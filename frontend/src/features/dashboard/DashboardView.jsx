@@ -9,40 +9,23 @@ import {
   ProcessTimePanel,
   TransitionTimePanel
 } from './components/dashboard-view/DashboardViewPanels.jsx';
+import { useDashboardContext } from '@/contexts/DashboardContext.jsx';
 
-export const DashboardView = React.memo(({
-  dashboard,
-  workloadVisibleRows,
-  showProcessBreakdownIdle,
-  setShowProcessBreakdownIdle,
-  mergeReviewAndEdit,
-  setMergeReviewAndEdit,
-  mergeSpread,
-  setMergeSpread,
-  ganttSingleLaneMode,
-  setGanttSingleLaneMode,
-  showSystemLane,
-  setShowSystemLane,
-  showStarMarkers,
-  ganttCollapseGaps,
-  setGanttCollapseGaps,
-  showGanttLegend,
-  setShowGanttLegend,
-  setSelectedGanttSegment,
-  setExpandedVisualizationId,
-}) => {
+export const DashboardView = React.memo(() => {
+  const { dashboard, controller } = useDashboardContext();
+
   const {
     kpiData,
-    ganttVisibleSegments,
     chartBaseSegments,
     contributionRows,
-    showIdle,
-    setShowIdle,
-    showWorkloadIdle,
-    setShowWorkloadIdle,
-    showWorkloadSystem,
-    setShowWorkloadSystem,
   } = dashboard;
+
+  const {
+    workloadVisibleRows,
+    showProcessBreakdownIdle,
+    mergeReviewAndEdit,
+    mergeSpread,
+  } = controller;
 
   const processBreakdownData = useProcessBreakdownData({
     chartBaseSegments,
@@ -90,45 +73,25 @@ export const DashboardView = React.memo(({
 
       <KpiGridPanel kpiData={kpiData} />
 
-      <TimelinePanel
-        ganttVisibleSegments={ganttVisibleSegments}
-        ganttSingleLaneMode={ganttSingleLaneMode} setGanttSingleLaneMode={setGanttSingleLaneMode}
-        showSystemLane={showSystemLane} setShowSystemLane={setShowSystemLane}
-        showIdle={showIdle} setShowIdle={setShowIdle}
-        showStarMarkers={showStarMarkers}
-        ganttCollapseGaps={ganttCollapseGaps} setGanttCollapseGaps={setGanttCollapseGaps}
-        showGanttLegend={showGanttLegend} setShowGanttLegend={setShowGanttLegend}
-        setSelectedGanttSegment={setSelectedGanttSegment}
-        setExpandedVisualizationId={setExpandedVisualizationId}
-      />
+      <TimelinePanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
         <UserSharePanel
-          workloadVisibleRows={workloadVisibleRows}
-          setExpandedVisualizationId={setExpandedVisualizationId}
           donutAnimationKey={donutAnimationKey}
         />
         <UserBreakdownPanel
-          contributionRows={contributionRows}
-          setExpandedVisualizationId={setExpandedVisualizationId}
           contributionAnimationKey={contributionAnimationKey}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         <ProcessTimePanel
-          chartBaseSegments={chartBaseSegments}
           processBreakdownData={processBreakdownData}
           processBreakdownAnimationKey={processBreakdownAnimationKey}
-          mergeReviewAndEdit={mergeReviewAndEdit} setMergeReviewAndEdit={setMergeReviewAndEdit}
-          mergeSpread={mergeSpread} setMergeSpread={setMergeSpread}
-          setExpandedVisualizationId={setExpandedVisualizationId}
         />
         <TransitionTimePanel
-          chartBaseSegments={chartBaseSegments}
           transitionTimeData={transitionTimeData}
           transitionAnimationKey={transitionAnimationKey}
-          setExpandedVisualizationId={setExpandedVisualizationId}
         />
       </div>
     </div>
