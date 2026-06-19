@@ -1,65 +1,49 @@
-import { startTransition, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchDashboardPayload, triggerGSheetSync } from '@/features/dashboard/utils/dashboardApi.js';
 import { buildSupabaseErrorMessage } from './useDashboardDataState.js';
 
-export function useDashboardDataFetching({ state }) {
-  const loadDashboardPayload = async (options = {}) => {
-    const payload = await fetchDashboardPayload({
-      includeDebug: Boolean(options.includeDebug),
-      refreshSnapshot: Boolean(options.refreshSnapshot),
-    });
+export function useDashboardDataFetching() {
+  const queryClient = useQueryClient();
 
-    startTransition(() => {
-      state.setSources(payload.sources);
-      state.setPerformance(payload.performance);
-      state.setGsheetConnections(payload.connections);
-      state.setHealthInfo(payload.healthInfo);
-      state.setSupabaseError(buildSupabaseErrorMessage(payload.healthInfo));
+  const query = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const payload = await fetchDashboardPayload({ includeDebug: false, refreshSnapshot: true });
+      return {
+        ...payload,
+        supabaseError: buildSupabaseErrorMessage(payload.healthInfo),
+      };
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+  });
 
-      if (payload.healthError) {
-        state.setBackendWarning(`Health error: ${payload.healthError}`);
-      }
-
-      if (options.includeDebug) {
-        state.setDebugInfo(payload.debugInfo);
-      }
-    });
-  };
-
-  const syncGSheet = async (options = {}) => {
-    state.setSyncing(true);
-    try {
-      await triggerGSheetSync({ timeoutMs: options.timeoutMs });
-    } finally {
-      state.setSyncing(false);
-    }
-  };
+  const syncMutation = useMutation({
+    mutationFn: async (options) => {
+      await triggerGSheetSync(options);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
 
   const refreshAll = async (options = {}) => {
-    state.setLoading(true);
-    try {
-      if (options.syncFirst !== false) {
-        await syncGSheet({ timeoutMs: options.syncTimeoutMs });
-      }
-      await loadDashboardPayload(options);
-
-      if (options.backgroundSync) {
-        syncGSheet({ timeoutMs: options.syncTimeoutMs })
-          .then(() => loadDashboardPayload(options))
-          .catch((error) => state.setBackendWarning(`Background sync error: ${error.message || 'Sync failed'}`));
-      }
-    } catch (error) {
-      state.setUserErrorMessage(error.message || 'Refresh failed', error);
-    } finally {
-      state.setLoading(false);
-      if (!options.backgroundSync) state.setSyncing(false);
-      state.setIsInitialLoadDone(true);
+    if (options.syncFirst !== false) {
+      await syncMutation.mutateAsync({ timeoutMs: options.syncTimeoutMs }).catch(() => {});
+    } else {
+      await query.refetch();
     }
   };
 
-  useEffect(() => {
-    refreshAll({ syncFirst: false, backgroundSync: false });
-  }, []);
-
-  return { refreshAll };
+  return {
+    data: query.data || { sources: [], performance: null, connections: [], healthInfo: null, debugInfo: null },
+    isLoading: query.isLoading || query.isFetching,
+    isSyncing: syncMutation.isPending,
+    isInitialLoadDone: query.isSuccess,
+    errorMessage: query.error?.message || syncMutation.error?.message || '',
+    supabaseError: query.data?.supabaseError || '',
+    backendWarning: query.data?.healthError ? `Health error: ${query.data.healthError}` : '',
+    refreshAll,
+    syncGSheet: syncMutation.mutateAsync,
+  };
 }

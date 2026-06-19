@@ -8,7 +8,7 @@ import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetr
 export function useDashboardData() {
   const filterState = useDashboardFilterState();
   const dataState = useDashboardDataState();
-  const fetching = useDashboardDataFetching({ state: dataState });
+  const fetching = useDashboardDataFetching();
 
   const {
     invalidSheetCounts,
@@ -20,8 +20,8 @@ export function useDashboardData() {
     segmentTypeOptions,
     normalizedSelectedSegmentTypes,
   } = useDashboardDerivedData({
-    sources: dataState.sources,
-    performance: dataState.performance,
+    sources: fetching.data.sources,
+    performance: fetching.data.performance,
     datePreset: filterState.datePreset,
     dateStart: filterState.dateStart,
     dateEnd: filterState.dateEnd,
@@ -37,8 +37,8 @@ export function useDashboardData() {
     dateRangeBounds: systemDateRangeBounds,
     weekendExcludedCount: systemWeekendExcludedCount,
   } = useDashboardDerivedData({
-    sources: dataState.sources,
-    performance: dataState.performance,
+    sources: fetching.data.sources,
+    performance: fetching.data.performance,
     datePreset: filterState.systemDatePreset,
     dateStart: filterState.systemDateStart,
     dateEnd: filterState.systemDateEnd,
@@ -102,6 +102,17 @@ export function useDashboardData() {
     ...dataState,
     setErrorMessage: dataState.setUserErrorMessage,
     ...filterState,
+    sources: fetching.data.sources,
+    gsheetConnections: fetching.data.connections,
+    performance: fetching.data.performance,
+    healthInfo: fetching.data.healthInfo,
+    debugInfo: fetching.data.debugInfo,
+    loading: fetching.isLoading,
+    syncing: fetching.isSyncing,
+    errorMessage: dataState.errorMessage || fetching.errorMessage,
+    supabaseError: fetching.supabaseError,
+    backendWarning: dataState.backendWarning || fetching.backendWarning,
+    isInitialLoadDone: fetching.isInitialLoadDone,
     selectedSegmentTypes: normalizedSelectedSegmentTypes,
     documentTree,
     systemDocumentTree,
@@ -121,5 +132,6 @@ export function useDashboardData() {
     contributionRows,
     workloadContributors,
     refreshAll: fetching.refreshAll,
+    syncGSheet: fetching.syncGSheet,
   };
 }
