@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './hooks/useDashboardData.js';
@@ -17,6 +18,8 @@ const noop = () => {};
 function App() {
   const dashboard = useDashboardData();
   const controller = useAppController(dashboard);
+  const location = useLocation();
+  const isDataManagement = location.pathname === '/data-management';
 
   // Prevent background scrolling when a modal is open
   React.useEffect(() => {
@@ -34,34 +37,38 @@ function App() {
     <DashboardProvider dashboard={dashboard} controller={controller}>
       <DashboardLayout dashboard={dashboard} controller={controller}>
         {!dashboard.isInitialLoadDone ? (
-          controller.activeView === 'data-management' ? <DataManagementLoader /> : <PanelLoader />
+          isDataManagement ? <DataManagementLoader /> : <PanelLoader />
         ) : (
-          <Suspense fallback={controller.activeView === 'data-management' ? <DataManagementLoader /> : <PanelLoader />}>
-            {controller.activeView === 'data-management' ? (
-            <DataManagementView
-              sources={dashboard.sources}
-              onUploadFiles={controller.handleUploadFiles}
-              onDeleteSource={controller.handleDeleteSource}
-              onConnectGSheet={controller.handleConnectGSheet}
-              onDisconnectGSheet={controller.handleDisconnectGSheet}
-              gsheetConnections={dashboard.gsheetConnections}
-              uploading={controller.uploading}
-              syncing={dashboard.syncing}
-              healthInfo={dashboard.healthInfo}
-            />
-            ) : controller.activeView === 'system-performance' ? (
-              <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
-            ) : controller.activeView === 'sheet-performance' ? (
-              <SheetPerformanceView 
-                segments={dashboard.systemFilteredBaseSegments} 
-                unfilteredSegments={dashboard.systemFileLevelSegments}
-                setExpandedVisualizationId={controller.setExpandedVisualizationId}
-                chartSettings={controller.sheetPerformanceChartSettings}
-                setChartSettings={controller.setSheetPerformanceChartSettings}
-              />
-            ) : (
-              <DashboardView />
-            )}
+          <Suspense fallback={isDataManagement ? <DataManagementLoader /> : <PanelLoader />}>
+            <Routes>
+              <Route path="/" element={<DashboardView />} />
+              <Route path="/data-management" element={
+                <DataManagementView
+                  sources={dashboard.sources}
+                  onUploadFiles={controller.handleUploadFiles}
+                  onDeleteSource={controller.handleDeleteSource}
+                  onConnectGSheet={controller.handleConnectGSheet}
+                  onDisconnectGSheet={controller.handleDisconnectGSheet}
+                  gsheetConnections={dashboard.gsheetConnections}
+                  uploading={controller.uploading}
+                  syncing={dashboard.syncing}
+                  healthInfo={dashboard.healthInfo}
+                />
+              } />
+              <Route path="/system-performance" element={
+                <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
+              } />
+              <Route path="/sheet-performance" element={
+                <SheetPerformanceView 
+                  segments={dashboard.systemFilteredBaseSegments} 
+                  unfilteredSegments={dashboard.systemFileLevelSegments}
+                  setExpandedVisualizationId={controller.setExpandedVisualizationId}
+                  chartSettings={controller.sheetPerformanceChartSettings}
+                  setChartSettings={controller.setSheetPerformanceChartSettings}
+                />
+              } />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </Suspense>
         )}
       </DashboardLayout>

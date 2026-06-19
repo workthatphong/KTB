@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   BarChart3,
 } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 const navItemClass = (isActive, isCollapsed) => `flex items-center rounded-xl font-semibold transition-[padding,background-color,border-color,color,box-shadow] duration-300 group
   ${isCollapsed ? 'justify-center px-2 py-3' : 'justify-start px-3 py-2.5 gap-3'}
@@ -24,8 +25,6 @@ const SidebarContent = ({
   mobileStateClass,
   isCollapsed,
   toggleCollapse,
-  activeView,
-  setActiveView,
   setMobileOpen,
 }) => (
   <aside
@@ -77,57 +76,63 @@ const SidebarContent = ({
         Dashboards
       </div>
       <nav className="space-y-1">
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveView('dashboard');
+        <NavLink
+          to="/"
+          onClick={() => {
             if (mobile) setMobileOpen(false);
           }}
-          className={navItemClass(activeView === 'dashboard', isCollapsed)}
+          className={({ isActive }) => navItemClass(isActive, isCollapsed)}
           title="Dashboard Overview"
         >
-          <LayoutDashboard className={`w-5 h-5 flex-shrink-0 transition-colors ${activeView === 'dashboard' ? 'text-[#00a4e4]' : ''}`} />
-          <span className={labelClass(isCollapsed)}>
-            Dashboard Overview
-          </span>
-        </a>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveView('sheet-performance');
+          {({ isActive }) => (
+            <>
+              <LayoutDashboard className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-[#00a4e4]' : ''}`} />
+              <span className={labelClass(isCollapsed)}>
+                Dashboard Overview
+              </span>
+            </>
+          )}
+        </NavLink>
+        <NavLink
+          to="/sheet-performance"
+          onClick={() => {
             if (mobile) setMobileOpen(false);
           }}
-          className={navItemClass(activeView === 'sheet-performance', isCollapsed)}
+          className={({ isActive }) => navItemClass(isActive, isCollapsed)}
           title="Sheet Performance"
         >
-          <BarChart3 className={`w-5 h-5 flex-shrink-0 transition-colors ${activeView === 'sheet-performance' ? 'text-[#00a4e4]' : ''}`} />
-          <span className={labelClass(isCollapsed)}>
-            Sheet Performance
-          </span>
-        </a>
+          {({ isActive }) => (
+            <>
+              <BarChart3 className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-[#00a4e4]' : ''}`} />
+              <span className={labelClass(isCollapsed)}>
+                Sheet Performance
+              </span>
+            </>
+          )}
+        </NavLink>
       </nav>
 
       <div className={sectionLabelClass(isCollapsed, 'mt-8 mb-4 px-3')}>
         Data Management
       </div>
       <nav className="space-y-1">
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveView('data-management');
+        <NavLink
+          to="/data-management"
+          onClick={() => {
             if (mobile) setMobileOpen(false);
           }}
-          className={navItemClass(activeView === 'data-management', isCollapsed)}
+          className={({ isActive }) => navItemClass(isActive, isCollapsed)}
           title="Data Management"
         >
-          <Database className={`w-5 h-5 flex-shrink-0 transition-colors ${activeView === 'data-management' ? 'text-[#00a4e4]' : ''}`} />
-          <span className={labelClass(isCollapsed)}>
-            Data Management
-          </span>
-        </a>
+          {({ isActive }) => (
+            <>
+              <Database className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-[#00a4e4]' : ''}`} />
+              <span className={labelClass(isCollapsed)}>
+                Data Management
+              </span>
+            </>
+          )}
+        </NavLink>
       </nav>
     </div>
   </aside>
@@ -138,8 +143,6 @@ export const Sidebar = memo(function Sidebar({
   setMobileOpen,
   isCollapsed,
   toggleCollapse,
-  activeView,
-  setActiveView,
 }) {
   const [mounted, setMounted] = useState(isMobileOpen);
   const [visible, setVisible] = useState(isMobileOpen);
@@ -162,8 +165,6 @@ export const Sidebar = memo(function Sidebar({
         mobile={false}
         isCollapsed={isCollapsed}
         toggleCollapse={toggleCollapse}
-        activeView={activeView}
-        setActiveView={setActiveView}
         setMobileOpen={setMobileOpen}
       />
 
@@ -181,8 +182,6 @@ export const Sidebar = memo(function Sidebar({
               mobileStateClass={visible ? 'mobile-sidebar-enter' : 'mobile-sidebar-exit'}
               isCollapsed={false}
               toggleCollapse={toggleCollapse}
-              activeView={activeView}
-              setActiveView={setActiveView}
               setMobileOpen={setMobileOpen}
             />
           </div>,

@@ -11,7 +11,6 @@ export function useAppController(dashboard) {
     setErrorMessage,
   } = dashboard;
 
-  const [activeView, setActiveView] = useState('dashboard');
   const [openDropdown, setOpenDropdown] = useState('');
   const [expandedVisualizationId, setExpandedVisualizationId] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -97,8 +96,6 @@ export function useAppController(dashboard) {
   };
 
   return {
-    activeView,
-    setActiveView,
     openDropdown,
     setOpenDropdown,
     expandedVisualizationId,

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sidebar } from '@/components/shared/Sidebar.jsx';
 import { FilterBar } from './components/FilterBar.jsx';
+import { useLocation } from 'react-router-dom';
 
 export function DashboardLayout({
   dashboard,
@@ -8,8 +9,6 @@ export function DashboardLayout({
   children
 }) {
   const {
-    activeView,
-    setActiveView,
     isSidebarCollapsed,
     setIsSidebarCollapsed,
     isMobileSidebarOpen,
@@ -29,13 +28,12 @@ export function DashboardLayout({
     systemDocumentSheetSearch,
     setSystemDocumentSheetSearch,
   } = controller;
-  const isSystemPerformanceView = activeView === 'sheet-performance';
+  const location = useLocation();
+  const isSystemPerformanceView = location.pathname === '/sheet-performance';
 
   return (
     <div className="flex h-screen bg-[#fbfdff] font-sans text-slate-900 overflow-hidden">
       <Sidebar
-        activeView={activeView}
-        setActiveView={setActiveView}
         isCollapsed={isSidebarCollapsed}
         toggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isMobileOpen={isMobileSidebarOpen}
