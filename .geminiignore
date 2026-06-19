@@ -18,7 +18,6 @@ desktop.ini
 .svn/
 .vscode/
 .idea/
-.agents/
 *.code-workspace
 .editorconfig
 .gitignore
@@ -142,7 +141,7 @@ _build/
 *.md
 !GEMINI.md
 !README.md
-!Agents.md
+!AGENTS.md
 
 # [TESTING & COVERAGE]
 coverage/
@@ -160,8 +159,4 @@ capistrano.log
 .env
 .env.*
 .gemini/
-.geminiignore
-.codexignore
-GEMINI.md
-Agents.md
 MEMORY.md
