@@ -132,6 +132,8 @@ def sync_source_to_supabase(
         ).fetchone()
         row_count = int(totals["row_count"] if totals else 0)
         source_count = int(totals["source_count"] if totals else 0)
+        
+        connected_sheets = conn.execute("SELECT * FROM connected_sheets").fetchall()
     finally:
         conn.close()
 
@@ -144,6 +146,10 @@ def sync_source_to_supabase(
         _upsert_rows("source_files", [dict(row) for row in source_file], chunk_size=100)
         _upsert_rows("source_pages", [dict(row) for row in source_pages], chunk_size=300)
         _upsert_rows("unified_rows", [dict(row) for row in source_rows], chunk_size=300)
+
+        # Always sync connected_sheets during partial sync since it's very small and crucial for gsheet tracking
+        _supabase_request("DELETE", "connected_sheets", query={"connection_id": "not.is.null"}, prefer="return=minimal")
+        _upsert_rows("connected_sheets", [dict(row) for row in connected_sheets], chunk_size=100)
 
         _supabase_request(
             "POST",
