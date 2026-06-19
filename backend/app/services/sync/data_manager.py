@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .data_manager_impl.utils import invalidate_runtime_caches
+from .data_manager_impl.utils import invalidate_runtime_caches, utc_now_iso
 from .data_manager_impl.gsheet_manager import (
     connect_gsheet,
     sync_all_gsheets,
@@ -22,4 +22,5 @@ __all__ = [
     "list_sources",
     "delete_source",
     "invalidate_runtime_caches",
+    "utc_now_iso",
 ]
