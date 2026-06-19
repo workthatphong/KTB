@@ -8,15 +8,15 @@ export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze';
 
   return {
-    root: resolve(process.cwd(), 'frontend'),
-    publicDir: resolve(process.cwd(), 'frontend/public'),
+    root: process.cwd(),
+    publicDir: resolve(process.cwd(), 'public'),
     plugins: [
       react(),
       viteCompression({ algorithm: 'gzip', ext: '.gz' }),
       viteCompression({ algorithm: 'brotliCompress', ext: '.br' }),
       isAnalyze
         ? visualizer({
-            filename: resolve(process.cwd(), 'frontend/dist/stats.html'),
+            filename: resolve(process.cwd(), 'dist/stats.html'),
             gzipSize: true,
             brotliSize: true,
             open: false,
@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         : null,
     ].filter(Boolean),
     build: {
-      outDir: resolve(process.cwd(), 'frontend/dist'),
+      outDir: resolve(process.cwd(), 'dist'),
       emptyOutDir: true,
       manifest: true,
       sourcemap: false,

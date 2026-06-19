@@ -1,4 +1,4 @@
-﻿# Dashboard (Vercel + Supabase Ready) 
+# Dashboard (Vercel + Supabase Ready) 
 
 ## Project Structure   
 
@@ -6,6 +6,7 @@
 .
 |- api/                # Vercel function entrypoint
 |- backend/            # Python backend source
+|  |- requirements.txt # Python dependencies
 |  `- app/
 |     |- presentation/ # HTTP layer (Flask app, routes, auth, upload validation)
 |     |- application/  # Use-cases / orchestration
@@ -13,26 +14,27 @@
 |     |- infrastructure/ # SQLite, Supabase sync, parser, static/bundler adapters
 |     `- services/     # Domain-oriented service modules
 |- docs/               # Documentation (.md files)
-|- frontend/
+|- frontend/           # React frontend
+|  |- package.json     # Frontend dependencies
 |  |- public/          # Static assets (index.html, fonts)
 |  `- src/
 |     |- features/     # Feature-first modules (dashboard, timeline, charts, etc.)
 |     |- components/   # Shared UI components
 |     |- hooks/        # App-level hooks
 |     `- lib/          # Shared utilities/constants
-|- scripts/            # Startup scripts and app entry point
-|- requirements.txt    # Dependencies
+|- scripts/            # Scripts (startup, refactoring, etc.)
 `- vercel.json         # Vercel config
 ```
 
 ## Local Run
 
 1. Install dependencies:
-   `pip install -r requirements.txt`
-   `npm install`
+   Backend: `pip install -r backend/requirements.txt`
+   Frontend: `npm --prefix frontend install`
+   (Or `cd frontend && npm install`)
 2. Build frontend:
-   `npm run build`
-   optional bundle analysis: `npm run analyze`
+   `npm --prefix frontend run build`
+   optional bundle analysis: `npm --prefix frontend run analyze`
 3. Start server:
    `bash scripts/start.sh` (Linux/macOS)
    or `.\scripts\start.ps1` (Windows)
