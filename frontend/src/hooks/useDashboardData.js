@@ -1,102 +1,96 @@
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { wrap } from 'comlink';
 import { useDashboardFilterState } from './useDashboardFilterState.js';
 import { useDashboardDataState } from './useDashboardDataState.js';
 import { useDashboardDataFetching } from './useDashboardDataFetching.js';
-import { useDashboardDerivedData } from '@/features/dashboard/hooks/useDashboardDerivedData.js';
-import { useDashboardFilters } from '@/features/dashboard/hooks/useDashboardFilters.js';
-import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetrics.js';
+import { initialKpiData } from '@/lib/constants.js';
+import { buildKpiData } from '@/lib/utils.js';
+
+// Initialize the worker once per module
+const worker = new Worker(new URL('../features/dashboard/workers/dashboardWorker.js', import.meta.url), { type: 'module' });
+const workerApi = wrap(worker);
 
 export function useDashboardData() {
   const filterState = useDashboardFilterState();
   const dataState = useDashboardDataState();
   const fetching = useDashboardDataFetching();
 
-  const {
-    invalidSheetCounts,
-    parsedSegments,
-    documentTree,
-    userOptions,
-    dateRangeBounds,
-    weekendExcludedCount,
-    segmentTypeOptions,
-    normalizedSelectedSegmentTypes,
-  } = useDashboardDerivedData({
+  // Create a memoized parameters object to prevent unnecessary worker calls
+  const workerParams = useMemo(() => ({
     sources: fetching.data.sources,
     performance: fetching.data.performance,
-    datePreset: filterState.datePreset,
-    dateStart: filterState.dateStart,
-    dateEnd: filterState.dateEnd,
-    excludeWeekends: filterState.excludeWeekends,
-    selectedFiles: filterState.selectedFiles,
-    selectedSheets: filterState.selectedSheets,
-    selectedSegmentTypes: filterState.selectedSegmentTypes,
+    filterState: {
+      datePreset: filterState.datePreset,
+      dateStart: filterState.dateStart,
+      dateEnd: filterState.dateEnd,
+      excludeWeekends: filterState.excludeWeekends,
+      selectedFiles: filterState.selectedFiles,
+      selectedSheets: filterState.selectedSheets,
+      selectedSegmentTypes: filterState.selectedSegmentTypes,
+      selectedUsers: filterState.selectedUsers,
+      showIdle: filterState.showIdle,
+      showWorkloadIdle: filterState.showWorkloadIdle,
+      systemDatePreset: filterState.systemDatePreset,
+      systemDateStart: filterState.systemDateStart,
+      systemDateEnd: filterState.systemDateEnd,
+      systemExcludeWeekends: filterState.systemExcludeWeekends,
+      systemSelectedFiles: filterState.systemSelectedFiles,
+      systemSelectedSheets: filterState.systemSelectedSheets,
+    }
+  }), [
+    fetching.data.sources,
+    fetching.data.performance,
+    filterState.datePreset,
+    filterState.dateStart,
+    filterState.dateEnd,
+    filterState.excludeWeekends,
+    filterState.selectedFiles,
+    filterState.selectedSheets,
+    filterState.selectedSegmentTypes,
+    filterState.selectedUsers,
+    filterState.showIdle,
+    filterState.showWorkloadIdle,
+    filterState.systemDatePreset,
+    filterState.systemDateStart,
+    filterState.systemDateEnd,
+    filterState.systemExcludeWeekends,
+    filterState.systemSelectedFiles,
+    filterState.systemSelectedSheets,
+  ]);
+
+  const workerQuery = useQuery({
+    queryKey: ['dashboardWorker', workerParams],
+    queryFn: () => workerApi.processAllDashboardData(workerParams),
+    enabled: !!fetching.data.performance,
+    placeholderData: (prev) => prev, // keep previous data while calculating
+    staleTime: Infinity, // never stale, only refetches when params change
   });
 
-  const {
-    parsedSegments: systemParsedSegments,
-    documentTree: systemDocumentTree,
-    dateRangeBounds: systemDateRangeBounds,
-    weekendExcludedCount: systemWeekendExcludedCount,
-  } = useDashboardDerivedData({
-    sources: fetching.data.sources,
-    performance: fetching.data.performance,
-    datePreset: filterState.systemDatePreset,
-    dateStart: filterState.systemDateStart,
-    dateEnd: filterState.systemDateEnd,
-    excludeWeekends: filterState.systemExcludeWeekends,
-    selectedFiles: filterState.systemSelectedFiles,
-    selectedSheets: filterState.systemSelectedSheets,
-    selectedSegmentTypes: [],
-  });
+  const workerData = workerQuery.data || {
+    invalidSheetCounts: {},
+    parsedSegments: [],
+    documentTree: [],
+    systemDocumentTree: [],
+    userOptions: { files: [], sheets: [], users: [] },
+    dateRangeBounds: { minTs: 0, maxTs: 0 },
+    weekendExcludedCount: 0,
+    systemWeekendExcludedCount: 0,
+    segmentTypeOptions: [],
+    normalizedSelectedSegmentTypes: [],
+    filteredBaseSegments: [],
+    ganttVisibleSegments: [],
+    systemFilteredBaseSegments: [],
+    systemFileLevelSegments: [],
+    chartBaseSegments: [],
+    kpis: null,
+    flowRows: [],
+    contributionRows: [],
+    workloadContributors: [],
+    systemFlowRows: [],
+  };
 
-  const { filteredBaseSegments, ganttVisibleSegments } = useDashboardFilters(parsedSegments, {
-    selectedFiles: filterState.selectedFiles,
-    selectedSheets: filterState.selectedSheets,
-    selectedUsers: filterState.selectedUsers,
-    selectedSegmentTypes: normalizedSelectedSegmentTypes,
-    showIdle: filterState.showIdle,
-    dateRangeBounds,
-    excludeWeekends: filterState.excludeWeekends,
-  });
-
-  const { filteredBaseSegments: systemFilteredBaseSegments } = useDashboardFilters(systemParsedSegments, {
-    selectedFiles: filterState.systemSelectedFiles,
-    selectedSheets: filterState.systemSelectedSheets,
-    selectedUsers: [],
-    selectedSegmentTypes: [],
-    showIdle: true,
-    dateRangeBounds: systemDateRangeBounds,
-    excludeWeekends: filterState.systemExcludeWeekends,
-  });
-
-  const { filteredBaseSegments: systemFileLevelSegments } = useDashboardFilters(systemParsedSegments, {
-    selectedFiles: filterState.systemSelectedFiles,
-    selectedSheets: [],
-    selectedUsers: [],
-    selectedSegmentTypes: [],
-    showIdle: true,
-    dateRangeBounds: systemDateRangeBounds,
-    excludeWeekends: filterState.systemExcludeWeekends,
-  });
-
-  const {
-    chartBaseSegments,
-    kpiData,
-    flowRows,
-    contributionRows,
-    workloadContributors,
-  } = useDashboardMetrics({
-    filteredBaseSegments,
-    showWorkloadIdle: filterState.showWorkloadIdle,
-    selectedSegmentTypes: normalizedSelectedSegmentTypes,
-  });
-
-  const {
-    flowRows: systemFlowRows,
-  } = useDashboardMetrics({
-    filteredBaseSegments: systemFilteredBaseSegments,
-    showWorkloadIdle: true,
-    selectedSegmentTypes: [],
-  });
+  const kpiData = useMemo(() => workerData.kpis ? buildKpiData(workerData.kpis) : initialKpiData, [workerData.kpis]);
 
   return {
     ...dataState,
@@ -107,30 +101,17 @@ export function useDashboardData() {
     performance: fetching.data.performance,
     healthInfo: fetching.data.healthInfo,
     debugInfo: fetching.data.debugInfo,
-    loading: fetching.isLoading,
+    loading: fetching.isLoading || workerQuery.isFetching,
     syncing: fetching.isSyncing,
-    errorMessage: dataState.errorMessage || fetching.errorMessage,
+    errorMessage: dataState.errorMessage || fetching.errorMessage || workerQuery.error?.message,
     supabaseError: fetching.supabaseError,
     backendWarning: dataState.backendWarning || fetching.backendWarning,
-    isInitialLoadDone: fetching.isInitialLoadDone,
-    selectedSegmentTypes: normalizedSelectedSegmentTypes,
-    documentTree,
-    systemDocumentTree,
-    userOptions,
-    weekendExcludedCount,
-    systemWeekendExcludedCount,
-    segmentTypeOptions,
-    invalidSheetCounts,
-    ganttVisibleSegments,
-    systemFilteredBaseSegments,
-    systemFileLevelSegments,
-    chartBaseSegments,
+    isInitialLoadDone: fetching.isInitialLoadDone && !!workerQuery.data,
+    
+    // Spread worker results
+    ...workerData,
     kpiData,
-    filteredBaseSegments,
-    flowRows,
-    systemFlowRows,
-    contributionRows,
-    workloadContributors,
+
     refreshAll: fetching.refreshAll,
     syncGSheet: fetching.syncGSheet,
   };
