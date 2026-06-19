@@ -173,7 +173,6 @@ export const FilterBar = React.memo(({
               syncFirst: true,
               syncTimeoutMs: 120000,
               refreshSnapshot: true,
-              showRefreshPagePrompt: true,
             })}
             disabled={loading || syncing}
             aria-label={loading || syncing ? 'Refreshing data' : 'Refresh data'}

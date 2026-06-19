@@ -42,7 +42,6 @@ export function useDashboardDataFetching({ state }) {
         await syncGSheet({ timeoutMs: options.syncTimeoutMs });
       }
       await loadDashboardPayload(options);
-      if (options.showRefreshPagePrompt) state.setShowRefreshPagePrompt(true);
 
       if (options.backgroundSync) {
         syncGSheet({ timeoutMs: options.syncTimeoutMs })

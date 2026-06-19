@@ -1,7 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { createPortal } from 'react-dom';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { RefreshCw } from 'lucide-react';
 import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
@@ -72,45 +70,6 @@ function App() {
           </Suspense>
         )}
       </DashboardLayout>
-
-      {dashboard.showRefreshPagePrompt ? createPortal(
-        <div
-          className="fixed inset-0 z-[550] bg-[#17335f]/35 backdrop-blur-sm flex items-center justify-center p-4 refresh-popup-overlay-enter"
-          onClick={() => dashboard.setShowRefreshPagePrompt(false)}
-        >
-          <div
-            className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl overflow-hidden refresh-popup-panel-enter"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="p-10 text-center">
-              <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-gradient-to-br from-[#00a4e4] to-[#3860be] text-white refresh-popup-icon-enter">
-                <RefreshCw className="h-12 w-12" />
-              </div>
-              <h2 className="text-3xl font-black text-[#17335f] mb-4">Refresh Complete</h2>
-              <p className="text-lg text-slate-500 mb-10 leading-relaxed px-4">
-                Data has been updated successfully. Please refresh the page to load the latest information.
-              </p>
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => dashboard.setShowRefreshPagePrompt(false)}
-                  className="flex-1 py-5 px-8 bg-slate-100 hover:bg-slate-200 text-slate-700 text-lg font-bold rounded-2xl transition-all active:scale-95"
-                >
-                  Later
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.location.reload()}
-                  className="flex-1 py-5 px-8 bg-gradient-to-r from-[#00a4e4] to-[#3860be] text-white text-lg font-bold rounded-2xl shadow-xl shadow-sky-100 transition-all active:scale-95"
-                >
-                  Refresh Page
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body
-      ) : null}
 
       <Suspense fallback={null}>
         {controller.expandedVisualizationId ? (

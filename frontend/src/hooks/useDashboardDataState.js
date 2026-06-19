@@ -37,7 +37,6 @@ export function useDashboardDataState() {
   const [backendWarning, setBackendWarning] = useState('');
   const [debugFetchError, setDebugFetchError] = useState('');
   const [isInitialLoadDone, setIsInitialLoadDone] = useState(false);
-  const [showRefreshPagePrompt, setShowRefreshPagePrompt] = useState(false);
 
   const setUserErrorMessage = (message, errorLike = null) => {
     if (errorLike?.isTimeout) {
@@ -60,7 +59,6 @@ export function useDashboardDataState() {
     backendWarning, setBackendWarning,
     debugFetchError, setDebugFetchError,
     isInitialLoadDone, setIsInitialLoadDone,
-    showRefreshPagePrompt, setShowRefreshPagePrompt,
     setUserErrorMessage,
   };
 }
