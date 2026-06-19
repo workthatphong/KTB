@@ -1,0 +1,42 @@
+.bg-blue-600 { background-color: var(--ktb-sky) !important; }
+.hover\:bg-blue-700:hover { background-color: #078ec7 !important; }
+.text-blue-600 { color: var(--ktb-sky) !important; }
+.text-blue-700 { color: var(--ktb-blue) !important; }
+.text-blue-500 { color: var(--ktb-sky) !important; }
+.text-blue-400 { color: rgba(0, 164, 228, 0.72) !important; }
+.bg-blue-50 { background-color: rgba(0, 164, 228, 0.09) !important; }
+.hover\:bg-blue-50:hover { background-color: rgba(0, 164, 228, 0.10) !important; }
+.border-blue-100 { border-color: rgba(0, 164, 228, 0.22) !important; }
+.border-blue-200 { border-color: rgba(0, 164, 228, 0.36) !important; }
+.border-blue-300 { border-color: rgba(0, 164, 228, 0.48) !important; }
+.hover\:border-blue-200:hover { border-color: rgba(0, 164, 228, 0.36) !important; }
+.hover\:border-blue-300:hover { border-color: rgba(0, 164, 228, 0.48) !important; }
+.focus\:border-blue-500:focus { border-color: var(--ktb-sky) !important; }
+.focus\:ring-blue-500\/20:focus { --tw-ring-color: rgba(0, 164, 228, 0.20) !important; }
+.focus\:ring-blue-100:focus { --tw-ring-color: rgba(0, 164, 228, 0.16) !important; }
+.accent-blue-600 { accent-color: var(--ktb-sky) !important; }
+.from-blue-600 {
+  --tw-gradient-from: var(--ktb-sky) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(0, 164, 228, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.to-indigo-700 { --tw-gradient-to: var(--ktb-blue) var(--tw-gradient-to-position) !important; }
+.from-blue-50 {
+  --tw-gradient-from: rgba(0, 164, 228, 0.11) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(0, 164, 228, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+.to-indigo-50 { --tw-gradient-to: rgba(56, 96, 190, 0.10) var(--tw-gradient-to-position) !important; }
+.shadow-ktb {
+  box-shadow: 0 10px 24px -22px rgba(56, 96, 190, 0.34), 0 1px 0 rgba(255, 255, 255, 0.72) inset;
+}
+
+/* Optimized Filter interactions */
+.filter-button-active {
+  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: scale(1.02);
+}
+
+.filter-button-press:active {
+  transform: scale(0.96);
+}

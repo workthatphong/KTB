@@ -1,0 +1,66 @@
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "Krungthai Fast Regular", "Noto Sans Thai", "Segoe UI", Tahoma, Arial, sans-serif;
+  background:
+    linear-gradient(180deg, rgba(0, 164, 228, 0.045) 0%, rgba(255, 255, 255, 0) 220px),
+    #fbfdff;
+}
+
+.font-sans,
+svg text,
+svg tspan {
+  font-family: "Krungthai Fast Regular", "Noto Sans Thai", "Segoe UI", Tahoma, Arial, sans-serif !important;
+}
+
+.font-bold,
+.font-extrabold,
+.font-black,
+svg text.font-bold,
+svg text.font-extrabold,
+svg text.font-black,
+svg tspan.font-bold,
+svg tspan.font-extrabold,
+svg tspan.font-black {
+  font-family: "Krungthai Fast Bold", "Krungthai Fast Regular", "Noto Sans Thai", "Segoe UI", Tahoma, Arial, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.app-scroll-shell {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.scroll-clarity-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
