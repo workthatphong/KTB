@@ -41,29 +41,42 @@ function BubbleTooltip({ active, payload }) {
   );
 }
 
-export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ data, expanded = false }) {
+export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ data, unfilteredData, expanded = false }) {
   const safeData = Array.isArray(data) ? data.filter((item) => Number(item.x) > 0 || Number(item.y) > 0 || Number(item.z) > 0) : [];
-  if (safeData.length === 0) return null;
+  const safeUnfilteredData = Array.isArray(unfilteredData) ? unfilteredData.filter((item) => Number(item.x) > 0 || Number(item.y) > 0 || Number(item.z) > 0) : safeData;
 
-  const maxX = Math.max(...safeData.map((item) => Number(item.x) || 0), 1);
-  const maxY = Math.max(...safeData.map((item) => Number(item.y) || 0), 1);
-  const maxZ = Math.max(...safeData.map((item) => Number(item.z) || 0), 1);
-  const pivotX = safeData.reduce((sum, item) => sum + (Number(item.x) || 0), 0) / safeData.length;
-  const pivotY = safeData.reduce((sum, item) => sum + (Number(item.y) || 0), 0) / safeData.length;
-  const coloredData = safeData.map((item) => {
+  if (safeUnfilteredData.length === 0) return null;
+
+  const maxX = Math.max(...safeUnfilteredData.map((item) => Number(item.x) || 0), 1);
+  const maxY = Math.max(...safeUnfilteredData.map((item) => Number(item.y) || 0), 1);
+  const maxZ = Math.max(...safeUnfilteredData.map((item) => Number(item.z) || 0), 1);
+  const pivotX = safeUnfilteredData.reduce((sum, item) => sum + (Number(item.x) || 0), 0) / safeUnfilteredData.length;
+  const pivotY = safeUnfilteredData.reduce((sum, item) => sum + (Number(item.y) || 0), 0) / safeUnfilteredData.length;
+
+  const activeNames = new Set(safeData.map(d => d.name));
+
+  const coloredData = safeUnfilteredData.map((item) => {
     const isRight = (Number(item.x) || 0) >= pivotX;
     const isTop = (Number(item.y) || 0) >= pivotY;
+    const isActive = activeNames.has(item.name);
 
+    let baseColors;
     if (isRight && isTop) {
-      return { ...item, fill: '#dc2626', stroke: '#991b1b', riskLabel: 'High Risk' };
+      baseColors = { fill: '#dc2626', stroke: '#991b1b', riskLabel: 'High Risk' };
+    } else if (isRight && !isTop) {
+      baseColors = { fill: '#ea580c', stroke: '#9a3412', riskLabel: 'Time-Heavy' };
+    } else if (!isRight && isTop) {
+      baseColors = { fill: '#0284c7', stroke: '#0c4a6e', riskLabel: 'Volume-Heavy' };
+    } else {
+      baseColors = { fill: '#16a34a', stroke: '#166534', riskLabel: 'Low Risk' };
     }
-    if (isRight && !isTop) {
-      return { ...item, fill: '#ea580c', stroke: '#9a3412', riskLabel: 'Time-Heavy' };
-    }
-    if (!isRight && isTop) {
-      return { ...item, fill: '#0284c7', stroke: '#0c4a6e', riskLabel: 'Volume-Heavy' };
-    }
-    return { ...item, fill: '#16a34a', stroke: '#166534', riskLabel: 'Low Risk' };
+
+    return { 
+      ...item, 
+      ...baseColors,
+      opacity: isActive ? 0.92 : 0.12,
+      strokeOpacity: isActive ? 1 : 0.2
+    };
   });
   const placedLabels = [];
 
@@ -71,6 +84,9 @@ export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ dat
     const x = Number(props?.x);
     const y = Number(props?.y);
     if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+    
+    // Only show labels for active items
+    if (!activeNames.has(props?.value)) return null;
 
     const rawName = clampSheetName(props?.value);
     const halfWidth = Math.max(18, rawName.length * 3.2);
@@ -135,9 +151,15 @@ export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ dat
           <ReferenceLine x={pivotX} stroke="#94a3b8" strokeDasharray="4 4" />
           <ReferenceLine y={pivotY} stroke="#94a3b8" strokeDasharray="4 4" />
           <Tooltip content={<BubbleTooltip />} cursor={{ strokeDasharray: '4 4', stroke: '#94a3b8' }} />
-          <Scatter data={coloredData} fillOpacity={0.78} strokeWidth={1.5}>
+          <Scatter data={coloredData} fillOpacity={1} strokeWidth={1.5}>
             {coloredData.map((item) => (
-              <Cell key={item.name} fill={item.fill} stroke={item.stroke} />
+              <Cell 
+                key={item.name} 
+                fill={item.fill} 
+                stroke={item.stroke} 
+                fillOpacity={item.opacity}
+                strokeOpacity={item.strokeOpacity}
+              />
             ))}
             <LabelList dataKey="name" content={renderBubbleLabel} />
           </Scatter>

@@ -1323,6 +1323,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
     mergeReviewAndEdit,
     mergeSpread,
     sheetPerformanceSegments,
+    sheetPerformanceUnfilteredSegments,
     sheetPerformanceChartSettings,
     setSelectedGanttSegment,
     timelineSettings,
@@ -1331,6 +1332,10 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
   const sheetPerformanceChartData = React.useMemo(
     () => buildSheetPerformanceChartsData(sheetPerformanceSegments),
     [sheetPerformanceSegments]
+  );
+  const unfilteredSheetPerformanceChartData = React.useMemo(
+    () => buildSheetPerformanceChartsData(sheetPerformanceUnfilteredSegments || []),
+    [sheetPerformanceUnfilteredSegments]
   );
   const sortedSheetPerformanceChartData = React.useMemo(() => ({
     totalTimeData: sortSheetPerformanceChartData(selectTotalTimeChartData(sheetPerformanceChartData.totalTimeData, sheetPerformanceChartSettings?.totalTime?.mode), sheetPerformanceChartSettings?.totalTime?.sortOrder),
@@ -1589,6 +1594,7 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
             {visualizationId === 'sheet-edit-data-relationship' && (
               <EditDataBubbleChart
                 data={sheetPerformanceChartData.editDataBubbleData}
+                unfilteredData={unfilteredSheetPerformanceChartData.editDataBubbleData}
                 expanded
               />
             )}

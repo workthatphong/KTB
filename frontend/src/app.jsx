@@ -183,6 +183,7 @@ function App() {
               mergeReviewAndEdit: controller.mergeReviewAndEdit,
               mergeSpread: controller.mergeSpread,
               sheetPerformanceSegments: dashboard.systemFilteredBaseSegments,
+              sheetPerformanceUnfilteredSegments: dashboard.systemFileLevelSegments,
               sheetPerformanceChartSettings: controller.sheetPerformanceChartSettings,
               setSelectedGanttSegment: noop,
               timelineSettings: {

@@ -138,7 +138,7 @@ export function SheetPerformanceView({ segments, unfilteredSegments, setExpanded
                 <Maximize2 className="w-4 h-4" />
               </button>
             </div>
-            <EditDataBubbleChart data={chartData.editDataBubbleData} />
+            <EditDataBubbleChart data={chartData.editDataBubbleData} unfilteredData={unfilteredChartData.editDataBubbleData} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
