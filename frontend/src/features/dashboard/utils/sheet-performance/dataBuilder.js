@@ -128,7 +128,7 @@ export function buildSheetPerformanceChartsData(segments) {
   return {
     editDataBubbleData: entries.map((entry) => ({
       name: entry.name,
-      x: entry.editDataSeconds,
+      x: entry.totalLeadTimeSeconds,
       y: entry.editDataCount,
       z: entry.reviewCount,
     })),

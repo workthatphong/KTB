@@ -29,7 +29,7 @@ function BubbleTooltip({ active, payload }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-2xl">
       <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{point.name}</div>
-      <div className="mt-1 text-sm font-semibold text-slate-600">Edit Data Time</div>
+      <div className="mt-1 text-sm font-semibold text-slate-600">Total Time</div>
       <div className="text-lg font-extrabold text-[#17335f]">{formatDuration(point.x)}</div>
       <div className="mt-2 text-sm font-semibold text-slate-600">Edit Data Items</div>
       <div className="text-lg font-extrabold text-[#17335f]">{point.y.toLocaleString()}</div>
@@ -132,9 +132,9 @@ export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ dat
             tickFormatter={(value) => formatDuration(value)}
             axisLine={{ stroke: '#cbd5e1' }}
             tickLine={false}
-            name="Edit Data Time"
+            name="Total Time"
           >
-            <Label value="Edit Data Time" position="bottom" offset={18} fill="#475569" style={{ fontSize: 12, fontWeight: 700 }} />
+            <Label value="Total Time" position="bottom" offset={18} fill="#475569" style={{ fontSize: 12, fontWeight: 700 }} />
           </XAxis>
           <YAxis
             type="number"
