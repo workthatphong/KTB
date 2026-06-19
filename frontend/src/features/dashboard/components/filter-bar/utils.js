@@ -1,4 +1,4 @@
-import { extractFileNameFromSheetKey, buildSheetKey } from '../../../../lib/utils.js';
+import { extractFileNameFromSheetKey, buildSheetKey } from '@/lib/utils.js';
 
 export const togglePinInList = (list, value) => (
   list.includes(value) ? list.filter((item) => item !== value) : [value, ...list]

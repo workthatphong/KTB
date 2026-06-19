@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   UploadCloud, Link2, Plus, FileText, FileSpreadsheet, Trash2
 } from 'lucide-react';
-import { toDisplayDate } from '../../lib/utils.js';
+import { toDisplayDate } from '@/lib/utils.js';
 
 export const DataManagementView = ({ sources, onUploadFiles, onDeleteSource, onConnectGSheet, onDisconnectGSheet, gsheetConnections, uploading, syncing, healthInfo }) => {
   const [itemToDelete, setItemToDelete] = useState(null);

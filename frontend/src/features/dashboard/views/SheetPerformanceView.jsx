@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LayoutDashboard, Maximize2, SlidersHorizontal } from 'lucide-react';
-import { EmptyState } from '../../../components/shared/EmptyState.jsx';
-import { EditDataBubbleChart } from '../../charts/EditDataBubbleChart.jsx';
-import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
+import { EmptyState } from '@/components/shared/EmptyState.jsx';
+import { EditDataBubbleChart } from '@/features/charts/EditDataBubbleChart.jsx';
+import { SheetBreakdownChart } from '@/features/charts/SheetBreakdownChart.jsx';
 import {
   buildSheetPerformanceChartsData,
   getTotalTimeChartAppearance,

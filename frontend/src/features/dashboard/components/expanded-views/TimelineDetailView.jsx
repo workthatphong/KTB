@@ -1,8 +1,8 @@
 import React from 'react';
-import { formatDuration, toDisplayDate } from '../../../../lib/utils.js';
-import { mapSegmentsToRows } from '../../../timeline/timelineUtils.js';
-import { mergeContinuousReprocessingSegments, toTimelineLane } from '../../../../lib/segmentUtils.js';
-import { isTimelineDurationSegment, toTimelineDetailCountKey, toTimelineBarLabel, shouldExcludeDetailActivity } from '../../utils/expandedViewUtils.js';
+import { formatDuration, toDisplayDate } from '@/lib/utils.js';
+import { mapSegmentsToRows } from '@/features/timeline/timelineUtils.js';
+import { mergeContinuousReprocessingSegments, toTimelineLane } from '@/lib/segmentUtils.js';
+import { isTimelineDurationSegment, toTimelineDetailCountKey, toTimelineBarLabel, shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
 function buildTimelineDetailData(segments, timelineSettings) {
   const singleLane = Boolean(timelineSettings?.singleLane);

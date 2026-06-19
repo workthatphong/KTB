@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { extractFileNameFromSheetKey, isIdleContextSegment, toTimelineLane } from '../../../lib/utils.js';
-import { toSegmentGroup } from '../utils/segmentData.js';
+import { extractFileNameFromSheetKey, isIdleContextSegment, toTimelineLane } from '@/lib/utils.js';
+import { toSegmentGroup } from '@/features/dashboard/utils/segmentData.js';
 
 export function useDashboardFilters(parsedSegments, filters) {
   const {

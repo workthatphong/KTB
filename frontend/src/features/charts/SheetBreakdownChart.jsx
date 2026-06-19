@@ -12,7 +12,7 @@ import {
   Cell,
   LabelList,
 } from 'recharts';
-import { formatDuration } from '../../lib/utils.js';
+import { formatDuration } from '@/lib/utils.js';
 
 function clampLabel(label, maxLength = 12) {
   const text = String(label || '');

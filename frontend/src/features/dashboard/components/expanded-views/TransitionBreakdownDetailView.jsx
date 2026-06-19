@@ -1,9 +1,9 @@
 import React from 'react';
 import { Clock, ChevronDown } from 'lucide-react';
-import { formatDuration, toDisplayDate } from '../../../../lib/utils.js';
-import { toGanttSegmentTypeLabel } from '../../../../lib/segmentUtils.js';
-import { buildTransitionBreakdownGroups } from '../../utils/transitionMetrics.js';
-import { shouldExcludeDetailActivity } from '../../utils/expandedViewUtils.js';
+import { formatDuration, toDisplayDate } from '@/lib/utils.js';
+import { toGanttSegmentTypeLabel } from '@/lib/segmentUtils.js';
+import { buildTransitionBreakdownGroups } from '@/features/dashboard/utils/transitionMetrics.js';
+import { shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
 const TransitionBreakdownDetailView = React.memo(({ segments }) => {
   const [openGroup, setOpenGroup] = React.useState('');

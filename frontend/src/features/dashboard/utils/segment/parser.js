@@ -1,4 +1,4 @@
-import { buildSheetKey } from '../../../../lib/utils.js';
+import { buildSheetKey } from '@/lib/utils.js';
 
 export function parseSegments(segments) {
   const parsed = [];

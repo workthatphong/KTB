@@ -1,7 +1,7 @@
 import React, { Suspense, useRef, useEffect, useState } from 'react';
 import { FileText, LayoutDashboard, Maximize2, SlidersHorizontal, Users, Clock } from 'lucide-react';
-import { EmptyState } from '../../../../components/shared/EmptyState.jsx';
-import { KpiSubtext } from '../../../../components/shared/KpiSubtext.jsx';
+import { EmptyState } from '@/components/shared/EmptyState.jsx';
+import { KpiSubtext } from '@/components/shared/KpiSubtext.jsx';
 
 const donutWorkloadChartPromise = import('../../../charts/DonutWorkloadChart.jsx').then((m) => ({ default: m.DonutWorkloadChart }));
 const userContributionStackChartPromise = import('../../../charts/UserContributionStackChart.jsx').then((m) => ({ default: m.UserContributionStackChart }));

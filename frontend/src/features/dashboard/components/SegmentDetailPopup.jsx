@@ -1,6 +1,6 @@
 import React from 'react';
 import { Clock, User, Server, X, FileText, RefreshCw } from 'lucide-react';
-import { formatDuration, toDisplayDate, toGanttSegmentTypeLabel } from '../../../lib/utils.js';
+import { formatDuration, toDisplayDate, toGanttSegmentTypeLabel } from '@/lib/utils.js';
 
 export function SegmentDetailPopup({ segment, onClose }) {
   if (!segment) return null;

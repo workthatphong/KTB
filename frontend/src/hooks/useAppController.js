@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { usePersistentState } from './usePersistentState.js';
-import { requestJson } from '../lib/api.js';
-import { createDefaultSheetPerformanceChartSettings } from '../features/dashboard/utils/sheetPerformanceCharts.js';
+import { requestJson } from '@/lib/api.js';
+import { createDefaultSheetPerformanceChartSettings } from '@/features/dashboard/utils/sheetPerformanceCharts.js';
 
 export function useAppController(dashboard) {
   const {

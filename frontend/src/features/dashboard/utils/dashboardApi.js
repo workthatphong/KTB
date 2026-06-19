@@ -1,4 +1,4 @@
-import { requestJson } from '../../../lib/api.js';
+import { requestJson } from '@/lib/api.js';
 
 export async function fetchDashboardPayload(options = {}) {
   const params = new URLSearchParams();

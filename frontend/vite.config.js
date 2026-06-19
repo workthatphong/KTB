@@ -10,6 +10,11 @@ export default defineConfig(({ mode }) => {
   return {
     root: process.cwd(),
     publicDir: resolve(process.cwd(), 'public'),
+    resolve: {
+      alias: {
+        '@': resolve(process.cwd(), 'src'),
+      },
+    },
     plugins: [
       react(),
       viteCompression({ algorithm: 'gzip', ext: '.gz' }),

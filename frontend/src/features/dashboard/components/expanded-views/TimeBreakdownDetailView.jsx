@@ -1,9 +1,9 @@
 import React from 'react';
 import { Clock, ChevronDown } from 'lucide-react';
-import { formatDuration, toDisplayDate } from '../../../../lib/utils.js';
-import { toTimelineLane, toGanttSegmentTypeLabel, toDrillGroup } from '../../../../lib/segmentUtils.js';
-import { toSegmentGroup } from '../../utils/segmentData.js';
-import { shouldExcludeDetailActivity } from '../../utils/expandedViewUtils.js';
+import { formatDuration, toDisplayDate } from '@/lib/utils.js';
+import { toTimelineLane, toGanttSegmentTypeLabel, toDrillGroup } from '@/lib/segmentUtils.js';
+import { toSegmentGroup } from '@/features/dashboard/utils/segmentData.js';
+import { shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
 function buildTimeBreakdownGroups(segments, selectedSegmentTypes, showProcessBreakdownIdle, mergeReviewAndEdit, mergeSpread) {
   const safeSegments = Array.isArray(segments) ? segments : [];

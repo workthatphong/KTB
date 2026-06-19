@@ -1,4 +1,4 @@
-import { GANTT_DRILL_GROUP_COLORS } from '../../../../lib/constants.js';
+import { GANTT_DRILL_GROUP_COLORS } from '@/lib/constants.js';
 
 export function getTotalTimeChartAppearance(mode = 'all') {
   if (mode === 'complete') {

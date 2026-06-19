@@ -13,7 +13,7 @@ import {
   YAxis,
   ZAxis,
 } from 'recharts';
-import { formatDuration } from '../../lib/durationFormatters.js';
+import { formatDuration } from '@/lib/durationFormatters.js';
 
 function clampSheetName(name, maxLength = 12) {
   const text = String(name || '');

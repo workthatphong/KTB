@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
-import { GANTT_MAX_TIMELINE_WIDTH_PX } from '../../../lib/constants.js';
-import { mapSegmentsToRows } from '../timelineUtils.js';
-import { resolveBusinessAxisTimestamp } from '../../dashboard/utils/segmentData.js';
+import { GANTT_MAX_TIMELINE_WIDTH_PX } from '@/lib/constants.js';
+import { mapSegmentsToRows } from '@/features/timeline/timelineUtils.js';
+import { resolveBusinessAxisTimestamp } from '@/features/dashboard/utils/segmentData.js';
 import {
   buildGanttAxisAnchors,
   buildGanttDisplayBounds,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar } from '../../components/shared/Sidebar.jsx';
+import { Sidebar } from '@/components/shared/Sidebar.jsx';
 import { FilterBar } from './components/FilterBar.jsx';
 
 export function DashboardLayout({

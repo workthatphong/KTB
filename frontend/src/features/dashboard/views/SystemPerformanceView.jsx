@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { SystemProcessingTrendChart } from '../../charts/SystemProcessingTrendChart.jsx';
-import { SystemParetoChart } from '../../charts/SystemParetoChart.jsx';
-import { FlowDelayComparisonTable } from '../../charts/FlowDelayComparisonTable.jsx';
-import { SystemBottleneckTable } from '../../charts/SystemBottleneckTable.jsx';
-import { safeNumber } from '../../../lib/utils.js';
+import { SystemProcessingTrendChart } from '@/features/charts/SystemProcessingTrendChart.jsx';
+import { SystemParetoChart } from '@/features/charts/SystemParetoChart.jsx';
+import { FlowDelayComparisonTable } from '@/features/charts/FlowDelayComparisonTable.jsx';
+import { SystemBottleneckTable } from '@/features/charts/SystemBottleneckTable.jsx';
+import { safeNumber } from '@/lib/utils.js';
 
 function systemPerformancePercentile(values, ratio) {
   if (values.length === 0) return 0;

@@ -6,9 +6,9 @@ import {
   safeNumber,
   toTimelineLane,
 } from '../../../lib/utils.js';
-import { initialKpiData } from '../../../lib/constants.js';
-import { calculateFlowRows, calculateUserStatsRows } from '../utils/dataParsers.js';
-import { toSegmentGroup } from '../utils/segmentData.js';
+import { initialKpiData } from '@/lib/constants.js';
+import { calculateFlowRows, calculateUserStatsRows } from '@/features/dashboard/utils/dataParsers.js';
+import { toSegmentGroup } from '@/features/dashboard/utils/segmentData.js';
 
 export function useDashboardMetrics(params) {
   const {

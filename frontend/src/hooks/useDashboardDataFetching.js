@@ -1,5 +1,5 @@
 import { startTransition, useEffect } from 'react';
-import { fetchDashboardPayload, triggerGSheetSync } from '../features/dashboard/utils/dashboardApi.js';
+import { fetchDashboardPayload, triggerGSheetSync } from '@/features/dashboard/utils/dashboardApi.js';
 import { buildSupabaseErrorMessage } from './useDashboardDataState.js';
 
 export function useDashboardDataFetching({ state }) {

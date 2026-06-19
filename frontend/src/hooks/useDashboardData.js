@@ -1,9 +1,9 @@
 import { useDashboardFilterState } from './useDashboardFilterState.js';
 import { useDashboardDataState } from './useDashboardDataState.js';
 import { useDashboardDataFetching } from './useDashboardDataFetching.js';
-import { useDashboardDerivedData } from '../features/dashboard/hooks/useDashboardDerivedData.js';
-import { useDashboardFilters } from '../features/dashboard/hooks/useDashboardFilters.js';
-import { useDashboardMetrics } from '../features/dashboard/hooks/useDashboardMetrics.js';
+import { useDashboardDerivedData } from '@/features/dashboard/hooks/useDashboardDerivedData.js';
+import { useDashboardFilters } from '@/features/dashboard/hooks/useDashboardFilters.js';
+import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetrics.js';
 
 export function useDashboardData() {
   const filterState = useDashboardFilterState();

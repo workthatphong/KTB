@@ -1,6 +1,6 @@
 import React from 'react';
-import { CHART_PALETTE } from '../../lib/constants.js';
-import { safeNumber, clampPercent } from '../../lib/utils.js';
+import { CHART_PALETTE } from '@/lib/constants.js';
+import { safeNumber, clampPercent } from '@/lib/utils.js';
 
 export const DurationBarChart = React.memo(({ rows, maxVisibleRows = 0 }) => {
   const maxValue = rows.reduce((max, row) => Math.max(max, safeNumber(row.value)), 0) || 1;

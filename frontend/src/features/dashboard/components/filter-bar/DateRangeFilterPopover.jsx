@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar } from 'lucide-react';
-import { FilterPopover } from '../../../../components/shared/FilterPopover.jsx';
+import { FilterPopover } from '@/components/shared/FilterPopover.jsx';
 import { getDateRangeSummary } from './utils.js';
 
 const DATE_PRESETS = ['all', '7d', '30d', '90d'];

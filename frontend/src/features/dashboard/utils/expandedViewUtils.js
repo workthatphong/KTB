@@ -1,4 +1,4 @@
-import { toDrillGroup, toGanttSegmentTypeLabel } from '../../../lib/segmentUtils.js';
+import { toDrillGroup, toGanttSegmentTypeLabel } from '@/lib/segmentUtils.js';
 
 export const POINT_IN_TIME_SEGMENT_TYPES = new Set([
   'AUTO_TIMEOUT_MARKER',

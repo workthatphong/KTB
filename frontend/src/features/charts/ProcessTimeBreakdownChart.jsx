@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LabelList, ResponsiveContainer } from 'recharts';
-import { formatDuration } from '../../lib/utils.js';
+import { formatDuration } from '@/lib/utils.js';
 
 const STACK_KEYS = [
   { key: 'vat', label: 'Value-Added', color: '#22C55E' },

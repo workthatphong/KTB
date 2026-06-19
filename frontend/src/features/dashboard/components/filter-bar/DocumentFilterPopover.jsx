@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { FileText } from 'lucide-react';
-import { FilterPopover } from '../../../../components/shared/FilterPopover.jsx';
-import { buildSheetKey } from '../../../../lib/utils.js';
+import { FilterPopover } from '@/components/shared/FilterPopover.jsx';
+import { buildSheetKey } from '@/lib/utils.js';
 import {
   getDocumentSummary,
   getDocumentFileSelectionState,

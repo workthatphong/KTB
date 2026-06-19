@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { toDrillGroup } from '../../../../lib/segmentUtils.js';
-import { GANTT_DRILL_GROUP_COLORS } from '../../../../lib/constants.js';
+import { toDrillGroup } from '@/lib/segmentUtils.js';
+import { GANTT_DRILL_GROUP_COLORS } from '@/lib/constants.js';
 
 export function useProcessBreakdownData(
   ganttVisibleSegments,

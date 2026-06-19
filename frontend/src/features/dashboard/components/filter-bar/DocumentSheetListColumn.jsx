@@ -1,6 +1,6 @@
 import React from 'react';
 import { Database, Pencil, Pin } from 'lucide-react';
-import { DropdownSearch } from '../../../../components/shared/DropdownSearch.jsx';
+import { DropdownSearch } from '@/components/shared/DropdownSearch.jsx';
 
 export function DocumentSheetListColumn({
   activeDocumentEntry,

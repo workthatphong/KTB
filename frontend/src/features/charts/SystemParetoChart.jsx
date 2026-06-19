@@ -1,5 +1,5 @@
 import React from 'react';
-import { safeNumber, formatDuration, formatPercent } from '../../lib/utils.js';
+import { safeNumber, formatDuration, formatPercent } from '@/lib/utils.js';
 
 export const SystemParetoChart = ({ rows, maxBars = 8 }) => {
   if (!rows || rows.length === 0) return null;

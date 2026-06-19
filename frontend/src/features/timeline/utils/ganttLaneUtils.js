@@ -1,4 +1,4 @@
-import { mergeContinuousReprocessingSegments } from '../../../lib/utils.js';
+import { mergeContinuousReprocessingSegments } from '@/lib/utils.js';
 
 export function buildGanttLanes(visibleSegments, showSystemLane, showIdleLane) {
   const laneDurationMap = {};

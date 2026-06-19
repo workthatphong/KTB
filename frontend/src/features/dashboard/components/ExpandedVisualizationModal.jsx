@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import { X } from 'lucide-react';
-import { buildAverageTransitionTimeData } from '../utils/transitionMetrics.js';
+import { buildAverageTransitionTimeData } from '@/features/dashboard/utils/transitionMetrics.js';
 
-import { EditDataBubbleChart } from '../../charts/EditDataBubbleChart.jsx';
-import { SheetBreakdownChart } from '../../charts/SheetBreakdownChart.jsx';
+import { EditDataBubbleChart } from '@/features/charts/EditDataBubbleChart.jsx';
+import { SheetBreakdownChart } from '@/features/charts/SheetBreakdownChart.jsx';
 
 import { TimelineDetailView } from './expanded-views/TimelineDetailView.jsx';
 import { UserShareDetailView } from './expanded-views/UserShareDetailView.jsx';
