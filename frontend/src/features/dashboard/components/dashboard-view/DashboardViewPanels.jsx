@@ -2,7 +2,7 @@ import React, { Suspense, useRef, useEffect, useState } from 'react';
 import { FileText, LayoutDashboard, Maximize2, SlidersHorizontal, Users, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
 import { KpiSubtext } from '@/components/shared/KpiSubtext.jsx';
-import { useDashboardContext } from '@/contexts/DashboardContext.jsx';
+import { useDashboardDataCtx, useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
 
 const donutWorkloadChartPromise = import('../../../charts/DonutWorkloadChart.jsx').then((m) => ({ default: m.DonutWorkloadChart }));
 const userContributionStackChartPromise = import('../../../charts/UserContributionStackChart.jsx').then((m) => ({ default: m.UserContributionStackChart }));
@@ -58,7 +58,8 @@ export const KpiGridPanel = React.memo(({ kpiData }) => {
 });
 
 export const TimelinePanel = React.memo(() => {
-  const { dashboard, controller } = useDashboardContext();
+  const dashboard = useDashboardDataCtx();
+  const controller = useDashboardUICtx();
   const { ganttVisibleSegments, showIdle, setShowIdle } = dashboard;
   const { 
     ganttSingleLaneMode, setGanttSingleLaneMode,
@@ -148,7 +149,7 @@ export const TimelinePanel = React.memo(() => {
 });
 
 export const UserSharePanel = React.memo(({ donutAnimationKey }) => {
-  const { controller } = useDashboardContext();
+  const controller = useDashboardUICtx();
   const { workloadVisibleRows, setExpandedVisualizationId } = controller;
 
   return (
@@ -172,7 +173,8 @@ export const UserSharePanel = React.memo(({ donutAnimationKey }) => {
 });
 
 export const UserBreakdownPanel = React.memo(({ contributionAnimationKey }) => {
-  const { dashboard, controller } = useDashboardContext();
+  const dashboard = useDashboardDataCtx();
+  const controller = useDashboardUICtx();
   const { contributionRows } = dashboard;
   const { setExpandedVisualizationId } = controller;
 
@@ -202,7 +204,8 @@ export const ProcessTimePanel = React.memo(({
   processBreakdownData,
   processBreakdownAnimationKey,
 }) => {
-  const { dashboard, controller } = useDashboardContext();
+  const dashboard = useDashboardDataCtx();
+  const controller = useDashboardUICtx();
   const { chartBaseSegments } = dashboard;
   const { 
     mergeReviewAndEdit, setMergeReviewAndEdit,
@@ -254,7 +257,8 @@ export const ProcessTimePanel = React.memo(({
 });
 
 export const TransitionTimePanel = React.memo(({ transitionTimeData, transitionAnimationKey }) => {
-  const { dashboard, controller } = useDashboardContext();
+  const dashboard = useDashboardDataCtx();
+  const controller = useDashboardUICtx();
   const { chartBaseSegments } = dashboard;
   const { setExpandedVisualizationId } = controller;
 
