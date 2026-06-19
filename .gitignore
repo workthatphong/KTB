@@ -1,4 +1,4 @@
-﻿# Python cache
+# Python cache
 __pycache__/
 *.py[cod]
 
@@ -17,3 +17,8 @@ local_dashboard.db
 artifacts/
 node_modules/
 frontend/dist/
+
+# Sensitive Data
+*.xlsx
+*.csv
+*.xls
