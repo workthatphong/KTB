@@ -121,7 +121,7 @@ export const EditDataBubbleChart = React.memo(function EditDataBubbleChart({ dat
 
   return (
     <div className={`w-full ${expanded ? 'h-[min(72vh,42rem)]' : 'h-[26rem]'}`}>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" debounce={200}>
         <ScatterChart margin={{ top: 12, right: 24, bottom: 48, left: 28 }}>
           <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
           <XAxis

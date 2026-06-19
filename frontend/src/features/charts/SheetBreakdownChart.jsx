@@ -97,16 +97,26 @@ export const SheetBreakdownChart = React.memo(({
   useEffect(() => {
     if (!scrollAreaRef.current) return undefined;
 
+    let timeoutId;
     const updateWidth = () => {
-      setScrollAreaWidth(scrollAreaRef.current?.clientWidth || 0);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (scrollAreaRef.current) {
+          setScrollAreaWidth(scrollAreaRef.current.clientWidth || 0);
+        }
+      }, 150);
     };
 
-    updateWidth();
+    // Initial width set without delay
+    setScrollAreaWidth(scrollAreaRef.current?.clientWidth || 0);
 
     const observer = new ResizeObserver(updateWidth);
     observer.observe(scrollAreaRef.current);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
@@ -131,7 +141,7 @@ export const SheetBreakdownChart = React.memo(({
         style={expanded ? undefined : { height: `${viewportHeight}px` }}
       >
         <div style={{ height: `${totalContentHeight}px`, width: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" debounce={200}>
             <BarChart
               data={data}
               layout="vertical"
@@ -194,7 +204,7 @@ export const SheetBreakdownChart = React.memo(({
 
       {/* Fixed X-Axis at the bottom */}
       <div className="w-full h-[50px] relative z-0 shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" debounce={200}>
           <BarChart
             data={data}
             layout="vertical"
