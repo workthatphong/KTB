@@ -286,6 +286,7 @@ export const FilterBar = React.memo(({
                 title="Task Type"
                 summary={
                   systemTaskType === 'all' ? 'All Tasks' :
+                  systemTaskType === 'completeTime' ? 'Complete Time' :
                   systemTaskType === 'editData' ? 'Edit Data' :
                   systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review'
                 }
@@ -299,6 +300,7 @@ export const FilterBar = React.memo(({
                 <div className="p-1.5 flex flex-col gap-0.5">
                   {[
                     { id: 'all', label: 'All Tasks' },
+                    { id: 'completeTime', label: 'Complete Time' },
                     { id: 'editData', label: 'Edit Data Time' },
                     { id: 'editDataRecord', label: 'Edit Data Record' },
                     { id: 'review', label: 'Review' }

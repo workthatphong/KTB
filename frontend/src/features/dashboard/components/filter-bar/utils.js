@@ -63,7 +63,10 @@ export function getFilteredDocumentTree({ documentTree, documentFileSearch, pinn
       const bPinned = pinnedFileSet.has(b.fileName);
       if (aPinned && !bPinned) return -1;
       if (!aPinned && bPinned) return 1;
-      return 0;
+      
+      const aDisplayName = fileDisplayNames[a.fileName] || a.fileName;
+      const bDisplayName = fileDisplayNames[b.fileName] || b.fileName;
+      return String(aDisplayName).localeCompare(String(bDisplayName), undefined, { numeric: true, sensitivity: 'base' });
     });
 }
 
@@ -93,7 +96,10 @@ export function getFilteredSheetsForActiveFile({
         const bPinned = pinnedSheetSet.has(bKey);
         if (aPinned && !bPinned) return -1;
         if (!aPinned && bPinned) return 1;
-        return 0;
+        
+        const aDisplayName = pageDisplayNames[aKey] || a;
+        const bDisplayName = pageDisplayNames[bKey] || b;
+        return String(aDisplayName).localeCompare(String(bDisplayName), undefined, { numeric: true, sensitivity: 'base' });
       })
     : [];
 

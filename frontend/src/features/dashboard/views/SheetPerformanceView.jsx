@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Clock, SlidersHorizontal, ArrowDownWideNarrow, ArrowUpNarrowWide, ArrowDownAZ } from 'lucide-react';
 import { ToggleSetting } from '../components/dashboard-view/DashboardViewPanels.jsx';
@@ -22,6 +23,8 @@ function getCognizeVsOthersData(rows, timeCategory = 'all') {
       rowTotal = (row.editDataCount || 0);
     } else if (timeCategory === 'review') {
       rowTotal = (row.reviewSeconds || 0);
+    } else if (timeCategory === 'completeTime') {
+      rowTotal = (row.totalSeconds || 0);
     } else {
       rowTotal = (row.reviewSeconds || 0) + (row.editDataSeconds || 0) + (row.editMetaSeconds || 0);
     }
@@ -47,12 +50,15 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
   for (const segment of segments) {
     if (!segment.segmentType?.startsWith('USER_')) continue;
     
-    const user = String(segment.userName || '').toLowerCase();
+    const origUser = String(segment.userName || '').trim();
+    const user = origUser.toLowerCase();
     if (user === 'system' || user === 'idle') continue;
     
     const isCognize = user.includes('cognize');
+    
     if (userRoleFilter === 'maker_only' && isCognize) continue;
     if (userRoleFilter === 'cognize_only' && !isCognize) continue;
+    if (userRoleFilter !== 'all' && userRoleFilter !== 'maker_only' && userRoleFilter !== 'cognize_only' && origUser !== userRoleFilter) continue;
     
     const fileName = String(segment.fileName || 'Unknown File');
     const sheetName = String(segment.pageName || '');
@@ -60,12 +66,32 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
     if (!sheetKey) continue;
     
     if (!pageStats.has(sheetKey)) {
-      pageStats.set(sheetKey, { name: sheetName || fileName, userFiltered: 0, cognizeFiltered: 0, makerFiltered: 0 });
+      pageStats.set(sheetKey, { 
+        name: sheetName || fileName, 
+        userFiltered: 0, 
+        cognizeFiltered: 0, 
+        makerFiltered: 0,
+        startTs: Number.MAX_SAFE_INTEGER,
+        endTs: 0
+      });
     }
     
     const stat = pageStats.get(sheetKey);
     const duration = Number(segment.durationSeconds) || 0;
     
+    const getTs = (val1, val2, val3) => {
+      const val = val1 ?? val2 ?? val3;
+      if (!val) return 0;
+      if (typeof val === 'number') return val;
+      const num = Number(val);
+      if (!isNaN(num)) return num;
+      return Date.parse(val) || 0;
+    };
+    const sTs = getTs(segment.startTs, segment.start, segment.startTime);
+    const eTs = getTs(segment.endTs, segment.end, segment.endTime);
+    if (sTs && sTs < stat.startTs) stat.startTs = sTs;
+    if (eTs && eTs > stat.endTs) stat.endTs = eTs;
+
     const drillGroup = toDrillGroup(segment.segmentType);
     let matchesCategory = true;
     if (timeCategory === 'editData' && drillGroup !== 'EditData') matchesCategory = false;
@@ -95,11 +121,19 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
       const diff = a.userFiltered - b.userFiltered;
       if (diff !== 0) return diff;
     }
+    if (userSortOrder === 'oldest') {
+      const diff = a.startTs - b.startTs;
+      if (diff !== 0) return diff;
+    }
+    if (userSortOrder === 'latest') {
+      const diff = b.endTs - a.endTs;
+      if (diff !== 0) return diff;
+    }
     return collator.compare(a.name, b.name);
   });
 
   return {
-    userData: sortedUser.map(s => ({ name: s.name, value: s.userFiltered, cognizeValue: s.cognizeFiltered, makerValue: s.makerFiltered })),
+    userData: sortedUser.map(s => ({ name: s.name, value: s.userFiltered, cognizeValue: s.cognizeFiltered, makerValue: s.makerFiltered, startTs: s.startTs, endTs: s.endTs })),
   };
 }
 
@@ -242,16 +276,82 @@ export function SheetPerformanceView({
   const [userSortOrder, setUserSortOrder] = useState('desc');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [isStackedView, setIsStackedView] = useState(false);
+  const [isTransparentPopup, setIsTransparentPopup] = useState(false);
   const userMenuRef = useRef(null);
+  const userMenuPanelRef = useRef(null);
+  const [userMenuStyle, setUserMenuStyle] = useState({});
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) setShowFilterMenu(false);
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) setShowUserMenu(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target) && (!userMenuPanelRef.current || !userMenuPanelRef.current.contains(event.target))) {
+        setShowUserMenu(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!showUserMenu) return;
+    const updatePosition = () => {
+      if (!userMenuRef.current) return;
+      const rect = userMenuRef.current.getBoundingClientRect();
+      
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      const panelWidth = 224; // w-56 is 14rem = 224px
+      let top, bottom, right;
+      let maxHeight = 0;
+
+      const preferredMaxHeight = window.innerHeight * 0.8;
+      
+      if (spaceBelow > 300 || spaceBelow >= spaceAbove) {
+        top = rect.bottom + 8;
+        maxHeight = Math.min(spaceBelow - 16, preferredMaxHeight);
+      } else {
+        bottom = window.innerHeight - rect.top + 8;
+        maxHeight = Math.min(spaceAbove - 16, preferredMaxHeight);
+      }
+
+      right = window.innerWidth - rect.right;
+
+      setUserMenuStyle({
+        top: top !== undefined ? `${top}px` : 'auto',
+        bottom: bottom !== undefined ? `${bottom}px` : 'auto',
+        right: `${right}px`,
+        maxHeight: `${maxHeight}px`,
+        width: `${panelWidth}px`
+      });
+    };
+    
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [showUserMenu]);
+
+  const uniqueUsers = useMemo(() => {
+    const usersSet = new Set();
+    const addUsers = (segs) => {
+      if (!segs) return;
+      for (const seg of segs) {
+        if (!seg.segmentType?.startsWith('USER_')) continue;
+        const u = String(seg.userName || '').trim();
+        const uLower = u.toLowerCase();
+        if (!u || uLower === 'system' || uLower === 'idle') continue;
+        usersSet.add(u);
+      }
+    };
+    addUsers(firstSegments);
+    addUsers(secondSegments);
+    return Array.from(usersSet).sort();
+  }, [firstSegments, secondSegments]);
 
   const firstData = useMemo(() => getCognizeVsOthersData(firstContributionRows, systemTaskType), [firstContributionRows, systemTaskType]);
   const secondData = useMemo(() => getCognizeVsOthersData(secondContributionRows, systemTaskType), [secondContributionRows, systemTaskType]);
@@ -412,14 +512,18 @@ export function SheetPerformanceView({
         </div>
 
         {/* Block 2: User Time per Page */}
-        <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-2 ${showUserMenu ? 'z-[120]' : 'z-10'}`}>
+        <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-2 ${showUserMenu ? 'z-[9999]' : 'z-10'}`}>
           <div className="absolute right-4 top-4 z-30 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="relative" ref={userMenuRef}>
               <button onClick={() => setShowUserMenu(!showUserMenu)} className={`p-1.5 border rounded-md transition-colors bg-white ${showUserMenu ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`} title="Display & Sort">
                 <SlidersHorizontal className="w-4 h-4" />
               </button>
-              {showUserMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[110] dropdown-slide-enter">
+              {showUserMenu && createPortal(
+                <div 
+                  ref={userMenuPanelRef}
+                  style={userMenuStyle}
+                  className={`fixed rounded-2xl border shadow-2xl p-4 z-[99999] overflow-y-auto custom-scrollbar dropdown-slide-enter ${isTransparentPopup ? 'bg-white/30 border-slate-200/30' : 'bg-white border-slate-200'}`}
+                >
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
                   <div className="flex flex-col gap-3">
                     <ToggleSetting 
@@ -427,6 +531,12 @@ export function SheetPerformanceView({
                       onChange={() => setIsStackedView(prev => !prev)} 
                     >
                       Split Colors
+                    </ToggleSetting>
+                    <ToggleSetting 
+                      checked={isTransparentPopup} 
+                      onChange={() => setIsTransparentPopup(prev => !prev)} 
+                    >
+                      Transparent Popup
                     </ToggleSetting>
                     <div className="border-t border-slate-100 my-1"></div>
                     <ToggleSetting 
@@ -441,6 +551,18 @@ export function SheetPerformanceView({
                     >
                       Lowest First
                     </ToggleSetting>
+                    <ToggleSetting 
+                      checked={userSortOrder === 'oldest'} 
+                      onChange={() => setUserSortOrder(prev => prev === 'oldest' ? 'default' : 'oldest')} 
+                    >
+                      Oldest First
+                    </ToggleSetting>
+                    <ToggleSetting 
+                      checked={userSortOrder === 'latest'} 
+                      onChange={() => setUserSortOrder(prev => prev === 'latest' ? 'default' : 'latest')} 
+                    >
+                      Latest First
+                    </ToggleSetting>
                     <div className="border-t border-slate-100 my-1"></div>
                     <ToggleSetting 
                       checked={userRoleFilter === 'maker_only'} 
@@ -454,8 +576,22 @@ export function SheetPerformanceView({
                     >
                       Cognize only
                     </ToggleSetting>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1.5 mb-1.5 mt-1.5">Specific Users</div>
+                    <div className="flex flex-col gap-1.5 max-h-[204px] overflow-y-auto pr-2 custom-scrollbar">
+                      {uniqueUsers.map(u => (
+                        <ToggleSetting 
+                          key={u}
+                          checked={userRoleFilter === u} 
+                          onChange={() => setUserRoleFilter(prev => prev === u ? 'all' : u)} 
+                        >
+                          {u} only
+                        </ToggleSetting>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           </div>

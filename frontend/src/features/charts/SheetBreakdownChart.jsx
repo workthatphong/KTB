@@ -13,6 +13,7 @@ import {
   LabelList,
 } from 'recharts';
 import { formatDuration } from '@/lib/utils.js';
+import { formatTimeTick } from '@/lib/dateFormatters.js';
 
 function clampLabel(label, maxLength = 12) {
   const text = String(label || '');
@@ -49,6 +50,9 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, scrollA
     const left = svgRect.left + coordinate.x + 10;
     const top = svgRect.top + coordinate.y - 60;
 
+    const startTs = payload[0].payload.startTs !== undefined ? payload[0].payload.startTs : payload[0].startTs;
+    const endTs = payload[0].payload.endTs !== undefined ? payload[0].payload.endTs : payload[0].endTs;
+
     return createPortal(
       <div 
         className="fixed pointer-events-none bg-white p-3 border border-slate-200 shadow-2xl rounded-xl z-[99999]"
@@ -58,6 +62,12 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, scrollA
         <p className="text-lg font-extrabold text-[#17335f]">
           {isDuration ? formatDuration(value) : value.toLocaleString()}
         </p>
+        {(startTs || endTs) && (
+          <div className="mt-2 text-xs text-slate-500 font-medium">
+            {startTs && <div>Start: {formatTimeTick(startTs)}</div>}
+            {endTs && <div>End: {formatTimeTick(endTs)}</div>}
+          </div>
+        )}
       </div>,
       document.body
     );

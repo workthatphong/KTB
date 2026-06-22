@@ -15,7 +15,7 @@ export function useDashboardFilterState() {
   const [systemSelectedSheets, setSystemSelectedSheets] = usePersistentState('system_filter_selectedSheets', []);
   const [selectedUsers, setSelectedUsers] = usePersistentState('filter_selectedUsers', []);
   const [selectedSegmentTypes, setSelectedSegmentTypes] = usePersistentState('filter_selectedSegmentTypes', []);
-  const [showIdle, setShowIdle] = usePersistentState('filter_showIdle', false);
+  const [showIdle, setShowIdle] = usePersistentState('filter_showIdle', true);
   const [showWorkloadIdle, setShowWorkloadIdle] = usePersistentState('filter_showWorkloadIdle', false);
   const [showWorkloadSystem, setShowWorkloadSystem] = usePersistentState('filter_showWorkloadSystem', false);
   const [pinnedFiles, setPinnedFiles] = usePersistentState('filter_pinnedFiles', []);
