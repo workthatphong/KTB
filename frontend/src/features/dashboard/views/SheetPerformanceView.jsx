@@ -297,9 +297,9 @@ export function SheetPerformanceView({
     totalSeconds: isTotalBased ? secondData.totalSeconds : (secondCognizeAvg + secondOthersAvg)
   }), [isTotalBased, secondCognizeAvg, secondOthersAvg, secondData]);
 
-  // Generate a stable ID based on the data content for framer-motion layoutId
-  const firstPanelId = useMemo(() => `doc-${firstDocumentFilterName}-${firstData.totalSeconds}`, [firstDocumentFilterName, firstData.totalSeconds]);
-  const secondPanelId = useMemo(() => `doc-${secondDocumentFilterName}-${secondData.totalSeconds}`, [secondDocumentFilterName, secondData.totalSeconds]);
+  // Generate a stable ID based on the document name for framer-motion layoutId
+  const firstPanelId = useMemo(() => `doc-${firstDocumentFilterName || 'first'}`, [firstDocumentFilterName]);
+  const secondPanelId = useMemo(() => `doc-${secondDocumentFilterName || 'second'}`, [secondDocumentFilterName]);
 
   return (
     <div className="max-w-[1600px] 2xl:max-w-[1760px] mx-auto space-y-6">
