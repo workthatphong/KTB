@@ -40,8 +40,8 @@ function getCognizeVsOthersData(rows, timeCategory = 'all') {
   };
 }
 
-function buildPageTimeData(segments, timeCategory = 'all', cognizeSortOrder = 'default', makerSortOrder = 'default') {
-  if (!segments || segments.length === 0) return { cognizeData: [], othersData: [] };
+function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'default', userRoleFilter = 'all') {
+  if (!segments || segments.length === 0) return { userData: [] };
   const pageStats = new Map();
   
   for (const segment of segments) {
@@ -50,26 +50,22 @@ function buildPageTimeData(segments, timeCategory = 'all', cognizeSortOrder = 'd
     const user = String(segment.userName || '').toLowerCase();
     if (user === 'system' || user === 'idle') continue;
     
+    const isCognize = user.includes('cognize');
+    if (userRoleFilter === 'maker_only' && isCognize) continue;
+    if (userRoleFilter === 'cognize_only' && !isCognize) continue;
+    
     const fileName = String(segment.fileName || 'Unknown File');
     const sheetName = String(segment.pageName || '');
     const sheetKey = String(segment.sheetKey || segment.documentId || `${fileName}::${sheetName}`).trim();
     if (!sheetKey) continue;
     
     if (!pageStats.has(sheetKey)) {
-      pageStats.set(sheetKey, { name: sheetName || fileName, cognizeAll: 0, othersAll: 0, cognizeFiltered: 0, othersFiltered: 0 });
+      pageStats.set(sheetKey, { name: sheetName || fileName, userFiltered: 0, cognizeFiltered: 0, makerFiltered: 0 });
     }
     
     const stat = pageStats.get(sheetKey);
     const duration = Number(segment.durationSeconds) || 0;
     
-    // Always add to "All"
-    if (user.includes('cognize')) {
-      stat.cognizeAll += duration;
-    } else {
-      stat.othersAll += duration;
-    }
-
-    // Add to "Filtered" if it matches category
     const drillGroup = toDrillGroup(segment.segmentType);
     let matchesCategory = true;
     if (timeCategory === 'editData' && drillGroup !== 'EditData') matchesCategory = false;
@@ -78,10 +74,11 @@ function buildPageTimeData(segments, timeCategory = 'all', cognizeSortOrder = 'd
 
     if (matchesCategory) {
       const increment = timeCategory === 'editDataRecord' ? (Number(segment.editDataItemCount) || 1) : duration;
-      if (user.includes('cognize')) {
+      stat.userFiltered += increment;
+      if (isCognize) {
         stat.cognizeFiltered += increment;
       } else {
-        stat.othersFiltered += increment;
+        stat.makerFiltered += increment;
       }
     }
   }
@@ -89,33 +86,20 @@ function buildPageTimeData(segments, timeCategory = 'all', cognizeSortOrder = 'd
   const allStats = Array.from(pageStats.values());
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
-  const sortedCognize = [...allStats].sort((a, b) => {
-    if (cognizeSortOrder === 'desc') {
-      const diff = b.cognizeFiltered - a.cognizeFiltered;
+  const sortedUser = [...allStats].sort((a, b) => {
+    if (userSortOrder === 'desc') {
+      const diff = b.userFiltered - a.userFiltered;
       if (diff !== 0) return diff;
     }
-    if (cognizeSortOrder === 'asc') {
-      const diff = a.cognizeFiltered - b.cognizeFiltered;
-      if (diff !== 0) return diff;
-    }
-    return collator.compare(a.name, b.name);
-  });
-
-  const sortedOthers = [...allStats].sort((a, b) => {
-    if (makerSortOrder === 'desc') {
-      const diff = b.othersFiltered - a.othersFiltered;
-      if (diff !== 0) return diff;
-    }
-    if (makerSortOrder === 'asc') {
-      const diff = a.othersFiltered - b.othersFiltered;
+    if (userSortOrder === 'asc') {
+      const diff = a.userFiltered - b.userFiltered;
       if (diff !== 0) return diff;
     }
     return collator.compare(a.name, b.name);
   });
 
   return {
-    cognizeData: sortedCognize.map(s => ({ name: s.name, value: s.cognizeFiltered })),
-    othersData: sortedOthers.map(s => ({ name: s.name, value: s.othersFiltered })),
+    userData: sortedUser.map(s => ({ name: s.name, value: s.userFiltered, cognizeValue: s.cognizeFiltered, makerValue: s.makerFiltered })),
   };
 }
 
@@ -254,19 +238,16 @@ export function SheetPerformanceView({
 
   const isDurationDisplay = systemTaskType !== 'editDataRecord';
 
-  const [showCognizeMenu, setShowCognizeMenu] = useState(false);
-  const [cognizeSortOrder, setCognizeSortOrder] = useState('desc');
-  const cognizeMenuRef = useRef(null);
-
-  const [showMakerMenu, setShowMakerMenu] = useState(false);
-  const [makerSortOrder, setMakerSortOrder] = useState('desc');
-  const makerMenuRef = useRef(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userSortOrder, setUserSortOrder] = useState('desc');
+  const [userRoleFilter, setUserRoleFilter] = useState('all');
+  const [isStackedView, setIsStackedView] = useState(false);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) setShowFilterMenu(false);
-      if (cognizeMenuRef.current && !cognizeMenuRef.current.contains(event.target)) setShowCognizeMenu(false);
-      if (makerMenuRef.current && !makerMenuRef.current.contains(event.target)) setShowMakerMenu(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) setShowUserMenu(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -275,27 +256,28 @@ export function SheetPerformanceView({
   const firstData = useMemo(() => getCognizeVsOthersData(firstContributionRows, systemTaskType), [firstContributionRows, systemTaskType]);
   const secondData = useMemo(() => getCognizeVsOthersData(secondContributionRows, systemTaskType), [secondContributionRows, systemTaskType]);
 
-  const firstPageTimes = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, cognizeSortOrder, makerSortOrder), [firstSegments, systemTaskType, cognizeSortOrder, makerSortOrder]);
-  const secondPageTimes = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, cognizeSortOrder, makerSortOrder), [secondSegments, systemTaskType, cognizeSortOrder, makerSortOrder]);
+  const firstPageTimes = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, userSortOrder, userRoleFilter), [firstSegments, systemTaskType, userSortOrder, userRoleFilter]);
+  const secondPageTimes = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, userSortOrder, userRoleFilter), [secondSegments, systemTaskType, userSortOrder, userRoleFilter]);
 
-  const firstCognizeAvg = useMemo(() => firstPageTimes.cognizeData.length > 0 ? firstPageTimes.cognizeData.reduce((acc, curr) => acc + curr.value, 0) / firstPageTimes.cognizeData.length : 0, [firstPageTimes.cognizeData]);
-  const firstOthersAvg = useMemo(() => firstPageTimes.othersData.length > 0 ? firstPageTimes.othersData.reduce((acc, curr) => acc + curr.value, 0) / firstPageTimes.othersData.length : 0, [firstPageTimes.othersData]);
-  const secondCognizeAvg = useMemo(() => secondPageTimes.cognizeData.length > 0 ? secondPageTimes.cognizeData.reduce((acc, curr) => acc + curr.value, 0) / secondPageTimes.cognizeData.length : 0, [secondPageTimes.cognizeData]);
-  const secondOthersAvg = useMemo(() => secondPageTimes.othersData.length > 0 ? secondPageTimes.othersData.reduce((acc, curr) => acc + curr.value, 0) / secondPageTimes.othersData.length : 0, [secondPageTimes.othersData]);
+  const firstPageTimesUnfiltered = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, 'default', 'all'), [firstSegments, systemTaskType]);
+  const secondPageTimesUnfiltered = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, 'default', 'all'), [secondSegments, systemTaskType]);
+
+  const firstUserAvg = useMemo(() => firstPageTimesUnfiltered.userData.length > 0 ? firstPageTimesUnfiltered.userData.reduce((acc, curr) => acc + curr.value, 0) / firstPageTimesUnfiltered.userData.length : 0, [firstPageTimesUnfiltered.userData]);
+  const secondUserAvg = useMemo(() => secondPageTimesUnfiltered.userData.length > 0 ? secondPageTimesUnfiltered.userData.reduce((acc, curr) => acc + curr.value, 0) / secondPageTimesUnfiltered.userData.length : 0, [secondPageTimesUnfiltered.userData]);
 
   const isTotalBased = displayMetric === 'pct_total' || displayMetric === 'total';
   
   const firstDisplayData = useMemo(() => ({
-    cognizeSeconds: isTotalBased ? firstData.cognizeSeconds : firstCognizeAvg,
-    othersSeconds: isTotalBased ? firstData.othersSeconds : firstOthersAvg,
-    totalSeconds: isTotalBased ? firstData.totalSeconds : (firstCognizeAvg + firstOthersAvg)
-  }), [isTotalBased, firstCognizeAvg, firstOthersAvg, firstData]);
+    cognizeSeconds: isTotalBased ? firstData.cognizeSeconds : (firstData.totalSeconds > 0 ? (firstData.cognizeSeconds / firstData.totalSeconds) * firstUserAvg : 0),
+    othersSeconds: isTotalBased ? firstData.othersSeconds : (firstData.totalSeconds > 0 ? (firstData.othersSeconds / firstData.totalSeconds) * firstUserAvg : 0),
+    totalSeconds: isTotalBased ? firstData.totalSeconds : firstUserAvg
+  }), [isTotalBased, firstUserAvg, firstData]);
 
   const secondDisplayData = useMemo(() => ({
-    cognizeSeconds: isTotalBased ? secondData.cognizeSeconds : secondCognizeAvg,
-    othersSeconds: isTotalBased ? secondData.othersSeconds : secondOthersAvg,
-    totalSeconds: isTotalBased ? secondData.totalSeconds : (secondCognizeAvg + secondOthersAvg)
-  }), [isTotalBased, secondCognizeAvg, secondOthersAvg, secondData]);
+    cognizeSeconds: isTotalBased ? secondData.cognizeSeconds : (secondData.totalSeconds > 0 ? (secondData.cognizeSeconds / secondData.totalSeconds) * secondUserAvg : 0),
+    othersSeconds: isTotalBased ? secondData.othersSeconds : (secondData.totalSeconds > 0 ? (secondData.othersSeconds / secondData.totalSeconds) * secondUserAvg : 0),
+    totalSeconds: isTotalBased ? secondData.totalSeconds : secondUserAvg
+  }), [isTotalBased, secondUserAvg, secondData]);
 
   // Generate a stable ID based on the document name for framer-motion layoutId
   const firstPanelId = useMemo(() => `doc-${firstDocumentFilterName || 'first'}`, [firstDocumentFilterName]);
@@ -306,7 +288,7 @@ export function SheetPerformanceView({
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17335f]">User Comparison</h1>
-          <p className="text-slate-500 mt-1">Compare time spent and edit volumes between Maker and Cognize across documents.</p>
+          <p className="text-slate-500 mt-1">Compare user time spent and edit volumes across documents.</p>
         </div>
       </div>
 
@@ -429,28 +411,48 @@ export function SheetPerformanceView({
           </div>
         </div>
 
-        {/* Block 2: Cognize Time per Page */}
-        <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-2 ${showCognizeMenu ? 'z-[120]' : 'z-10'}`}>
-          <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="relative" ref={cognizeMenuRef}>
-              <button onClick={() => setShowCognizeMenu(!showCognizeMenu)} className={`p-1.5 border rounded-md transition-colors bg-white ${showCognizeMenu ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`}>
+        {/* Block 2: User Time per Page */}
+        <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-2 ${showUserMenu ? 'z-[120]' : 'z-10'}`}>
+          <div className="absolute right-4 top-4 z-30 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="relative" ref={userMenuRef}>
+              <button onClick={() => setShowUserMenu(!showUserMenu)} className={`p-1.5 border rounded-md transition-colors bg-white ${showUserMenu ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`} title="Display & Sort">
                 <SlidersHorizontal className="w-4 h-4" />
               </button>
-              {showCognizeMenu && (
+              {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[110] dropdown-slide-enter">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Sort Order</div>
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
                   <div className="flex flex-col gap-3">
                     <ToggleSetting 
-                      checked={cognizeSortOrder === 'desc'} 
-                      onChange={() => setCognizeSortOrder(prev => prev === 'desc' ? 'default' : 'desc')} 
+                      checked={isStackedView} 
+                      onChange={() => setIsStackedView(prev => !prev)} 
+                    >
+                      Split Colors
+                    </ToggleSetting>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <ToggleSetting 
+                      checked={userSortOrder === 'desc'} 
+                      onChange={() => setUserSortOrder(prev => prev === 'desc' ? 'default' : 'desc')} 
                     >
                       Highest First
                     </ToggleSetting>
                     <ToggleSetting 
-                      checked={cognizeSortOrder === 'asc'} 
-                      onChange={() => setCognizeSortOrder(prev => prev === 'asc' ? 'default' : 'asc')} 
+                      checked={userSortOrder === 'asc'} 
+                      onChange={() => setUserSortOrder(prev => prev === 'asc' ? 'default' : 'asc')} 
                     >
                       Lowest First
+                    </ToggleSetting>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <ToggleSetting 
+                      checked={userRoleFilter === 'maker_only'} 
+                      onChange={() => setUserRoleFilter(prev => prev === 'maker_only' ? 'all' : 'maker_only')} 
+                    >
+                      Maker only
+                    </ToggleSetting>
+                    <ToggleSetting 
+                      checked={userRoleFilter === 'cognize_only'} 
+                      onChange={() => setUserRoleFilter(prev => prev === 'cognize_only' ? 'all' : 'cognize_only')} 
+                    >
+                      Cognize only
                     </ToggleSetting>
                   </div>
                 </div>
@@ -458,13 +460,13 @@ export function SheetPerformanceView({
             </div>
           </div>
 
-          <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">Cognize Time</h2>
+          <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">User Time</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">
               {/* First Documents */}
               <motion.div 
-                key={`cognize-time-${firstPanelId}`}
-                layoutId={`cognize-time-${firstPanelId}`}
+                key={`user-time-${firstPanelId}`}
+                layoutId={`user-time-${firstPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -473,20 +475,20 @@ export function SheetPerformanceView({
               >
                 <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
                 <div className="flex-1 min-h-0">
-                  {firstPageTimes.cognizeData.length === 0 ? (
+                  {firstPageTimes.userData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
                       <Clock className="w-8 h-8 opacity-20" />
                       <span className="text-sm font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SheetBreakdownChart data={firstPageTimes.cognizeData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} />
+                    <SheetBreakdownChart data={firstPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
                   )}
                 </div>
               </motion.div>
               {/* Second Documents */}
               <motion.div 
-                key={`cognize-time-${secondPanelId}`}
-                layoutId={`cognize-time-${secondPanelId}`}
+                key={`user-time-${secondPanelId}`}
+                layoutId={`user-time-${secondPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -495,93 +497,13 @@ export function SheetPerformanceView({
               >
                 <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
                 <div className="flex-1 min-h-0">
-                  {secondPageTimes.cognizeData.length === 0 ? (
+                  {secondPageTimes.userData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
                       <Clock className="w-8 h-8 opacity-20" />
                       <span className="text-sm font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SheetBreakdownChart data={secondPageTimes.cognizeData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} />
-                  )}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Block 3: Other User Time per Page */}
-        <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-3 ${showMakerMenu ? 'z-[120]' : 'z-10'}`}>
-          <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="relative" ref={makerMenuRef}>
-              <button onClick={() => setShowMakerMenu(!showMakerMenu)} className={`p-1.5 border rounded-md transition-colors bg-white ${showMakerMenu ? 'text-blue-600 border-blue-200' : 'text-slate-400 hover:text-slate-600'}`}>
-                <SlidersHorizontal className="w-4 h-4" />
-              </button>
-              {showMakerMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[110] dropdown-slide-enter">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Sort Order</div>
-                  <div className="flex flex-col gap-3">
-                    <ToggleSetting 
-                      checked={makerSortOrder === 'desc'} 
-                      onChange={() => setMakerSortOrder(prev => prev === 'desc' ? 'default' : 'desc')} 
-                    >
-                      Highest First
-                    </ToggleSetting>
-                    <ToggleSetting 
-                      checked={makerSortOrder === 'asc'} 
-                      onChange={() => setMakerSortOrder(prev => prev === 'asc' ? 'default' : 'asc')} 
-                    >
-                      Lowest First
-                    </ToggleSetting>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">Maker Time</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            <AnimatePresence mode="popLayout">
-              {/* First Documents */}
-              <motion.div 
-                key={`maker-time-${firstPanelId}`}
-                layoutId={`maker-time-${firstPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
-                <div className="flex-1 min-h-0">
-                  {firstPageTimes.othersData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                      <Clock className="w-8 h-8 opacity-20" />
-                      <span className="text-sm font-semibold">No Data</span>
-                    </div>
-                  ) : (
-                    <SheetBreakdownChart data={firstPageTimes.othersData} expanded activeFill="#F59E0B" valueLabelFill="#F59E0B" isDuration={isDurationDisplay} />
-                  )}
-                </div>
-              </motion.div>
-              {/* Second Documents */}
-              <motion.div 
-                key={`maker-time-${secondPanelId}`}
-                layoutId={`maker-time-${secondPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
-                <div className="flex-1 min-h-0">
-                  {secondPageTimes.othersData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                      <Clock className="w-8 h-8 opacity-20" />
-                      <span className="text-sm font-semibold">No Data</span>
-                    </div>
-                  ) : (
-                    <SheetBreakdownChart data={secondPageTimes.othersData} expanded activeFill="#F59E0B" valueLabelFill="#F59E0B" isDuration={isDurationDisplay} />
+                    <SheetBreakdownChart data={secondPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
                   )}
                 </div>
               </motion.div>

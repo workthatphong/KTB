@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label, isDuration, coordinate, scrollA
     if (!svgElement) return null;
 
     const svgRect = svgElement.getBoundingClientRect();
-    const value = payload[0].value;
+    const value = payload[0].payload.value !== undefined ? payload[0].payload.value : payload[0].value;
     
     const left = svgRect.left + coordinate.x + 10;
     const top = svgRect.top + coordinate.y - 60;
@@ -74,6 +74,7 @@ export const SheetBreakdownChart = React.memo(({
   activeFill = '#00a4e4',
   inactiveFill = '#94a3b8',
   valueLabelFill = '#00a4e4',
+  isStacked = false,
 }) => {
   const reactId = React.useId();
   const containerRef = useRef(null);
@@ -169,29 +170,49 @@ export const SheetBreakdownChart = React.memo(({
                 content={<CustomTooltip isDuration={isDuration} scrollAreaRef={scrollAreaRef} />} 
                 cursor={{ fill: '#f8fafc' }} 
               />
-              <Bar
-                dataKey="value"
-                radius={[0, 6, 6, 0]}
-                barSize={20}
-              >
-                <LabelList 
-                  content={(props) => (
-                    <DurationBarLabel 
-                      {...props} 
-                      data={data} 
-                      isDuration={isDuration} 
-                      average={average}
-                      fillColor={valueLabelFill}
+              {isStacked ? (
+                <>
+                  <Bar dataKey="cognizeValue" stackId="a" fill="#00a4e4" radius={[0, 0, 0, 0]} barSize={20} />
+                  <Bar dataKey="makerValue" stackId="a" fill="#F59E0B" radius={[0, 6, 6, 0]} barSize={20}>
+                    <LabelList 
+                      content={(props) => (
+                        <DurationBarLabel 
+                          {...props} 
+                          value={props.payload ? props.payload.value : props.value}
+                          data={data} 
+                          isDuration={isDuration} 
+                          average={average}
+                          fillColor={valueLabelFill}
+                        />
+                      )} 
                     />
-                  )} 
-                />
-                {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={(Number(entry.value) >= average) ? activeFill : inactiveFill} 
+                  </Bar>
+                </>
+              ) : (
+                <Bar
+                  dataKey="value"
+                  radius={[0, 6, 6, 0]}
+                  barSize={20}
+                >
+                  <LabelList 
+                    content={(props) => (
+                      <DurationBarLabel 
+                        {...props} 
+                        data={data} 
+                        isDuration={isDuration} 
+                        average={average}
+                        fillColor={valueLabelFill}
+                      />
+                    )} 
                   />
-                ))}
-              </Bar>
+                  {data.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={(Number(entry.value) >= average) ? activeFill : inactiveFill} 
+                    />
+                  ))}
+                </Bar>
+              )}
               {showAverageLine && (
                 <ReferenceLine
                   x={average}
