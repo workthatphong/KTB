@@ -37,6 +37,8 @@ export function useDashboardData() {
       systemExcludeWeekends: filterState.systemExcludeWeekends,
       systemSelectedFiles: filterState.systemSelectedFiles,
       systemSelectedSheets: filterState.systemSelectedSheets,
+      systemSecondSelectedFiles: filterState.systemSecondSelectedFiles,
+      systemSecondSelectedSheets: filterState.systemSecondSelectedSheets,
     }
   }), [
     fetching.data.sources,
@@ -57,6 +59,8 @@ export function useDashboardData() {
     filterState.systemExcludeWeekends,
     filterState.systemSelectedFiles,
     filterState.systemSelectedSheets,
+    filterState.systemSecondSelectedFiles,
+    filterState.systemSecondSelectedSheets,
   ]);
 
   const workerQuery = useQuery({

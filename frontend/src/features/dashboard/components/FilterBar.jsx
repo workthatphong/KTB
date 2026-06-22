@@ -17,6 +17,10 @@ export const FilterBar = React.memo(({
   setDocumentFileSearch,
   documentSheetSearch,
   setDocumentSheetSearch,
+  systemSecondDocumentFileSearch,
+  setSystemSecondDocumentFileSearch,
+  systemSecondDocumentSheetSearch,
+  setSystemSecondDocumentSheetSearch,
   onMenuClick,
 }) => {
   const {
@@ -50,6 +54,17 @@ export const FilterBar = React.memo(({
   const activeDocumentFile = isSystemFilterMode ? dashboard.systemActiveDocumentFile : dashboard.activeDocumentFile;
   const setActiveDocumentFile = isSystemFilterMode ? dashboard.setSystemActiveDocumentFile : dashboard.setActiveDocumentFile;
   const documentTree = isSystemFilterMode ? dashboard.systemDocumentTree : dashboard.documentTree;
+
+  const secondSelectedFiles = dashboard.systemSecondSelectedFiles || [];
+  const setSecondSelectedFiles = dashboard.setSystemSecondSelectedFiles;
+  const secondSelectedSheets = dashboard.systemSecondSelectedSheets || [];
+  const setSecondSelectedSheets = dashboard.setSystemSecondSelectedSheets;
+  const secondPinnedFiles = dashboard.systemSecondPinnedFiles || [];
+  const setSecondPinnedFiles = dashboard.setSystemSecondPinnedFiles;
+  const secondPinnedSheets = dashboard.systemSecondPinnedSheets || [];
+  const setSecondPinnedSheets = dashboard.setSystemSecondPinnedSheets;
+  const secondActiveDocumentFile = dashboard.systemSecondActiveDocumentFile || '';
+  const setSecondActiveDocumentFile = dashboard.setSystemSecondActiveDocumentFile;
 
   const handleToggleFileSelection = (fileName, currentlyChecked = false) => {
     const { nextFiles, nextSheets } = updateSelectionForFile({
@@ -86,6 +101,43 @@ export const FilterBar = React.memo(({
   const handleClearDocumentSelection = () => {
     setSelectedFiles([]);
     if (setSelectedSheets) setSelectedSheets([]);
+  };
+
+  const handleToggleSecondFileSelection = (fileName, currentlyChecked = false) => {
+    const { nextFiles, nextSheets } = updateSelectionForFile({
+      selectedFiles: secondSelectedFiles,
+      selectedSheets: secondSelectedSheets,
+      fileName,
+      currentlyChecked,
+    });
+    if (setSecondSelectedFiles) setSecondSelectedFiles(nextFiles);
+    if (setSecondSelectedSheets) setSecondSelectedSheets(nextSheets);
+  };
+
+  const handleToggleSecondSheetSelection = (sheetName) => {
+    if (!secondActiveDocumentFile) return;
+
+    const { nextFiles, nextSheets } = updateSelectionForSheet({
+      selectedFiles: secondSelectedFiles,
+      selectedSheets: secondSelectedSheets,
+      fileName: secondActiveDocumentFile,
+      sheetName,
+    });
+    if (setSecondSelectedFiles) setSecondSelectedFiles(nextFiles);
+    if (setSecondSelectedSheets) setSecondSelectedSheets(nextSheets);
+  };
+
+  const handleTogglePinnedSecondFile = (fileName) => {
+    if (setSecondPinnedFiles) setSecondPinnedFiles((prev) => togglePinInList(prev, fileName));
+  };
+
+  const handleTogglePinnedSecondSheet = (sheetKey) => {
+    if (setSecondPinnedSheets) setSecondPinnedSheets((prev) => togglePinInList(prev, sheetKey));
+  };
+
+  const handleClearSecondDocumentSelection = () => {
+    if (setSecondSelectedFiles) setSecondSelectedFiles([]);
+    if (setSecondSelectedSheets) setSecondSelectedSheets([]);
   };
 
   const handleRenameFile = (fileName, nextDisplayName) => {
@@ -139,32 +191,92 @@ export const FilterBar = React.memo(({
             weekendExcludedCount={weekendExcludedCount}
           />
 
-          <DocumentFilterPopover
-            openDropdown={openDropdown}
-            setOpenDropdown={setOpenDropdown}
-            allowSheetSelection={true}
-            documentTree={documentTree}
-            selectedFiles={selectedFiles}
-            selectedSheets={selectedSheets}
-            pinnedFiles={pinnedFiles}
-            pinnedSheets={pinnedSheets}
-            activeDocumentFile={activeDocumentFile}
-            setActiveDocumentFile={setActiveDocumentFile}
-            fileDisplayNames={fileDisplayNames}
-            pageDisplayNames={pageDisplayNames}
-            documentFileSearch={documentFileSearch}
-            setDocumentFileSearch={setDocumentFileSearch}
-            documentSheetSearch={documentSheetSearch}
-            setDocumentSheetSearch={setDocumentSheetSearch}
-            invalidSheetCounts={invalidSheetCounts}
-            onToggleFileSelection={handleToggleFileSelection}
-            onToggleSheetSelection={handleToggleSheetSelection}
-            onTogglePinnedFile={handleTogglePinnedFile}
-            onTogglePinnedSheet={handleTogglePinnedSheet}
-            onRenameFile={handleRenameFile}
-            onRenamePage={handleRenamePage}
-            onClearSelection={handleClearDocumentSelection}
-          />
+          {isSystemFilterMode ? (
+            <>
+              <DocumentFilterPopover
+                title="First documents"
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+                allowSheetSelection={true}
+                documentTree={documentTree}
+                selectedFiles={selectedFiles}
+                selectedSheets={selectedSheets}
+                pinnedFiles={pinnedFiles}
+                pinnedSheets={pinnedSheets}
+                activeDocumentFile={activeDocumentFile}
+                setActiveDocumentFile={setActiveDocumentFile}
+                fileDisplayNames={fileDisplayNames}
+                pageDisplayNames={pageDisplayNames}
+                documentFileSearch={documentFileSearch}
+                setDocumentFileSearch={setDocumentFileSearch}
+                documentSheetSearch={documentSheetSearch}
+                setDocumentSheetSearch={setDocumentSheetSearch}
+                invalidSheetCounts={invalidSheetCounts}
+                onToggleFileSelection={handleToggleFileSelection}
+                onToggleSheetSelection={handleToggleSheetSelection}
+                onTogglePinnedFile={handleTogglePinnedFile}
+                onTogglePinnedSheet={handleTogglePinnedSheet}
+                onRenameFile={handleRenameFile}
+                onRenamePage={handleRenamePage}
+                onClearSelection={handleClearDocumentSelection}
+              />
+              <DocumentFilterPopover
+                title="Second Documents"
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+                allowSheetSelection={true}
+                documentTree={documentTree}
+                selectedFiles={secondSelectedFiles}
+                selectedSheets={secondSelectedSheets}
+                pinnedFiles={secondPinnedFiles}
+                pinnedSheets={secondPinnedSheets}
+                activeDocumentFile={secondActiveDocumentFile}
+                setActiveDocumentFile={setSecondActiveDocumentFile}
+                fileDisplayNames={fileDisplayNames}
+                pageDisplayNames={pageDisplayNames}
+                documentFileSearch={systemSecondDocumentFileSearch}
+                setDocumentFileSearch={setSystemSecondDocumentFileSearch}
+                documentSheetSearch={systemSecondDocumentSheetSearch}
+                setDocumentSheetSearch={setSystemSecondDocumentSheetSearch}
+                invalidSheetCounts={invalidSheetCounts}
+                onToggleFileSelection={handleToggleSecondFileSelection}
+                onToggleSheetSelection={handleToggleSecondSheetSelection}
+                onTogglePinnedFile={handleTogglePinnedSecondFile}
+                onTogglePinnedSheet={handleTogglePinnedSecondSheet}
+                onRenameFile={handleRenameFile}
+                onRenamePage={handleRenamePage}
+                onClearSelection={handleClearSecondDocumentSelection}
+              />
+            </>
+          ) : (
+            <DocumentFilterPopover
+              title="Documents"
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
+              allowSheetSelection={true}
+              documentTree={documentTree}
+              selectedFiles={selectedFiles}
+              selectedSheets={selectedSheets}
+              pinnedFiles={pinnedFiles}
+              pinnedSheets={pinnedSheets}
+              activeDocumentFile={activeDocumentFile}
+              setActiveDocumentFile={setActiveDocumentFile}
+              fileDisplayNames={fileDisplayNames}
+              pageDisplayNames={pageDisplayNames}
+              documentFileSearch={documentFileSearch}
+              setDocumentFileSearch={setDocumentFileSearch}
+              documentSheetSearch={documentSheetSearch}
+              setDocumentSheetSearch={setDocumentSheetSearch}
+              invalidSheetCounts={invalidSheetCounts}
+              onToggleFileSelection={handleToggleFileSelection}
+              onToggleSheetSelection={handleToggleSheetSelection}
+              onTogglePinnedFile={handleTogglePinnedFile}
+              onTogglePinnedSheet={handleTogglePinnedSheet}
+              onRenameFile={handleRenameFile}
+              onRenamePage={handleRenamePage}
+              onClearSelection={handleClearDocumentSelection}
+            />
+          )}
         </div>
 
         <div className="shrink-0 flex items-center gap-4 pl-4 border-l border-[#d7e8f6] max-sm:gap-2 max-sm:pl-0 max-sm:border-l-0">

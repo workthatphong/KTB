@@ -24,6 +24,11 @@ export function useDashboardFilterState() {
   const [systemPinnedFiles, setSystemPinnedFiles] = usePersistentState('system_filter_pinnedFiles', []);
   const [systemPinnedSheets, setSystemPinnedSheets] = usePersistentState('system_filter_pinnedSheets', []);
   const [systemActiveDocumentFile, setSystemActiveDocumentFile] = usePersistentState('system_filter_activeDocumentFile', '');
+  const [systemSecondSelectedFiles, setSystemSecondSelectedFiles] = usePersistentState('system_filter_secondSelectedFiles', []);
+  const [systemSecondSelectedSheets, setSystemSecondSelectedSheets] = usePersistentState('system_filter_secondSelectedSheets', []);
+  const [systemSecondPinnedFiles, setSystemSecondPinnedFiles] = usePersistentState('system_filter_secondPinnedFiles', []);
+  const [systemSecondPinnedSheets, setSystemSecondPinnedSheets] = usePersistentState('system_filter_secondPinnedSheets', []);
+  const [systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile] = usePersistentState('system_filter_secondActiveDocumentFile', '');
   const [fileDisplayNames, setFileDisplayNames] = usePersistentState('filter_fileDisplayNames', {});
   const [pageDisplayNames, setPageDisplayNames] = usePersistentState('filter_pageDisplayNames', {});
 
@@ -51,6 +56,11 @@ export function useDashboardFilterState() {
     systemPinnedFiles, setSystemPinnedFiles,
     systemPinnedSheets, setSystemPinnedSheets,
     systemActiveDocumentFile, setSystemActiveDocumentFile,
+    systemSecondSelectedFiles, setSystemSecondSelectedFiles,
+    systemSecondSelectedSheets, setSystemSecondSelectedSheets,
+    systemSecondPinnedFiles, setSystemSecondPinnedFiles,
+    systemSecondPinnedSheets, setSystemSecondPinnedSheets,
+    systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile,
     fileDisplayNames, setFileDisplayNames,
     pageDisplayNames, setPageDisplayNames,
   };
