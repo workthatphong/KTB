@@ -194,7 +194,8 @@ export const FilterBar = React.memo(({
           {isSystemFilterMode ? (
             <>
               <DocumentFilterPopover
-                title="First documents"
+                title={dashboard.systemFirstDocumentFilterName}
+                onTitleChange={dashboard.setSystemFirstDocumentFilterName}
                 openDropdown={openDropdown}
                 setOpenDropdown={setOpenDropdown}
                 allowSheetSelection={true}
@@ -221,7 +222,8 @@ export const FilterBar = React.memo(({
                 onClearSelection={handleClearDocumentSelection}
               />
               <DocumentFilterPopover
-                title="Second Documents"
+                title={dashboard.systemSecondDocumentFilterName}
+                onTitleChange={dashboard.setSystemSecondDocumentFilterName}
                 openDropdown={openDropdown}
                 setOpenDropdown={setOpenDropdown}
                 allowSheetSelection={true}

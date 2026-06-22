@@ -13,6 +13,7 @@ import { DocumentSheetListColumn } from './DocumentSheetListColumn.jsx';
 
 export const DocumentFilterPopover = React.memo(({
   title = "Documents",
+  onTitleChange,
   openDropdown,
   setOpenDropdown,
   allowSheetSelection = true,
@@ -70,6 +71,7 @@ export const DocumentFilterPopover = React.memo(({
     <FilterPopover
       id={`document-file-${title}`}
       title={title}
+      onTitleChange={onTitleChange}
       summary={getDocumentSummary(selectedFiles, selectedSheets, allowSheetSelection)}
       openDropdown={openDropdown}
       setOpenDropdown={setOpenDropdown}

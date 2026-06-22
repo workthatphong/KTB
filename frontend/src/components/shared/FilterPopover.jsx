@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react';
 export const FilterPopover = ({
   id,
   title,
+  onTitleChange,
   summary,
   openDropdown,
   setOpenDropdown,
@@ -18,6 +19,34 @@ export const FilterPopover = ({
   const rootRef = useRef(null);
   const panelRef = useRef(null);
   const [panelStyle, setPanelStyle] = useState({ top: 0, left: 0, maxHeight: 0 });
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState('');
+
+  const handleTitleClick = (e) => {
+    if (onTitleChange) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsEditingTitle(true);
+      setEditTitleValue(title);
+    }
+  };
+
+  const handleTitleBlur = () => {
+    setIsEditingTitle(false);
+    if (editTitleValue.trim() !== '' && editTitleValue.trim() !== title) {
+      onTitleChange(editTitleValue.trim());
+    }
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTitleBlur();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditingTitle(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -92,8 +121,26 @@ export const FilterPopover = ({
       >
         {Icon ? <Icon className={`w-4 h-4 max-sm:w-3.5 max-sm:h-3.5 transition-colors ${active ? 'text-blue-600' : 'text-slate-400'} shrink-0`} /> : null}
         <div className="min-w-0 flex-1 leading-tight">
-          <div className="text-[10px] uppercase tracking-[0.08em] text-slate-400 max-sm:hidden">
-            {title}
+          <div className="text-[10px] uppercase tracking-[0.08em] text-slate-400 max-sm:hidden flex items-center">
+            {isEditingTitle ? (
+              <input
+                autoFocus
+                value={editTitleValue}
+                onChange={(e) => setEditTitleValue(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={handleTitleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-transparent border-b border-blue-400 outline-none text-slate-700 w-full min-w-[60px] placeholder:text-slate-300"
+              />
+            ) : (
+              <span
+                onClick={handleTitleClick}
+                className={onTitleChange ? "cursor-text hover:text-slate-500 border-b border-transparent hover:border-slate-300 transition-colors" : ""}
+                title={onTitleChange ? "Click to rename" : ""}
+              >
+                {title}
+              </span>
+            )}
           </div>
           <div className={`text-sm font-semibold truncate max-sm:text-[11px] ${active ? 'text-blue-700' : 'text-slate-700'}`}>
             {summary}
