@@ -352,6 +352,7 @@ export function SheetPerformanceView({
             <AnimatePresence mode="popLayout">
               {/* First Documents */}
               <motion.div 
+                key={`user-breakdown-${firstPanelId}`}
                 layoutId={`user-breakdown-${firstPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -376,6 +377,7 @@ export function SheetPerformanceView({
               
               {/* Second Documents */}
               <motion.div 
+                key={`user-breakdown-${secondPanelId}`}
                 layoutId={`user-breakdown-${secondPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -435,6 +437,7 @@ export function SheetPerformanceView({
             <AnimatePresence mode="popLayout">
               {/* First Documents */}
               <motion.div 
+                key={`cognize-time-${firstPanelId}`}
                 layoutId={`cognize-time-${firstPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -456,6 +459,7 @@ export function SheetPerformanceView({
               </motion.div>
               {/* Second Documents */}
               <motion.div 
+                key={`cognize-time-${secondPanelId}`}
                 layoutId={`cognize-time-${secondPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -513,6 +517,7 @@ export function SheetPerformanceView({
             <AnimatePresence mode="popLayout">
               {/* First Documents */}
               <motion.div 
+                key={`maker-time-${firstPanelId}`}
                 layoutId={`maker-time-${firstPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -534,6 +539,7 @@ export function SheetPerformanceView({
               </motion.div>
               {/* Second Documents */}
               <motion.div 
+                key={`maker-time-${secondPanelId}`}
                 layoutId={`maker-time-${secondPanelId}`}
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
