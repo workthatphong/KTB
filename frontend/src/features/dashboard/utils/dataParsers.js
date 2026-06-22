@@ -129,6 +129,8 @@ export function calculateUserStatsRows(ganttVisibleSegments) {
         uploadSeconds: 0,
         sessionCount: 0,
         reworkCount: 0,
+        editDataCount: 0,
+        reviewCount: 0,
         autoClosedCount: 0,
         documents: new Set()
       });
@@ -141,11 +143,15 @@ export function calculateUserStatsRows(ganttVisibleSegments) {
     const st = String(segment.segmentType || '');
     if (isDataEditSegmentType(st)) {
       stats.editDataSeconds += durationSeconds;
+      stats.editDataCount += (Number(segment.editDataItemCount) || 1);
       stats.reworkCount += 1;
     } else if (isMetaEditSegmentType(st)) {
       stats.editMetaSeconds += durationSeconds;
       stats.reworkCount += 1;
-    } else { stats.reviewSeconds += durationSeconds; }
+    } else { 
+      stats.reviewSeconds += durationSeconds; 
+      stats.reviewCount += 1;
+    }
     if (segment.autoTimeout || st === 'USER_REVIEW_AUTO_TIMEOUT') { stats.autoClosedCount += 1; }
   });
   return Array.from(userStatsMap.values()).map((stats) => ({
@@ -161,5 +167,7 @@ export function calculateUserStatsRows(ganttVisibleSegments) {
     autoClosedRate: stats.sessionCount > 0 ? stats.autoClosedCount / stats.sessionCount : 0,
     avgTimePerDocSeconds: stats.totalSeconds / Math.max(1, stats.documents.size),
     sessionCount: stats.sessionCount,
+    editDataCount: stats.editDataCount,
+    reviewCount: stats.reviewCount,
   })).sort((a, b) => b.totalSeconds - a.totalSeconds);
 }

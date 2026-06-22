@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Menu, RefreshCw } from 'lucide-react';
 import { DateRangeFilterPopover } from './filter-bar/DateRangeFilterPopover.jsx';
 import { DocumentFilterPopover } from './filter-bar/DocumentFilterPopover.jsx';
+import { FilterPopover } from '@/components/shared/FilterPopover.jsx';
+import { ListTodo, ArrowRightLeft } from 'lucide-react';
 import {
   togglePinInList,
   updateSelectionForFile,
@@ -21,6 +23,8 @@ export const FilterBar = React.memo(({
   setSystemSecondDocumentFileSearch,
   systemSecondDocumentSheetSearch,
   setSystemSecondDocumentSheetSearch,
+  systemTaskType,
+  setSystemTaskType,
   onMenuClick,
 }) => {
   const {
@@ -140,6 +144,34 @@ export const FilterBar = React.memo(({
     if (setSecondSelectedSheets) setSecondSelectedSheets([]);
   };
 
+  const [isSwapping, setIsSwapping] = useState(false);
+
+  const handleSwapDocuments = () => {
+    setIsSwapping(true);
+    setTimeout(() => setIsSwapping(false), 300);
+
+    const tempSelectedFiles = selectedFiles;
+    const tempSelectedSheets = selectedSheets;
+    const tempPinnedFiles = pinnedFiles;
+    const tempPinnedSheets = pinnedSheets;
+    const tempActiveDocumentFile = activeDocumentFile;
+    const tempFirstName = dashboard.systemFirstDocumentFilterName;
+    
+    setSelectedFiles(secondSelectedFiles);
+    if (setSelectedSheets) setSelectedSheets(secondSelectedSheets);
+    setPinnedFiles(secondPinnedFiles);
+    if (setPinnedSheets) setPinnedSheets(secondPinnedSheets);
+    setActiveDocumentFile(secondActiveDocumentFile);
+    if (dashboard.setSystemFirstDocumentFilterName) dashboard.setSystemFirstDocumentFilterName(dashboard.systemSecondDocumentFilterName);
+    
+    if (setSecondSelectedFiles) setSecondSelectedFiles(tempSelectedFiles);
+    if (setSecondSelectedSheets) setSecondSelectedSheets(tempSelectedSheets);
+    if (setSecondPinnedFiles) setSecondPinnedFiles(tempPinnedFiles);
+    if (setSecondPinnedSheets) setSecondPinnedSheets(tempPinnedSheets);
+    if (setSecondActiveDocumentFile) setSecondActiveDocumentFile(tempActiveDocumentFile);
+    if (dashboard.setSystemSecondDocumentFilterName) dashboard.setSystemSecondDocumentFilterName(tempFirstName);
+  };
+
   const handleRenameFile = (fileName, nextDisplayName) => {
     setFileDisplayNames((prev) => {
       const trimmed = String(nextDisplayName || '').trim();
@@ -249,6 +281,45 @@ export const FilterBar = React.memo(({
                 onRenamePage={handleRenamePage}
                 onClearSelection={handleClearSecondDocumentSelection}
               />
+              <FilterPopover
+                id="taskType"
+                title="Task Type"
+                summary={
+                  systemTaskType === 'all' ? 'All Tasks' :
+                  systemTaskType === 'editData' ? 'Edit Data' :
+                  systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review'
+                }
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+                icon={ListTodo}
+                active={systemTaskType !== 'all'}
+                minWidthClass="w-[140px]"
+                panelClassName="w-[160px]"
+              >
+                <div className="p-1.5 flex flex-col gap-0.5">
+                  {[
+                    { id: 'all', label: 'All Tasks' },
+                    { id: 'editData', label: 'Edit Data Time' },
+                    { id: 'editDataRecord', label: 'Edit Data Record' },
+                    { id: 'review', label: 'Review' }
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setSystemTaskType(opt.id); setOpenDropdown(''); }}
+                      className={`w-full text-left px-3 py-2 text-[13px] font-semibold rounded-lg transition-colors ${systemTaskType === opt.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </FilterPopover>
+              <button
+                onClick={handleSwapDocuments}
+                className="flex items-center justify-center w-9 h-9 shrink-0 text-slate-500 bg-white border border-[#d7e8f6] hover:text-[#3860be] hover:border-[#bfe8f8] hover:bg-[#e8f7fd] rounded-xl transition-all shadow-ktb active:scale-95"
+                title="Swap Document 1 and Document 2"
+              >
+                <ArrowRightLeft className={`w-4 h-4 transition-transform duration-300 ${isSwapping ? 'rotate-180 scale-110' : ''}`} />
+              </button>
             </>
           ) : (
             <DocumentFilterPopover

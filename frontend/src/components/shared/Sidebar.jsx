@@ -99,13 +99,13 @@ const SidebarContent = ({
             if (mobile) setMobileOpen(false);
           }}
           className={({ isActive }) => navItemClass(isActive, isCollapsed)}
-          title="Sheet Performance"
+          title="User Comparison"
         >
           {({ isActive }) => (
             <>
               <BarChart3 className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-[#00a4e4]' : ''}`} />
               <span className={labelClass(isCollapsed)}>
-                Sheet Performance
+                User Comparison
               </span>
             </>
           )}

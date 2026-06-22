@@ -65,6 +65,7 @@ function App() {
                   firstSegments={dashboard.systemFilteredBaseSegments}
                   secondSegments={dashboard.systemSecondFilteredBaseSegments}
                   unfilteredSegments={dashboard.systemFileLevelSegments}
+                  systemTaskType={controller.systemTaskType}
                   setExpandedVisualizationId={controller.setExpandedVisualizationId}
                   chartSettings={controller.sheetPerformanceChartSettings}
                   setChartSettings={controller.setSheetPerformanceChartSettings}

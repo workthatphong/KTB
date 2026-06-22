@@ -67,11 +67,11 @@ export function SystemPerformanceView({ segments, flowRows }) {
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-6">
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-stagger-1">
         <h2 className="text-lg font-bold mb-6">Processing Trend</h2>
         <SystemProcessingTrendChart rows={trendRows} />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-stagger-2">
         <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
           <h2 className="text-lg font-bold mb-6">Pareto Analysis</h2>
           <SystemParetoChart rows={bottleneckRows} />
@@ -81,7 +81,7 @@ export function SystemPerformanceView({ segments, flowRows }) {
           <FlowDelayComparisonTable rows={comparisonRows} />
         </div>
       </div>
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm animate-stagger-3">
         <h2 className="text-lg font-bold mb-6">System Bottlenecks</h2>
         <SystemBottleneckTable rows={bottleneckRows} />
       </div>
