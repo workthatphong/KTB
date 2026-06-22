@@ -92,6 +92,8 @@ export function useDashboardData() {
     contributionRows: [],
     workloadContributors: [],
     systemFlowRows: [],
+    systemContributionRows: [],
+    systemSecondContributionRows: [],
   };
 
   const kpiData = useMemo(() => workerData.kpis ? buildKpiData(workerData.kpis) : initialKpiData, [workerData.kpis]);

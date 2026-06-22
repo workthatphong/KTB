@@ -58,7 +58,12 @@ function App() {
               } />
               <Route path="/sheet-performance" element={
                 <SheetPerformanceView 
-                  segments={dashboard.systemFilteredBaseSegments} 
+                  firstDocumentFilterName={dashboard.systemFirstDocumentFilterName}
+                  secondDocumentFilterName={dashboard.systemSecondDocumentFilterName}
+                  firstContributionRows={dashboard.systemContributionRows}
+                  secondContributionRows={dashboard.systemSecondContributionRows}
+                  firstSegments={dashboard.systemFilteredBaseSegments}
+                  secondSegments={dashboard.systemSecondFilteredBaseSegments}
                   unfilteredSegments={dashboard.systemFileLevelSegments}
                   setExpandedVisualizationId={controller.setExpandedVisualizationId}
                   chartSettings={controller.sheetPerformanceChartSettings}

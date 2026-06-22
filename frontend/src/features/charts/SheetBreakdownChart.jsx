@@ -38,13 +38,16 @@ function DurationBarLabel({ x, y, width, height, value, index, data, isDuration,
   );
 }
 
-const CustomTooltip = ({ active, payload, label, isDuration, coordinate, containerRef }) => {
-  if (active && payload && payload.length && coordinate && containerRef.current) {
-    const rect = containerRef.current.getBoundingClientRect();
+const CustomTooltip = ({ active, payload, label, isDuration, coordinate, scrollAreaRef }) => {
+  if (active && payload && payload.length && coordinate && scrollAreaRef.current) {
+    const svgElement = scrollAreaRef.current.querySelector('svg');
+    if (!svgElement) return null;
+
+    const svgRect = svgElement.getBoundingClientRect();
     const value = payload[0].value;
     
-    const left = rect.left + coordinate.x + 10;
-    const top = rect.top + coordinate.y - 60;
+    const left = svgRect.left + coordinate.x + 10;
+    const top = svgRect.top + coordinate.y - 60;
 
     return createPortal(
       <div 
@@ -163,7 +166,7 @@ export const SheetBreakdownChart = React.memo(({
                 dx={-5}
               />
               <Tooltip 
-                content={<CustomTooltip isDuration={isDuration} containerRef={containerRef} />} 
+                content={<CustomTooltip isDuration={isDuration} scrollAreaRef={scrollAreaRef} />} 
                 cursor={{ fill: '#f8fafc' }} 
               />
               <Bar

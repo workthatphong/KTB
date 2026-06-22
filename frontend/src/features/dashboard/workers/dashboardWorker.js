@@ -197,6 +197,18 @@ const api = {
       selectedSegmentTypes: [],
     });
 
+    const systemSecondDerived = computeDerivedData({
+      sources,
+      performance,
+      datePreset: filterState.systemDatePreset,
+      dateStart: filterState.systemDateStart,
+      dateEnd: filterState.systemDateEnd,
+      excludeWeekends: filterState.systemExcludeWeekends,
+      selectedFiles: filterState.systemSecondSelectedFiles,
+      selectedSheets: filterState.systemSecondSelectedSheets,
+      selectedSegmentTypes: [],
+    });
+
     const userFilters = computeFilters(userDerived.parsedSegments, {
       selectedFiles: filterState.selectedFiles,
       selectedSheets: filterState.selectedSheets,
@@ -214,6 +226,16 @@ const api = {
       selectedSegmentTypes: [],
       showIdle: true,
       dateRangeBounds: systemDerived.dateRangeBounds,
+      excludeWeekends: filterState.systemExcludeWeekends,
+    });
+
+    const systemSecondFilters = computeFilters(systemSecondDerived.parsedSegments, {
+      selectedFiles: filterState.systemSecondSelectedFiles,
+      selectedSheets: filterState.systemSecondSelectedSheets,
+      selectedUsers: [],
+      selectedSegmentTypes: [],
+      showIdle: true,
+      dateRangeBounds: systemSecondDerived.dateRangeBounds,
       excludeWeekends: filterState.systemExcludeWeekends,
     });
 
@@ -239,6 +261,12 @@ const api = {
       selectedSegmentTypes: [],
     });
 
+    const systemSecondMetrics = computeMetrics({
+      filteredBaseSegments: systemSecondFilters.filteredBaseSegments,
+      showWorkloadIdle: true,
+      selectedSegmentTypes: [],
+    });
+
     return {
       invalidSheetCounts: userDerived.invalidSheetCounts,
       parsedSegments: userDerived.parsedSegments,
@@ -254,6 +282,7 @@ const api = {
       filteredBaseSegments: userFilters.filteredBaseSegments,
       ganttVisibleSegments: userFilters.ganttVisibleSegments,
       systemFilteredBaseSegments: systemFilters.filteredBaseSegments,
+      systemSecondFilteredBaseSegments: systemSecondFilters.filteredBaseSegments,
       systemFileLevelSegments: systemFileFilters.filteredBaseSegments,
 
       chartBaseSegments: userMetrics.chartBaseSegments,
@@ -262,6 +291,8 @@ const api = {
       contributionRows: userMetrics.contributionRows,
       workloadContributors: userMetrics.workloadContributors,
       systemFlowRows: systemMetrics.flowRows,
+      systemContributionRows: systemMetrics.contributionRows,
+      systemSecondContributionRows: systemSecondMetrics.contributionRows,
     };
   }
 };
