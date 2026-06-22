@@ -159,7 +159,7 @@ const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDuration =
   return (
     <div className="mt-8">
       {/* Labels */}
-      <div className="flex justify-between text-sm font-bold text-[#17335f] mb-3">
+      <div className="flex justify-between items-center text-sm font-bold text-[#17335f] mb-3">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-sm bg-[#00a4e4]"></span>
           Cognize
@@ -307,6 +307,32 @@ export function SheetPerformanceView({
         <div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#17335f]">User Comparison</h1>
           <p className="text-slate-500 mt-1">Compare time spent and edit volumes between Maker and Cognize across documents.</p>
+        </div>
+      </div>
+
+      {/* KPI Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 mb-6">
+        <div className="relative min-w-0 bg-white px-0.5 py-1.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#d7e8f6] shadow-ktb text-center sm:text-left animate-stagger-1 cursor-default">
+          <div className="hidden sm:flex w-10 h-10 rounded-xl bg-blue-50 items-center justify-center mb-4 relative z-10">
+            <Users className="w-5 h-5 text-blue-500" />
+          </div>
+          <div className="whitespace-nowrap overflow-visible sm:overflow-hidden sm:truncate tracking-tighter sm:tracking-normal text-[0.56rem] leading-tight sm:text-sm font-semibold mb-0.5 sm:mb-1 text-slate-500 relative z-10">
+            {firstDocumentFilterName || 'First documents'}
+          </div>
+          <div className="min-w-0 whitespace-nowrap text-[0.72rem] leading-none sm:text-[1.4rem] lg:text-[2rem] 2xl:text-[2.1rem] font-extrabold text-[#17335f] relative z-10">
+            {isDurationDisplay ? formatDuration(firstDisplayData.totalSeconds) : `${firstDisplayData.totalSeconds.toLocaleString()} items`}
+          </div>
+        </div>
+        <div className="relative min-w-0 bg-white px-0.5 py-1.5 sm:p-4 rounded-xl sm:rounded-2xl border border-[#d7e8f6] shadow-ktb text-center sm:text-left animate-stagger-2 cursor-default">
+          <div className="hidden sm:flex w-10 h-10 rounded-xl bg-orange-50 items-center justify-center mb-4 relative z-10">
+            <Users className="w-5 h-5 text-orange-500" />
+          </div>
+          <div className="whitespace-nowrap overflow-visible sm:overflow-hidden sm:truncate tracking-tighter sm:tracking-normal text-[0.56rem] leading-tight sm:text-sm font-semibold mb-0.5 sm:mb-1 text-slate-500 relative z-10">
+            {secondDocumentFilterName || 'Second documents'}
+          </div>
+          <div className="min-w-0 whitespace-nowrap text-[0.72rem] leading-none sm:text-[1.4rem] lg:text-[2rem] 2xl:text-[2.1rem] font-extrabold text-[#17335f] relative z-10">
+            {isDurationDisplay ? formatDuration(secondDisplayData.totalSeconds) : `${secondDisplayData.totalSeconds.toLocaleString()} items`}
+          </div>
         </div>
       </div>
 
