@@ -138,6 +138,10 @@ def api_delete_gsheet_payload(connection_id: str) -> dict:
         **api_sources_payload(),
     }
 
+def api_update_settings_payload(new_settings: dict) -> dict:
+    updated = dashboard_snapshot_service.update_dashboard_settings(new_settings)
+    return {"settings": updated}
+
 def json_response(
     handler: SimpleHTTPRequestHandler, payload: dict, status: int = 200
 ) -> None:
@@ -229,6 +233,16 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             except Exception as exc:
                 json_response(self, {"error": str(exc)}, status=400)
                 return True
+
+        if parsed.path == "/api/settings":
+            try:
+                payload = read_json_body(self)
+                json_response(self, api_update_settings_payload(payload))
+                return True
+            except Exception as exc:
+                json_response(self, {"error": str(exc)}, status=400)
+                return True
+
         return False
 
     def _handle_api_delete(self, parsed) -> bool:

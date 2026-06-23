@@ -159,10 +159,14 @@ def build_dashboard_snapshot_payload() -> dict:
     connections = _list_connections_from_conn()
     row_count, _ = current_unified_rows_signature()
 
+    existing = load_local_dashboard_snapshot()
+    settings = existing.get("settings", {}) if existing else {}
+
     payload = {
         "sources": sources,
         "performance": performance,
         "connections": connections,
+        "settings": settings,
         "snapshotMeta": {
             "updatedAt": _utc_now_iso(),
             "rowCount": int(row_count),
@@ -171,6 +175,24 @@ def build_dashboard_snapshot_payload() -> dict:
         },
     }
     return payload
+
+
+def update_dashboard_settings(new_settings: dict) -> dict:
+    payload = get_dashboard_snapshot_payload()
+    if not payload:
+        payload = build_dashboard_snapshot_payload()
+
+    current_settings = payload.get("settings", {})
+    if not isinstance(current_settings, dict):
+        current_settings = {}
+        
+    current_settings.update(new_settings)
+    payload["settings"] = current_settings
+
+    store_local_dashboard_snapshot(payload)
+    if is_supabase_enabled():
+        sync_dashboard_snapshot_to_supabase(payload)
+    return current_settings
 
 
 def rebuild_dashboard_snapshot(sync_remote: bool = True) -> dict:

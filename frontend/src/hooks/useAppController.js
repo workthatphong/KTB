@@ -14,7 +14,7 @@ export function useAppController(dashboard) {
   const [openDropdown, setOpenDropdown] = useState('');
   const [expandedVisualizationId, setExpandedVisualizationId] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = usePersistentState('sidebar_collapsed', false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = usePersistentState('sidebar_collapsed', false, dashboard.settings);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [userSearchText, setUserSearchText] = useState('');
   const [segmentTypeSearchText, setSegmentTypeSearchText] = useState('');
@@ -24,17 +24,17 @@ export function useAppController(dashboard) {
   const [systemDocumentSheetSearch, setSystemDocumentSheetSearch] = useState('');
   const [systemSecondDocumentFileSearch, setSystemSecondDocumentFileSearch] = useState('');
   const [systemSecondDocumentSheetSearch, setSystemSecondDocumentSheetSearch] = useState('');
-  const [systemTaskType, setSystemTaskType] = usePersistentState('filter_systemTaskType', 'all');
+  const [systemTaskType, setSystemTaskType] = usePersistentState('filter_systemTaskType', 'all', dashboard.settings);
   const [sheetPerformanceChartSettings, setSheetPerformanceChartSettings] = useState(() => createDefaultSheetPerformanceChartSettings());
-  const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true);
-  const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true);
-  const [mergeSpread, setMergeSpread] = usePersistentState('chart_mergeSpread', false);
-  const [ganttSingleLaneMode, setGanttSingleLaneMode] = usePersistentState('filter_ganttSingleLaneMode', false);
-  const [showSystemLane, setShowSystemLane] = usePersistentState('filter_showSystemLane', true);
-  const [showStarMarkers, setShowStarMarkers] = usePersistentState('filter_showStarMarkers', true);
-  const [ganttCollapseGaps, setGanttCollapseGaps] = usePersistentState('filter_ganttCollapseGaps', false);
-  const [showGanttLegend, setShowGanttLegend] = usePersistentState('filter_showGanttLegend', true);
-  const [ganttAllInPage, setGanttAllInPage] = usePersistentState('filter_ganttAllInPage', false);
+  const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true, dashboard.settings);
+  const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true, dashboard.settings);
+  const [mergeSpread, setMergeSpread] = usePersistentState('chart_mergeSpread', false, dashboard.settings);
+  const [ganttSingleLaneMode, setGanttSingleLaneMode] = usePersistentState('filter_ganttSingleLaneMode', false, dashboard.settings);
+  const [showSystemLane, setShowSystemLane] = usePersistentState('filter_showSystemLane', true, dashboard.settings);
+  const [showStarMarkers, setShowStarMarkers] = usePersistentState('filter_showStarMarkers', true, dashboard.settings);
+  const [ganttCollapseGaps, setGanttCollapseGaps] = usePersistentState('filter_ganttCollapseGaps', false, dashboard.settings);
+  const [showGanttLegend, setShowGanttLegend] = usePersistentState('filter_showGanttLegend', true, dashboard.settings);
+  const [ganttAllInPage, setGanttAllInPage] = usePersistentState('filter_ganttAllInPage', false, dashboard.settings);
 
   const workloadVisibleRows = useMemo(() => {
     const filtered = workloadContributors.filter((row) => showWorkloadSystem || row.user !== 'System');

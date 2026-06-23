@@ -113,6 +113,19 @@ def api_gsheet_sync():
         return jsonify({"error": str(exc)}), HTTPStatus.BAD_REQUEST
 
 
+@api_bp.post("/settings")
+def api_update_settings():
+    auth_error = require_write_auth()
+    if auth_error is not None:
+        return auth_error
+
+    try:
+        payload = request.get_json(silent=True) or {}
+        return jsonify(dashboard_service.api_update_settings_payload(payload))
+    except Exception as exc:  # pragma: no cover - runtime path
+        return jsonify({"error": str(exc)}), HTTPStatus.BAD_REQUEST
+
+
 @api_bp.delete("/sources/<path:source_id>")
 def api_source_delete(source_id: str):
     auth_error = require_write_auth()

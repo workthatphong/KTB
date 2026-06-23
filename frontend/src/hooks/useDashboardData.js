@@ -104,6 +104,7 @@ export function useDashboardData() {
     ...filterState,
     sources: fetching.data.sources,
     gsheetConnections: fetching.data.connections,
+    settings: fetching.data.settings || {},
     performance: fetching.data.performance,
     healthInfo: fetching.data.healthInfo,
     debugInfo: fetching.data.debugInfo,
