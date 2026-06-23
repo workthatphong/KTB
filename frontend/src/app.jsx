@@ -102,6 +102,10 @@ function App() {
                 showStarMarkers: controller.showStarMarkers,
                 collapseGaps: controller.ganttCollapseGaps,
                 showGanttLegend: controller.showGanttLegend,
+                allInPage: controller.ganttAllInPage,
+                groupingMode: dashboard.selectedSheets?.length > 1 ? 'sheet' : 
+                  (dashboard.selectedSheets?.length === 1 ? 'default' :
+                    ((dashboard.selectedFiles?.length > 0 ? dashboard.selectedFiles.length : (dashboard.documentTree?.length || 0)) === 1 ? 'sheet' : 'file')),
               },
             }}
           />

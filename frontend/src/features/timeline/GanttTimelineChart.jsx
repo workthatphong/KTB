@@ -22,6 +22,8 @@ export const GanttTimelineChart = ({
   showStarMarkers = true,
   collapseGaps = false,
   showGanttLegend = true,
+  groupingMode = 'default',
+  allInPage = false,
 }) => {
   const containerRef = useRef(null);
   const headerScrollRef = useRef(null);
@@ -44,7 +46,10 @@ export const GanttTimelineChart = ({
     showIdleLane,
     collapseGaps,
     showStarMarkers,
-    zoomScale
+    zoomScale,
+    groupingMode,
+    allInPage,
+    containerWidth: scrollState.viewW
   });
 
   const events = useGanttEvents({

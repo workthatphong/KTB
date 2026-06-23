@@ -71,11 +71,68 @@ function applySecondSpreadHandoffTiming(rows) {
 /**
  * Maps raw segments into parsed rows for the Gantt chart.
  */
-export const mapSegmentsToRows = (segments, singleLane) => {
+export const mapSegmentsToRows = (segments, singleLane, groupingMode = 'default') => {
   const parsedRows = [];
   const reopenMarkers = [];
 
-  (segments || []).forEach((segment, idx) => {
+  let segmentsToProcess = segments || [];
+
+  if (groupingMode === 'file' || groupingMode === 'sheet') {
+    const groups = new Map();
+    segmentsToProcess.forEach(segment => {
+      const segmentType = String(segment.segmentType || 'UNKNOWN');
+      if (segmentType === 'AUTO_TIMEOUT_MARKER' || REOPEN_MARKER_TYPES.has(segmentType)) return;
+
+      let key;
+      let label;
+      if (groupingMode === 'sheet') {
+        const pName = segment.pageName || segment.sheetKey || 'Unknown Sheet';
+        key = `${segment.fileName}::${pName}`;
+        label = pName;
+      } else {
+        key = segment.fileName || 'Unknown File';
+        label = key;
+      }
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          ...segment,
+          segmentType: 'USER_EDIT_DATA',
+          _customLane: label,
+          startTs: Number.MAX_SAFE_INTEGER,
+          endTs: 0,
+        });
+      }
+
+      const group = groups.get(key);
+      const startTs = Date.parse(segment.start || '');
+      const endTsRaw = Date.parse(segment.end || '');
+      const endTs = Math.max(endTsRaw, startTs + 1000);
+
+      if (Number.isFinite(startTs) && startTs < group.startTs) {
+        group.startTs = startTs;
+        group.start = segment.start;
+      }
+      if (Number.isFinite(endTs) && endTs > group.endTs) {
+        group.endTs = endTs;
+        group.end = segment.end;
+      }
+      
+      const rStartTs = Number(segment.rawStartTs);
+      if (Number.isFinite(rStartTs) && rStartTs < (group.rawStartTs || Number.MAX_SAFE_INTEGER)) group.rawStartTs = rStartTs;
+      const rEndTs = Number(segment.rawEndTs);
+      if (Number.isFinite(rEndTs) && rEndTs > (group.rawEndTs || 0)) group.rawEndTs = rEndTs;
+    });
+
+    segmentsToProcess = Array.from(groups.values()).map(g => {
+      g.durationSeconds = Math.max(0, Math.round((g.endTs - g.startTs) / 1000));
+      if (g.startTs !== Number.MAX_SAFE_INTEGER) g.start = new Date(g.startTs).toISOString();
+      if (g.endTs !== 0) g.end = new Date(g.endTs).toISOString();
+      return g;
+    });
+  }
+
+  segmentsToProcess.forEach((segment, idx) => {
     const startTs = Date.parse(segment.start || '');
     const endTsRaw = Date.parse(segment.end || '');
     if (!Number.isFinite(startTs) || !Number.isFinite(endTsRaw)) return;
@@ -89,14 +146,19 @@ export const mapSegmentsToRows = (segments, singleLane) => {
       return;
     }
 
-    const lane = singleLane ? 'All user' : toTimelineLane(segmentType, segment.userName);
+    let lane;
+    if (segment._customLane) {
+      lane = segment._customLane;
+    } else {
+      lane = singleLane ? 'All user' : toTimelineLane(segmentType, segment.userName);
+    }
 
     parsedRows.push({
       id: `${segmentType}-${idx}`,
       segmentType,
       lane,
       userName: segment.userName,
-      origLane: toTimelineLane(segmentType, segment.userName),
+      origLane: segment._customLane || toTimelineLane(segmentType, segment.userName),
       startTs,
       endTs: Math.max(endTsRaw, startTs + 1000),
       durationSeconds: safeNumber(segment.durationSeconds),

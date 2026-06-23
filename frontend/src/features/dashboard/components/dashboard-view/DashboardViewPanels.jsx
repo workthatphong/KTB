@@ -60,13 +60,14 @@ export const KpiGridPanel = React.memo(({ kpiData }) => {
 export const TimelinePanel = React.memo(() => {
   const dashboard = useDashboardDataCtx();
   const controller = useDashboardUICtx();
-  const { ganttVisibleSegments, showIdle, setShowIdle } = dashboard;
+  const { ganttVisibleSegments, showIdle, setShowIdle, selectedFiles, selectedSheets } = dashboard;
   const { 
     ganttSingleLaneMode, setGanttSingleLaneMode,
     showSystemLane, setShowSystemLane,
     showStarMarkers,
     ganttCollapseGaps, setGanttCollapseGaps,
     showGanttLegend, setShowGanttLegend,
+    ganttAllInPage, setGanttAllInPage,
     setExpandedVisualizationId
   } = controller;
 
@@ -108,6 +109,21 @@ export const TimelinePanel = React.memo(() => {
     setGanttCollapseGaps(!ganttCollapseGaps);
   };
 
+  const visibleFileCount = selectedFiles && selectedFiles.length > 0 
+    ? selectedFiles.length 
+    : (dashboard.documentTree ? dashboard.documentTree.length : 0);
+
+  let groupingMode = 'default';
+  if (selectedSheets && selectedSheets.length > 1) {
+    groupingMode = 'sheet';
+  } else if (selectedSheets && selectedSheets.length === 1) {
+    groupingMode = 'default';
+  } else if (visibleFileCount === 1) {
+    groupingMode = 'sheet';
+  } else if (visibleFileCount > 1) {
+    groupingMode = 'file';
+  }
+
   return (
     <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb relative group animate-stagger-2 ${showTimelineFilterMenu ? 'z-[120]' : 'z-10'}`}>
       <div className="absolute right-4 top-4 z-30 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -118,11 +134,17 @@ export const TimelinePanel = React.memo(() => {
             <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-xl p-4 z-[110] dropdown-slide-enter">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Timeline Settings</div>
               <div className="space-y-3">
-                <ToggleSetting checked={ganttSingleLaneMode} onChange={() => setGanttSingleLaneMode(!ganttSingleLaneMode)}>Merge User Lanes</ToggleSetting>
-                <ToggleSetting checked={showSystemLane} onChange={toggleSystemLane}>Show System Lane</ToggleSetting>
-                <ToggleSetting checked={showIdle} onChange={toggleIdleGaps}>Show Idle Gaps</ToggleSetting>
-                <ToggleSetting checked={ganttCollapseGaps} onChange={toggleCollapseGaps} notice={timelineNotice}>Collapse Time Gaps</ToggleSetting>
-                <ToggleSetting checked={showGanttLegend} onChange={() => setShowGanttLegend(!showGanttLegend)}>Show Legend</ToggleSetting>
+                {groupingMode !== 'default' ? (
+                  <ToggleSetting checked={ganttAllInPage} onChange={() => setGanttAllInPage(!ganttAllInPage)}>All in page</ToggleSetting>
+                ) : (
+                  <>
+                    <ToggleSetting checked={ganttSingleLaneMode} onChange={() => setGanttSingleLaneMode(!ganttSingleLaneMode)}>Merge User Lanes</ToggleSetting>
+                    <ToggleSetting checked={showSystemLane} onChange={toggleSystemLane}>Show System Lane</ToggleSetting>
+                    <ToggleSetting checked={showIdle} onChange={toggleIdleGaps}>Show Idle Gaps</ToggleSetting>
+                    <ToggleSetting checked={ganttCollapseGaps} onChange={toggleCollapseGaps} notice={timelineNotice}>Collapse Time Gaps</ToggleSetting>
+                    <ToggleSetting checked={showGanttLegend} onChange={() => setShowGanttLegend(!showGanttLegend)}>Show Legend</ToggleSetting>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -140,7 +162,9 @@ export const TimelinePanel = React.memo(() => {
             showIdleLane={showIdle}
             showStarMarkers={showStarMarkers}
             collapseGaps={ganttCollapseGaps}
-            showGanttLegend={showGanttLegend}
+            showGanttLegend={groupingMode === 'default' ? showGanttLegend : false}
+            groupingMode={groupingMode}
+            allInPage={ganttAllInPage}
           />
         </Suspense>
       )}

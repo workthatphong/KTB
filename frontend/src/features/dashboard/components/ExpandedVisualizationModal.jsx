@@ -124,7 +124,9 @@ export const ExpandedVisualizationModal = React.memo(({ visualizationId, onClose
                 showIdleLane={timelineSettings?.showIdleLane}
                 showStarMarkers={timelineSettings?.showStarMarkers}
                 collapseGaps={timelineSettings?.collapseGaps}
-                showGanttLegend={timelineSettings?.showGanttLegend}
+                showGanttLegend={timelineSettings?.groupingMode === 'default' ? timelineSettings?.showGanttLegend : false}
+                groupingMode={timelineSettings?.groupingMode}
+                allInPage={timelineSettings?.allInPage}
               />
             )}
             {visualizationId === 'donut' && <DonutWorkloadChart key={donutAnimationKey} rows={workloadVisibleRows} expanded />}

@@ -22,9 +22,12 @@ export function useGanttLayout({
   showIdleLane,
   collapseGaps,
   showStarMarkers,
-  zoomScale
+  zoomScale,
+  groupingMode = 'default',
+  allInPage = false,
+  containerWidth = 1000
 }) {
-  const mapped = useMemo(() => mapSegmentsToRows(segments, singleLane), [segments, singleLane]);
+  const mapped = useMemo(() => mapSegmentsToRows(segments, singleLane, groupingMode), [segments, singleLane, groupingMode]);
 
   const axisBaseRawTs = useMemo(() => {
     if (mapped.length === 0) return null;
@@ -106,7 +109,14 @@ export function useGanttLayout({
   const timelinePadRight = 18;
   const minTimelinePx = collapseGaps ? (singleLane ? 2 : 2) : 2;
   const baseTimelineWidth = Math.min(120000, Math.max(minTimelinePx, Math.round(displaySpanHours * pxPerHour)));
-  const timelineWidth = Math.min(GANTT_MAX_TIMELINE_WIDTH_PX, Math.max(minTimelinePx, Math.round(baseTimelineWidth * zoomScale)));
+  
+  const timelineWidth = useMemo(() => {
+    if (allInPage) {
+      return Math.max(minTimelinePx, containerWidth - timelinePadLeft - timelinePadRight - 10);
+    }
+    return Math.min(GANTT_MAX_TIMELINE_WIDTH_PX, Math.max(minTimelinePx, Math.round(baseTimelineWidth * zoomScale)));
+  }, [allInPage, containerWidth, minTimelinePx, baseTimelineWidth, zoomScale, timelinePadLeft, timelinePadRight]);
+
   const baseCompactedTs = useMemo(() => compactTs(displayMinTs), [compactTs, displayMinTs]);
   const pxPerMs = useMemo(() => timelineWidth / displaySpanMs, [timelineWidth, displaySpanMs]);
 

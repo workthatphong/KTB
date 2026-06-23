@@ -34,6 +34,7 @@ export function useAppController(dashboard) {
   const [showStarMarkers, setShowStarMarkers] = usePersistentState('filter_showStarMarkers', true);
   const [ganttCollapseGaps, setGanttCollapseGaps] = usePersistentState('filter_ganttCollapseGaps', false);
   const [showGanttLegend, setShowGanttLegend] = usePersistentState('filter_showGanttLegend', true);
+  const [ganttAllInPage, setGanttAllInPage] = usePersistentState('filter_ganttAllInPage', false);
 
   const workloadVisibleRows = useMemo(() => {
     const filtered = workloadContributors.filter((row) => showWorkloadSystem || row.user !== 'System');
@@ -144,6 +145,8 @@ export function useAppController(dashboard) {
     setGanttCollapseGaps,
     showGanttLegend,
     setShowGanttLegend,
+    ganttAllInPage,
+    setGanttAllInPage,
     workloadVisibleRows,
     handleUploadFiles,
     handleDeleteSource,
