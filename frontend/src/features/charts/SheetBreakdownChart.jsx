@@ -33,7 +33,7 @@ function DurationBarLabel({ x, y, width, height, value, index, data, isDuration,
   }
 
   const isNegative = value < 0;
-  const tipX = isNegative ? x - 8 : x + width + 8;
+  const tipX = isNegative ? x - Math.abs(width) - 8 : x + Math.abs(width) + 8;
   const textAnchor = isNegative ? "end" : "start";
 
   const displayValue = (isDiffChart || isButterflyChart) ? Math.abs(value) : value;

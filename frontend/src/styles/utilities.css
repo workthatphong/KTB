@@ -40,3 +40,11 @@
 .filter-button-press:active {
   transform: scale(0.96);
 }
+
+/* Disable Recharts clipping for labels so they can extend into Y-axis gap */
+.recharts-layer.recharts-bar {
+  clip-path: none !important;
+}
+.recharts-layer.recharts-label-list {
+  clip-path: none !important;
+}
