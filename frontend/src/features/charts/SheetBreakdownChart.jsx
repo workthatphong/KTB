@@ -85,6 +85,8 @@ export const SheetBreakdownChart = React.memo(({
   inactiveFill = '#94a3b8',
   valueLabelFill = '#00a4e4',
   isStacked = false,
+  onScroll,
+  setScrollRef,
 }) => {
   const reactId = React.useId();
   const containerRef = useRef(null);
@@ -151,7 +153,11 @@ export const SheetBreakdownChart = React.memo(({
       {/* Scrollable area for Bars and Y-Axis */}
       <div 
         className={`w-full overflow-y-auto no-scrollbar relative z-10 ${expanded ? 'flex-1 min-h-0' : ''}`}
-        ref={scrollAreaRef}
+        ref={(el) => {
+          scrollAreaRef.current = el;
+          if (setScrollRef) setScrollRef(el);
+        }}
+        onScroll={onScroll}
         style={expanded ? undefined : { height: `${viewportHeight}px` }}
       >
         <div style={{ height: `${totalContentHeight}px`, width: '100%' }}>
