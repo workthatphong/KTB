@@ -23,6 +23,8 @@ function getCognizeVsOthersData(rows, timeCategory = 'all') {
       rowTotal = (row.editDataCount || 0);
     } else if (timeCategory === 'review') {
       rowTotal = (row.reviewSeconds || 0);
+    } else if (timeCategory === 'reviewRecord') {
+      rowTotal = (row.reviewCount || 0);
     } else if (timeCategory === 'completeTime') {
       rowTotal = (row.totalSeconds || 0);
     } else {
@@ -43,7 +45,7 @@ function getCognizeVsOthersData(rows, timeCategory = 'all') {
   };
 }
 
-function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'default', userRoleFilter = 'all') {
+function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'default', userRoleFilter = 'all', mergeSameName = false) {
   if (!segments || segments.length === 0) return { userData: [] };
   const pageStats = new Map();
   
@@ -62,12 +64,17 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
     
     const fileName = String(segment.fileName || 'Unknown File');
     const sheetName = String(segment.pageName || '');
-    const sheetKey = String(segment.sheetKey || segment.documentId || `${fileName}::${sheetName}`).trim();
+    const name = sheetName || fileName;
+    let sheetKey = String(segment.sheetKey || segment.documentId || `${fileName}::${sheetName}`).trim();
     if (!sheetKey) continue;
+    
+    if (mergeSameName) {
+      sheetKey = name;
+    }
     
     if (!pageStats.has(sheetKey)) {
       pageStats.set(sheetKey, { 
-        name: sheetName || fileName, 
+        name: name, 
         userFiltered: 0, 
         cognizeFiltered: 0, 
         makerFiltered: 0,
@@ -97,9 +104,15 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
     if (timeCategory === 'editData' && drillGroup !== 'EditData') matchesCategory = false;
     if (timeCategory === 'review' && drillGroup !== 'Review') matchesCategory = false;
     if (timeCategory === 'editDataRecord' && drillGroup !== 'EditData') matchesCategory = false;
+    if (timeCategory === 'reviewRecord' && drillGroup !== 'Review') matchesCategory = false;
 
     if (matchesCategory) {
-      const increment = timeCategory === 'editDataRecord' ? (Number(segment.editDataItemCount) || 1) : duration;
+      let increment = duration;
+      if (timeCategory === 'editDataRecord') {
+        increment = Number(segment.editDataItemCount) || 1;
+      } else if (timeCategory === 'reviewRecord') {
+        increment = 1;
+      }
       stat.userFiltered += increment;
       if (isCognize) {
         stat.cognizeFiltered += increment;
@@ -126,7 +139,7 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
       if (diff !== 0) return diff;
     }
     if (userSortOrder === 'latest') {
-      const diff = b.endTs - a.endTs;
+      const diff = b.startTs - a.startTs;
       if (diff !== 0) return diff;
     }
     return collator.compare(a.name, b.name);
@@ -190,9 +203,15 @@ const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'defa
     if (timeCategory === 'editData' && drillGroup !== 'EditData') matchesCategory = false;
     if (timeCategory === 'review' && drillGroup !== 'Review') matchesCategory = false;
     if (timeCategory === 'editDataRecord' && drillGroup !== 'EditData') matchesCategory = false;
+    if (timeCategory === 'reviewRecord' && drillGroup !== 'Review') matchesCategory = false;
 
     if (matchesCategory) {
-      const increment = timeCategory === 'editDataRecord' ? (Number(segment.editDataItemCount) || 1) : duration;
+      let increment = duration;
+      if (timeCategory === 'editDataRecord') {
+        increment = Number(segment.editDataItemCount) || 1;
+      } else if (timeCategory === 'reviewRecord') {
+        increment = 1;
+      }
       stat.userFiltered += increment;
       if (isCognize) {
         stat.cognizeFiltered += increment;
@@ -219,7 +238,7 @@ const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'defa
       if (diff !== 0) return diff;
     }
     if (userSortOrder === 'latest') {
-      const diff = b.endTs - a.endTs;
+      const diff = b.startTs - a.startTs;
       if (diff !== 0) return diff;
     }
     return collator.compare(a.name, b.name);
@@ -363,12 +382,13 @@ export function SheetPerformanceView({
   const [displayMetric, setDisplayMetric] = useState('avg'); // 'pct_total', 'pct_avg', 'total', 'avg'
   const filterRef = useRef(null);
 
-  const isDurationDisplay = systemTaskType !== 'editDataRecord';
+  const isDurationDisplay = systemTaskType !== 'editDataRecord' && systemTaskType !== 'reviewRecord';
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [userSortOrder, setUserSortOrder] = useState('desc');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [isStackedView, setIsStackedView] = useState(false);
+  const [isGroupedView2, setIsGroupedView2] = useState(false);
   const [isTransparentPopup, setIsTransparentPopup] = useState(false);
   const userMenuRef = useRef(null);
   const userMenuPanelRef = useRef(null);
@@ -494,6 +514,12 @@ export function SheetPerformanceView({
   const firstPageTimes = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, userSortOrder, userRoleFilter), [firstSegments, systemTaskType, userSortOrder, userRoleFilter]);
   const secondPageTimes = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, userSortOrder, userRoleFilter), [secondSegments, systemTaskType, userSortOrder, userRoleFilter]);
 
+  const groupedPageTimes = useMemo(() => {
+    if (!isGroupedView2) return { userData: [] };
+    const allSegments = [...(firstSegments || []), ...(secondSegments || [])];
+    return buildPageTimeData(allSegments, systemTaskType, userSortOrder, userRoleFilter, true);
+  }, [isGroupedView2, firstSegments, secondSegments, systemTaskType, userSortOrder, userRoleFilter]);
+
   const firstUserTimesRaw = useMemo(() => buildUserTimeData(firstSegments, systemTaskType, userSortOrder3, userRoleFilter), [firstSegments, systemTaskType, userSortOrder3, userRoleFilter]);
   const secondUserTimesRaw = useMemo(() => buildUserTimeData(secondSegments, systemTaskType, userSortOrder3, userRoleFilter), [secondSegments, systemTaskType, userSortOrder3, userRoleFilter]);
 
@@ -611,9 +637,9 @@ export function SheetPerformanceView({
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display Options</div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
-                      { id: 'avg', label: systemTaskType === 'editDataRecord' ? 'Avg Count' : 'Avg Time' },
+                      { id: 'avg', label: (systemTaskType === 'editDataRecord' || systemTaskType === 'reviewRecord') ? 'Avg Count' : 'Avg Time' },
                       { id: 'pct_avg', label: '% Avg' },
-                      { id: 'total', label: systemTaskType === 'editDataRecord' ? 'Total Count' : 'Total Time' },
+                      { id: 'total', label: (systemTaskType === 'editDataRecord' || systemTaskType === 'reviewRecord') ? 'Total Count' : 'Total Time' },
                       { id: 'pct_total', label: '% Total' }
                     ].map(opt => (
                       <button
@@ -635,7 +661,7 @@ export function SheetPerformanceView({
           </div>
           <div className="relative mb-6 flex justify-center items-center">
             <h2 className="text-xl font-extrabold text-[#17335f]">
-              {`${displayMetric.includes('pct') ? '% ' : ''}${displayMetric.includes('avg') ? 'Average ' : 'Total '}${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review time'}${displayMetric.includes('avg') ? ' Per sheet' : ''}`}
+              {`${displayMetric.includes('pct') ? '% ' : ''}${displayMetric.includes('avg') ? 'Average ' : 'Total '}${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'}${displayMetric.includes('avg') ? ' Per sheet' : ''}`}
             </h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
@@ -711,6 +737,12 @@ export function SheetPerformanceView({
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
                   <div className="flex flex-col gap-3">
                     <ToggleSetting 
+                      checked={isGroupedView2} 
+                      onChange={() => setIsGroupedView2(prev => !prev)} 
+                    >
+                      Group into Single Chart
+                    </ToggleSetting>
+                    <ToggleSetting 
                       checked={isStackedView} 
                       onChange={() => setIsStackedView(prev => !prev)} 
                     >
@@ -781,54 +813,80 @@ export function SheetPerformanceView({
           </div>
 
           <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">
-            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review time'} By Sheet`}
+            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By Sheet`}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">
-              {/* First Documents */}
-              <motion.div 
-                key={`user-time-${firstPanelId}`}
-                layoutId={`user-time-${firstPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
-                <div className="flex-1 min-h-0">
-                  {firstPageTimes.userData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                      <Clock className="w-8 h-8 opacity-20" />
-                      <span className="text-sm font-semibold">No Data</span>
+              {isGroupedView2 ? (
+                <motion.div 
+                  key="grouped-user-time"
+                  layoutId="grouped-user-time"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                  className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
+                >
+                  <h3 className="text-md font-bold text-slate-500 mb-4">All Documents</h3>
+                  <div className="flex-1 min-h-0">
+                    {groupedPageTimes.userData.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                        <Clock className="w-8 h-8 opacity-20" />
+                        <span className="text-sm font-semibold">No Data</span>
+                      </div>
+                    ) : (
+                      <SheetBreakdownChart data={groupedPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
+                    )}
+                  </div>
+                </motion.div>
+              ) : (
+                <>
+                  {/* First Documents */}
+                  <motion.div 
+                    key={`user-time-${firstPanelId}`}
+                    layoutId={`user-time-${firstPanelId}`}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                    transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                    className="flex flex-col min-h-[240px]"
+                  >
+                    <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
+                    <div className="flex-1 min-h-0">
+                      {firstPageTimes.userData.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                          <Clock className="w-8 h-8 opacity-20" />
+                          <span className="text-sm font-semibold">No Data</span>
+                        </div>
+                      ) : (
+                        <SheetBreakdownChart data={firstPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
+                      )}
                     </div>
-                  ) : (
-                    <SheetBreakdownChart data={firstPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
-                  )}
-                </div>
-              </motion.div>
-              {/* Second Documents */}
-              <motion.div 
-                key={`user-time-${secondPanelId}`}
-                layoutId={`user-time-${secondPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
-                <div className="flex-1 min-h-0">
-                  {secondPageTimes.userData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                      <Clock className="w-8 h-8 opacity-20" />
-                      <span className="text-sm font-semibold">No Data</span>
+                  </motion.div>
+                  {/* Second Documents */}
+                  <motion.div 
+                    key={`user-time-${secondPanelId}`}
+                    layoutId={`user-time-${secondPanelId}`}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                    transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                    className="flex flex-col min-h-[240px]"
+                  >
+                    <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
+                    <div className="flex-1 min-h-0">
+                      {secondPageTimes.userData.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                          <Clock className="w-8 h-8 opacity-20" />
+                          <span className="text-sm font-semibold">No Data</span>
+                        </div>
+                      ) : (
+                        <SheetBreakdownChart data={secondPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
+                      )}
                     </div>
-                  ) : (
-                    <SheetBreakdownChart data={secondPageTimes.userData} expanded activeFill="#00a4e4" valueLabelFill="#00a4e4" isDuration={isDurationDisplay} isStacked={isStackedView} />
-                  )}
-                </div>
-              </motion.div>
+                  </motion.div>
+                </>
+              )}
             </AnimatePresence>
           </div>
         </div>
@@ -881,7 +939,7 @@ export function SheetPerformanceView({
           </div>
 
           <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">
-            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review time'} By User`}
+            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By User`}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">

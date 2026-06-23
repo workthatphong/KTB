@@ -287,7 +287,8 @@ export const FilterBar = React.memo(({
                 summary={
                   systemTaskType === 'all' ? 'Review & Edit Data Time' :
                   systemTaskType === 'editData' ? 'Edit Data Time' :
-                  systemTaskType === 'editDataRecord' ? 'Edit Data Record' : 'Review time'
+                  systemTaskType === 'editDataRecord' ? 'Edit Data Record' :
+                  systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'
                 }
                 openDropdown={openDropdown}
                 setOpenDropdown={setOpenDropdown}
@@ -301,7 +302,8 @@ export const FilterBar = React.memo(({
                     { id: 'all', label: 'Review & Edit Data Time' },
                     { id: 'editData', label: 'Edit Data Time' },
                     { id: 'review', label: 'Review time' },
-                    { id: 'editDataRecord', label: 'Edit Data Record' }
+                    { id: 'editDataRecord', label: 'Edit Data Record' },
+                    { id: 'reviewRecord', label: 'Review count' }
                   ].map(opt => (
                     <button
                       key={opt.id}
