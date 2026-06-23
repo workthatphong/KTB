@@ -398,6 +398,8 @@ export function SheetPerformanceView({
   const [userSortOrder3, setUserSortOrder3] = useState('desc');
   const [alignUsers3, setAlignUsers3] = useState(false);
   const [syncScroll3, setSyncScroll3] = useState(false);
+  const [showDiffChart, setShowDiffChart] = useState(false);
+
   const userMenuRef3 = useRef(null);
   const userMenuPanelRef3 = useRef(null);
   const [userMenuStyle3, setUserMenuStyle3] = useState({});
@@ -524,7 +526,7 @@ export function SheetPerformanceView({
   const secondUserTimesRaw = useMemo(() => buildUserTimeData(secondSegments, systemTaskType, userSortOrder3, userRoleFilter), [secondSegments, systemTaskType, userSortOrder3, userRoleFilter]);
 
   const { alignedFirstUserTimes, alignedSecondUserTimes } = useMemo(() => {
-    if (!alignUsers3) return { alignedFirstUserTimes: firstUserTimesRaw, alignedSecondUserTimes: secondUserTimesRaw };
+    if (!alignUsers3 && !showDiffChart) return { alignedFirstUserTimes: firstUserTimesRaw, alignedSecondUserTimes: secondUserTimesRaw };
     
     const userMap = new Map();
     firstUserTimesRaw.userData.forEach(u => {
@@ -588,6 +590,26 @@ export function SheetPerformanceView({
 
   const firstUserTimes = alignedFirstUserTimes;
   const secondUserTimes = alignedSecondUserTimes;
+
+  const diffUserData = useMemo(() => {
+    if (!showDiffChart) return [];
+    
+    return firstUserTimes.userData.map((u, i) => {
+      const v1 = u.value;
+      const v2 = secondUserTimes.userData[i]?.value || 0;
+      const diff = v2 - v1; 
+      
+      let fill = '#94a3b8';
+      if (diff > 0) fill = '#ef4444';
+      if (diff < 0) fill = '#22c55e';
+      
+      return {
+        ...u,
+        value: diff,
+        fill
+      };
+    });
+  }, [firstUserTimes, secondUserTimes, showDiffChart]);
 
   const firstPageTimesUnfiltered = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, 'default', 'all'), [firstSegments, systemTaskType]);
   const secondPageTimesUnfiltered = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, 'default', 'all'), [secondSegments, systemTaskType]);
@@ -813,7 +835,7 @@ export function SheetPerformanceView({
           </div>
 
           <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">
-            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By Sheet`}
+            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By Sheet${userRoleFilter === 'maker_only' ? ' Maker only' : userRoleFilter === 'cognize_only' ? ' Cognize only' : userRoleFilter !== 'all' ? ` ${userRoleFilter} only` : ''}`}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">
@@ -907,8 +929,9 @@ export function SheetPerformanceView({
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
                   <div className="flex flex-col gap-3">
                     <ToggleSetting 
-                      checked={alignUsers3} 
+                      checked={alignUsers3 || showDiffChart} 
                       onChange={() => setAlignUsers3(prev => !prev)} 
+                      disabled={showDiffChart}
                     >
                       Align Users (Same Row)
                     </ToggleSetting>
@@ -918,6 +941,22 @@ export function SheetPerformanceView({
                     >
                       Sync Scroll
                     </ToggleSetting>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <ToggleSetting 
+                      checked={showDiffChart} 
+                      onChange={() => {
+                        setShowDiffChart(prev => {
+                          const next = !prev;
+                          if (next) {
+                            setAlignUsers3(true);
+                          }
+                          return next;
+                        });
+                      }} 
+                    >
+                      Compare Diff
+                    </ToggleSetting>
+
                     <div className="border-t border-slate-100 my-1"></div>
                     <ToggleSetting 
                       checked={userSortOrder3 === 'desc'} 
@@ -943,17 +982,48 @@ export function SheetPerformanceView({
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">
-              {/* First Documents */}
-              <motion.div 
-                key={`user-group-${firstPanelId}`}
-                layoutId={`user-group-${firstPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
+              {showDiffChart ? (
+                <motion.div 
+                  key="user-diff-chart"
+                  layoutId="user-diff-chart"
+                  className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                >
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
+                    <h3 className="text-md font-bold text-slate-500 mb-4">
+                      {firstDocumentFilterName || 'First documents'}
+                    </h3>
+                    <h3 className="text-md font-bold text-slate-500 mb-4">
+                      {secondDocumentFilterName || 'Second Documents'}
+                    </h3>
+                  </div>
+                  <div className="flex-1 min-h-0">
+                    <SheetBreakdownChart 
+                      data={diffUserData} 
+                      expanded 
+                      isDuration={isDurationDisplay} 
+                      isStacked={false}
+                      isDiffChart={true}
+                      showAverageLine={false}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <>
+                  {/* First Documents */}
+                  <motion.div 
+                    key={`user-group-${firstPanelId}`}
+                    layoutId={`user-group-${firstPanelId}`}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                    transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                    className="flex flex-col min-h-[240px]"
+                  >
+                    <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
                 <div className="flex-1 min-h-0">
                   {firstUserTimes.userData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
@@ -973,38 +1043,40 @@ export function SheetPerformanceView({
                     />
                   )}
                 </div>
-              </motion.div>
-              {/* Second Documents */}
-              <motion.div 
-                key={`user-group-${secondPanelId}`}
-                layoutId={`user-group-${secondPanelId}`}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-                className="flex flex-col min-h-[240px]"
-              >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
-                <div className="flex-1 min-h-0">
-                  {secondUserTimes.userData.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                      <Clock className="w-8 h-8 opacity-20" />
-                      <span className="text-sm font-semibold">No Data</span>
+                  </motion.div>
+                  {/* Second Documents */}
+                  <motion.div 
+                    key={`user-group-${secondPanelId}`}
+                    layoutId={`user-group-${secondPanelId}`}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                    transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                    className="flex flex-col min-h-[240px]"
+                  >
+                      <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
+                    <div className="flex-1 min-h-0">
+                      {secondUserTimes.userData.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                          <Clock className="w-8 h-8 opacity-20" />
+                          <span className="text-sm font-semibold">No Data</span>
+                        </div>
+                      ) : (
+                        <SheetBreakdownChart 
+                          data={secondUserTimes.userData} 
+                          expanded 
+                          activeFill="#00a4e4" 
+                          valueLabelFill="#00a4e4" 
+                          isDuration={isDurationDisplay} 
+                          isStacked={isStackedView}
+                          setScrollRef={(el) => scrollRefSecond3.current = el}
+                          onScroll={handleScrollSecond3}
+                        />
+                      )}
                     </div>
-                  ) : (
-                    <SheetBreakdownChart 
-                      data={secondUserTimes.userData} 
-                      expanded 
-                      activeFill="#00a4e4" 
-                      valueLabelFill="#00a4e4" 
-                      isDuration={isDurationDisplay} 
-                      isStacked={isStackedView}
-                      setScrollRef={(el) => scrollRefSecond3.current = el}
-                      onScroll={handleScrollSecond3}
-                    />
-                  )}
-                </div>
-              </motion.div>
+                  </motion.div>
+                </>
+              )}
             </AnimatePresence>
           </div>
         </div>
