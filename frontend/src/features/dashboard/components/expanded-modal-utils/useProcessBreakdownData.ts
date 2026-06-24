@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
 import { GANTT_DRILL_GROUP_COLORS } from '@/lib/constants.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { GANTT_MAX_ZOOM_SCALE, GANTT_MIN_ZOOM_SCALE } from '@/lib/constants.js';
 

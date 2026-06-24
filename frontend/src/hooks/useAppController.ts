@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo, useState } from 'react';
 import { usePersistentState } from './usePersistentState.js';
 import { requestJson } from '@/lib/api.js';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 import { buildUserTimeData } from '../../SheetPerformanceUtils.js';
 

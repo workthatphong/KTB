@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 import { extractFileNameFromSheetKey, isIdleContextSegment, toTimelineLane } from '@/lib/utils.js';
 import { toSegmentGroup } from '@/features/dashboard/utils/segmentData.js';

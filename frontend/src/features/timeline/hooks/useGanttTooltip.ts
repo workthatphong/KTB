@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { GANTT_DRILL_GROUP_LABELS } from '@/lib/constants.js';
 

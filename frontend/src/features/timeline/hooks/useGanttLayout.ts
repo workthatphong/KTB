@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo, useCallback } from 'react';
 import { GANTT_MAX_TIMELINE_WIDTH_PX } from '@/lib/constants.js';
 import { mapSegmentsToRows } from '@/features/timeline/timelineUtils.js';

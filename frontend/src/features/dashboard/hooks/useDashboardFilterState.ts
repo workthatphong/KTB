@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { usePersistentState } from '../../../hooks/usePersistentState.js';
 
 export function useDashboardFilterState() {

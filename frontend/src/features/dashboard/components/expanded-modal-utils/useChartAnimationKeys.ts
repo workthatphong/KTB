@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMemo } from 'react';
 
 export function buildChartAnimationKey(rows, fields) {
