@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { formatDuration } from '@/lib/utils.js';

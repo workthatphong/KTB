@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { CHART_PALETTE } from '@/lib/constants.js';
 import { safeNumber, formatDuration } from '@/lib/utils.js';

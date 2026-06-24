@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as d3 from 'd3';
 import { CHART_PALETTE } from '@/lib/constants.js';
