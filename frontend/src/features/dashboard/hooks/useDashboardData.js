@@ -8,7 +8,7 @@ import { initialKpiData } from '@/lib/constants.js';
 import { buildKpiData } from '@/lib/utils.js';
 
 // Initialize the worker once per module
-const worker = new Worker(new URL('../features/dashboard/workers/dashboardWorker.js', import.meta.url), { type: 'module' });
+const worker = new Worker(new URL('../workers/dashboardWorker.js', import.meta.url), { type: 'module' });
 const workerApi = wrap(worker);
 
 export function useDashboardData() {

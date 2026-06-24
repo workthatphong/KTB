@@ -4,7 +4,7 @@ import {
   PROCESSING_EQUIVALENT_IDLE_SEGMENT_TYPES,
   REPROCESSING_SEGMENT_MERGE_GAP_MS,
   MARKER_STAR_MIN_GAP_PX
-} from './constants.js';
+} from '../../../lib/constants.js';
 
 export function toSegmentTypeLabel(segmentType) {
   const key = String(segmentType || '');

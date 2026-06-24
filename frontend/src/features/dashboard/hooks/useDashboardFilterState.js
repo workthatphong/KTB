@@ -1,4 +1,4 @@
-import { usePersistentState } from './usePersistentState.js';
+import { usePersistentState } from '../../../hooks/usePersistentState.js';
 
 export function useDashboardFilterState() {
   const [datePreset, setDatePreset] = usePersistentState('filter_datePreset', 'all');
