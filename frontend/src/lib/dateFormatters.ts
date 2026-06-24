@@ -1,19 +1,19 @@
-export function toDisplayDate(value) {
+export function toDisplayDate(value: string | number | Date | null | undefined): string {
   if (!value) return '-';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return String(value);
   return parsed.toLocaleString();
 }
 
-export function toExcelDateTime(value) {
+export function toExcelDateTime(value: string | number | Date | null | undefined): string {
   if (!value) return '';
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return String(value);
-  const pad = (number) => String(number).padStart(2, '0');
+  const pad = (number: number) => String(number).padStart(2, '0');
   return `${parsed.getFullYear()}-${pad(parsed.getMonth() + 1)}-${pad(parsed.getDate())} ${pad(parsed.getHours())}:${pad(parsed.getMinutes())}:${pad(parsed.getSeconds())}`;
 }
 
-export function formatTimeTick(value) {
+export function formatTimeTick(value: string | number | Date | null | undefined): string {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
@@ -25,7 +25,7 @@ export function formatTimeTick(value) {
   });
 }
 
-export function formatTickHeader(value) {
+export function formatTickHeader(value: string | number | Date | null | undefined): { dateLabel: string; timeLabel: string } {
   if (!value) return { dateLabel: '-', timeLabel: '' };
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return { dateLabel: String(value), timeLabel: '' };
@@ -35,7 +35,7 @@ export function formatTickHeader(value) {
   };
 }
 
-export function isSameCalendarDay(aTs, bTs) {
+export function isSameCalendarDay(aTs: number, bTs: number): boolean {
   const a = new Date(aTs);
   const b = new Date(bTs);
   return a.getFullYear() === b.getFullYear()

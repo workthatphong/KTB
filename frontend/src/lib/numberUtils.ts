@@ -1,13 +1,13 @@
-export function safeNumber(value) {
+export function safeNumber(value: any): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function clampPercent(value) {
+export function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
 }
 
-export function percentile(values, ratio) {
+export function percentile(values: any[], ratio: number): number {
   const prepared = (Array.isArray(values) ? values : [])
     .map((value) => safeNumber(value))
     .filter((value) => value > 0)

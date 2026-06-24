@@ -1,4 +1,4 @@
-export function formatDuration(seconds) {
+export function formatDuration(seconds: string | number): string {
   const safe = Math.max(0, Math.round(Number(seconds) || 0));
   if (safe === 0) return '0s';
 
@@ -44,6 +44,6 @@ export function formatDuration(seconds) {
   return parts.slice(0, 2).join(' ');
 }
 
-export function formatPercent(value) {
+export function formatPercent(value: string | number): string {
   return `${((Number(value) || 0) * 100).toFixed(1)}%`;
 }
