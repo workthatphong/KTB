@@ -1,15 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
-
-from backend.app.presentation.http.app import app
-
+import uvicorn
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Dashboard API server")
     parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
-    app.run(host="0.0.0.0", port=args.port)
+    uvicorn.run("backend.app.presentation.http.app:app", host="0.0.0.0", port=args.port, reload=True)
 
 
 if __name__ == "__main__":

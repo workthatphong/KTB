@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
 
-from flask import send_from_directory
+
 
 ROOT_STATIC_ALLOWLIST = {"favicon.ico", "robots.txt", "manifest.webmanifest"}
 FRONTEND_DIST_PREFIX = "assets/"
@@ -69,10 +69,12 @@ def resolve_static_file(project_root: Path, url_path: str) -> Path | None:
     return None
 
 
+from fastapi.responses import FileResponse
+
 def serve_static_file(project_root: Path, url_path: str):
     static_file = resolve_static_file(project_root, url_path)
     if static_file is None:
         return None
 
-    mimetype = "application/javascript" if static_file.suffix.lower() in {".js", ".mjs"} else None
-    return send_from_directory(static_file.parent, static_file.name, mimetype=mimetype)
+    media_type = "application/javascript" if static_file.suffix.lower() in {".js", ".mjs"} else None
+    return FileResponse(static_file, media_type=media_type)

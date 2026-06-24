@@ -6,6 +6,7 @@ import { useDashboardData } from './features/dashboard/hooks/useDashboardData';
 import { DashboardLayout } from './features/dashboard/DashboardLayout';
 import { PanelLoader, DataManagementLoader } from './components/shared/Loaders';
 import { DashboardProvider } from './features/dashboard/contexts/DashboardContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const DashboardView = lazy(() => import('./features/dashboard/DashboardView').then(m => ({ default: m.DashboardView })));
 const DataManagementView = lazy(() => import('./features/data-management/DataManagementView').then(m => ({ default: m.DataManagementView })));
@@ -33,87 +34,89 @@ function App() {
   }, [controller.expandedVisualizationId]);
 
   return (
-    <DashboardProvider dashboard={dashboard} controller={controller}>
-      <DashboardLayout dashboard={dashboard} controller={controller}>
-        {!dashboard.isInitialLoadDone ? (
-          isDataManagement ? <DataManagementLoader /> : <PanelLoader />
-        ) : (
-          <Suspense fallback={isDataManagement ? <DataManagementLoader /> : <PanelLoader />}>
-            <Routes>
-              <Route path="/" element={<DashboardView />} />
-              <Route path="/data-management" element={
-                <DataManagementView
-                  sources={dashboard.sources}
-                  onUploadFiles={controller.handleUploadFiles}
-                  onDeleteSource={controller.handleDeleteSource}
-                  onConnectGSheet={controller.handleConnectGSheet}
-                  onDisconnectGSheet={controller.handleDisconnectGSheet}
-                  gsheetConnections={dashboard.gsheetConnections}
-                  uploading={controller.uploading}
-                  syncing={dashboard.syncing}
-                  healthInfo={dashboard.healthInfo}
-                />
-              } />
-              <Route path="/system-performance" element={
-                <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
-              } />
-              <Route path="/sheet-performance" element={
-                <SheetPerformanceView 
-                  firstDocumentFilterName={dashboard.systemFirstDocumentFilterName}
-                  secondDocumentFilterName={dashboard.systemSecondDocumentFilterName}
-                  firstContributionRows={dashboard.systemContributionRows}
-                  secondContributionRows={dashboard.systemSecondContributionRows}
-                  systemDocumentsSwapped={dashboard.systemDocumentsSwapped}
-                  firstSegments={dashboard.systemFilteredBaseSegments}
-                  secondSegments={dashboard.systemSecondFilteredBaseSegments}
-                  unfilteredSegments={dashboard.systemFileLevelSegments}
-                  systemTaskType={controller.systemTaskType}
-                  setExpandedVisualizationId={controller.setExpandedVisualizationId}
-                  chartSettings={controller.sheetPerformanceChartSettings}
-                  setChartSettings={controller.setSheetPerformanceChartSettings}
-                />
-              } />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        )}
-      </DashboardLayout>
+    <ErrorBoundary>
+      <DashboardProvider dashboard={dashboard} controller={controller}>
+        <DashboardLayout dashboard={dashboard} controller={controller}>
+          {!dashboard.isInitialLoadDone ? (
+            isDataManagement ? <DataManagementLoader /> : <PanelLoader />
+          ) : (
+            <Suspense fallback={isDataManagement ? <DataManagementLoader /> : <PanelLoader />}>
+              <Routes>
+                <Route path="/" element={<DashboardView />} />
+                <Route path="/data-management" element={
+                  <DataManagementView
+                    sources={dashboard.sources}
+                    onUploadFiles={controller.handleUploadFiles}
+                    onDeleteSource={controller.handleDeleteSource}
+                    onConnectGSheet={controller.handleConnectGSheet}
+                    onDisconnectGSheet={controller.handleDisconnectGSheet}
+                    gsheetConnections={dashboard.gsheetConnections}
+                    uploading={controller.uploading}
+                    syncing={dashboard.syncing}
+                    healthInfo={dashboard.healthInfo}
+                  />
+                } />
+                <Route path="/system-performance" element={
+                  <SystemPerformanceView segments={dashboard.systemFilteredBaseSegments} flowRows={dashboard.systemFlowRows} />
+                } />
+                <Route path="/sheet-performance" element={
+                  <SheetPerformanceView 
+                    firstDocumentFilterName={dashboard.systemFirstDocumentFilterName}
+                    secondDocumentFilterName={dashboard.systemSecondDocumentFilterName}
+                    firstContributionRows={dashboard.systemContributionRows}
+                    secondContributionRows={dashboard.systemSecondContributionRows}
+                    systemDocumentsSwapped={dashboard.systemDocumentsSwapped}
+                    firstSegments={dashboard.systemFilteredBaseSegments}
+                    secondSegments={dashboard.systemSecondFilteredBaseSegments}
+                    unfilteredSegments={dashboard.systemFileLevelSegments}
+                    systemTaskType={controller.systemTaskType}
+                    setExpandedVisualizationId={controller.setExpandedVisualizationId}
+                    chartSettings={controller.sheetPerformanceChartSettings}
+                    setChartSettings={controller.setSheetPerformanceChartSettings}
+                  />
+                } />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          )}
+        </DashboardLayout>
 
-      <Suspense fallback={null}>
-        {controller.expandedVisualizationId ? (
-          <ExpandedVisualizationModal
-            visualizationId={controller.expandedVisualizationId}
-            onClose={() => controller.setExpandedVisualizationId('')}
-            data={{
-              ganttVisibleSegments: dashboard.ganttVisibleSegments,
-              chartBaseSegments: dashboard.chartBaseSegments,
-              selectedSegmentTypes: dashboard.selectedSegmentTypes,
-              showProcessBreakdownIdle: controller.showProcessBreakdownIdle,
-              workloadVisibleRows: controller.workloadVisibleRows,
-              contributionRows: dashboard.contributionRows,
-              mergeReviewAndEdit: controller.mergeReviewAndEdit,
-              mergeSpread: controller.mergeSpread,
-              sheetPerformanceSegments: dashboard.systemFilteredBaseSegments,
-              sheetPerformanceUnfilteredSegments: dashboard.systemFileLevelSegments,
-              sheetPerformanceChartSettings: controller.sheetPerformanceChartSettings,
-              setSelectedGanttSegment: noop,
-              timelineSettings: {
-                singleLane: controller.ganttSingleLaneMode,
-                showSystemLane: controller.showSystemLane,
-                showIdleLane: dashboard.showIdle,
-                showStarMarkers: controller.showStarMarkers,
-                collapseGaps: controller.ganttCollapseGaps,
-                showGanttLegend: controller.showGanttLegend,
-                allInPage: controller.ganttAllInPage,
-                groupingMode: dashboard.selectedSheets?.length > 1 ? 'sheet' : 
-                  (dashboard.selectedSheets?.length === 1 ? 'default' :
-                    ((dashboard.selectedFiles?.length > 0 ? dashboard.selectedFiles.length : (dashboard.documentTree?.length || 0)) === 1 ? 'sheet' : 'file')),
-              },
-            }}
-          />
-        ) : null}
-      </Suspense>
-    </DashboardProvider>
+        <Suspense fallback={null}>
+          {controller.expandedVisualizationId ? (
+            <ExpandedVisualizationModal
+              visualizationId={controller.expandedVisualizationId}
+              onClose={() => controller.setExpandedVisualizationId('')}
+              data={{
+                ganttVisibleSegments: dashboard.ganttVisibleSegments,
+                chartBaseSegments: dashboard.chartBaseSegments,
+                selectedSegmentTypes: dashboard.selectedSegmentTypes,
+                showProcessBreakdownIdle: controller.showProcessBreakdownIdle,
+                workloadVisibleRows: controller.workloadVisibleRows,
+                contributionRows: dashboard.contributionRows,
+                mergeReviewAndEdit: controller.mergeReviewAndEdit,
+                mergeSpread: controller.mergeSpread,
+                sheetPerformanceSegments: dashboard.systemFilteredBaseSegments,
+                sheetPerformanceUnfilteredSegments: dashboard.systemFileLevelSegments,
+                sheetPerformanceChartSettings: controller.sheetPerformanceChartSettings,
+                setSelectedGanttSegment: noop,
+                timelineSettings: {
+                  singleLane: controller.ganttSingleLaneMode,
+                  showSystemLane: controller.showSystemLane,
+                  showIdleLane: dashboard.showIdle,
+                  showStarMarkers: controller.showStarMarkers,
+                  collapseGaps: controller.ganttCollapseGaps,
+                  showGanttLegend: controller.showGanttLegend,
+                  allInPage: controller.ganttAllInPage,
+                  groupingMode: dashboard.selectedSheets?.length > 1 ? 'sheet' : 
+                    (dashboard.selectedSheets?.length === 1 ? 'default' :
+                      ((dashboard.selectedFiles?.length > 0 ? dashboard.selectedFiles.length : (dashboard.documentTree?.length || 0)) === 1 ? 'sheet' : 'file')),
+                },
+              }}
+            />
+          ) : null}
+        </Suspense>
+      </DashboardProvider>
+    </ErrorBoundary>
   );
 }
 

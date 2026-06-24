@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from flask import Flask
+from fastapi import FastAPI
 
-from .api import api_bp
-from .web import web_bp
+from .api import api_router
+from .web import web_router
 
-
-def register_blueprints(app: Flask) -> None:
-    app.register_blueprint(api_bp)
-    app.register_blueprint(web_bp)
+def register_routers(app: FastAPI) -> None:
+    app.include_router(api_router)
+    app.include_router(web_router)

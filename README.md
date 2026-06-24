@@ -7,7 +7,7 @@
 |- api/                # Vercel function entrypoint
 |- backend/            # Python backend source
 |  `- app/
-|     |- presentation/ # HTTP layer (Flask app, routes, auth, upload validation)
+|     |- presentation/ # HTTP layer (FastAPI app, routes, auth, upload validation)
 |     |- application/  # Use-cases / orchestration
 |     |- config/       # Settings and constants
 |     |- infrastructure/ # SQLite, Supabase sync, parser, static/bundler adapters
@@ -35,12 +35,11 @@
    `npm run build`
    optional bundle analysis: `npm run analyze --workspace=frontend`
 3. Start server:
-   `bash scripts/start.sh` (Linux/macOS)
-   or `.\scripts\start.ps1` (Windows)
-   
-   (Alternatively: `python scripts/app.py --port 8000`)
+   `npm run dev` (Runs both frontend and backend concurrently)
+   or `npm run dev:backend` (Runs backend using Uvicorn on port 8000)
 4. Open:
-   `http://localhost:8000/`
+   - Dashboard: `http://localhost:8000/`
+   - API Documentation (Swagger UI): `http://localhost:8000/api/docs`
 
 ## Write Endpoint Authentication (Production)
 

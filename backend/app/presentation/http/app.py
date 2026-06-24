@@ -1,24 +1,17 @@
 from __future__ import annotations
 
-import gzip
-
-from flask import Flask
-from flask import request
+from fastapi import FastAPI, Request
+from fastapi.middleware.gzip import GZipMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from ...infrastructure.db.sqlite_store import init_db
-from .routes import register_blueprints
+from .routes import register_routers
 from ...config.settings import build_upload_limits
 
-
-def create_app() -> Flask:
-    app = Flask(__name__, static_folder=None)
-    init_db()
-
-    app.config["UPLOAD_LIMITS"] = build_upload_limits()
-
-    @app.after_request
-    def optimize_response_headers(response):
-        path = request.path or ""
+class CacheControlMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        path = request.url.path or ""
 
         if path.startswith("/api/") or path == "/" or path.endswith(".html"):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -35,33 +28,25 @@ def create_app() -> Flask:
         ):
             response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
 
-        accepted_encodings = request.headers.get("Accept-Encoding", "")
-        should_gzip = (
-            "gzip" in accepted_encodings.lower()
-            and not response.direct_passthrough
-            and 200 <= response.status_code < 300
-            and "Content-Encoding" not in response.headers
-            and response.mimetype in {
-                "application/javascript",
-                "application/json",
-                "text/css",
-                "text/html",
-                "image/svg+xml",
-            }
-        )
-        if should_gzip:
-            raw = response.get_data()
-            if len(raw) >= 1024:
-                compressed = gzip.compress(raw, compresslevel=6)
-                if len(compressed) < len(raw):
-                    response.set_data(compressed)
-                    response.headers["Content-Encoding"] = "gzip"
-                    response.headers["Content-Length"] = str(len(compressed))
-                    response.headers["Vary"] = "Accept-Encoding"
         return response
 
-    register_blueprints(app)
-    return app
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="Dashboard API",
+        description="API documentation for the KTB Dashboard",
+        version="1.0.0",
+        docs_url="/api/docs",
+        openapi_url="/api/openapi.json",
+    )
+    init_db()
 
+    # We can attach upload limits to app.state
+    app.state.UPLOAD_LIMITS = build_upload_limits()
+
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
+    app.add_middleware(CacheControlMiddleware)
+
+    register_routers(app)
+    return app
 
 app = create_app()
