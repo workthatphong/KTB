@@ -5,14 +5,14 @@ import gzip
 from flask import Flask
 from flask import request
 
-from ...application import dashboard_service
+from ...infrastructure.db.sqlite_store import init_db
 from .routes import register_blueprints
 from ...config.settings import build_upload_limits
 
 
 def create_app() -> Flask:
     app = Flask(__name__, static_folder=None)
-    dashboard_service.init_db()
+    init_db()
 
     app.config["UPLOAD_LIMITS"] = build_upload_limits()
 

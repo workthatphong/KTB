@@ -5,14 +5,14 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, send_from_directory
 
-from ....application import dashboard_service
+from ....config.constants.constants_paths import PROJECT_ROOT
 from ....infrastructure.static_files import serve_static_file
 
 web_bp = Blueprint("web", __name__)
 
 
 def _frontend_dist_dir() -> Path:
-    return dashboard_service.PROJECT_ROOT / "frontend" / "dist"
+    return PROJECT_ROOT / "frontend" / "dist"
 
 
 @web_bp.get("/")
@@ -34,7 +34,7 @@ def web_static(filename: str):
     if head_segment == "api":
         return jsonify({"error": "Not found"}), HTTPStatus.NOT_FOUND
 
-    static_response = serve_static_file(dashboard_service.PROJECT_ROOT, filename)
+    static_response = serve_static_file(PROJECT_ROOT, filename)
     if static_response is not None:
         return static_response
 

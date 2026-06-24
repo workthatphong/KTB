@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 from flask import Blueprint, current_app, jsonify, request
 
-from ....application import dashboard_service
+from ....application import use_cases
 from ..auth import require_write_auth
 from ....config.settings import UploadLimits
 from ..uploads import RequestLimitError, validate_upload_payload
@@ -14,27 +14,27 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 @api_bp.get("/health")
 def api_health():
-    return jsonify(dashboard_service.build_health_payload())
+    return jsonify(use_cases.build_health_payload())
 
 
 @api_bp.get("/sources")
 def api_sources():
-    return jsonify(dashboard_service.api_sources_payload())
+    return jsonify(use_cases.api_sources_payload())
 
 
 @api_bp.get("/debug")
 def api_debug():
-    return jsonify(dashboard_service.build_debug_snapshot())
+    return jsonify(use_cases.build_debug_snapshot())
 
 
 @api_bp.get("/user-performance")
 def api_user_performance():
-    return jsonify(dashboard_service.compute_user_performance())
+    return jsonify(use_cases.compute_user_performance())
 
 
 @api_bp.get("/gsheet/connections")
 def api_gsheet_connections():
-    return jsonify(dashboard_service.api_gsheet_connections_payload())
+    return jsonify(use_cases.api_gsheet_connections_payload())
 
 @api_bp.get("/dashboard")
 def api_dashboard():
@@ -49,7 +49,7 @@ def api_dashboard():
         "yes",
     }
     return jsonify(
-        dashboard_service.api_dashboard_payload(
+        use_cases.api_dashboard_payload(
             include_debug=include_debug,
             refresh_snapshot=refresh_snapshot,
         )
@@ -78,7 +78,7 @@ def api_upload():
             max_total_bytes=limits.max_total_decoded_bytes,
         )
 
-        return jsonify(dashboard_service.api_upload_payload(files))
+        return jsonify(use_cases.api_upload_payload(files))
     except RequestLimitError as exc:
         return jsonify({"error": str(exc)}), HTTPStatus.REQUEST_ENTITY_TOO_LARGE
     except Exception as exc:  # pragma: no cover - runtime path
@@ -96,7 +96,7 @@ def api_gsheet_connect():
         url = str(payload.get("url", "")).strip()
         if not url:
             raise ValueError("Request must include a 'url' field with the Google Sheet URL.")
-        return jsonify(dashboard_service.api_connect_gsheet_payload(url))
+        return jsonify(use_cases.api_connect_gsheet_payload(url))
     except Exception as exc:  # pragma: no cover - runtime path
         return jsonify({"error": str(exc)}), HTTPStatus.BAD_REQUEST
 
@@ -108,7 +108,7 @@ def api_gsheet_sync():
         return auth_error
 
     try:
-        return jsonify(dashboard_service.api_sync_gsheet_payload())
+        return jsonify(use_cases.api_sync_gsheet_payload())
     except Exception as exc:  # pragma: no cover - runtime path
         return jsonify({"error": str(exc)}), HTTPStatus.BAD_REQUEST
 
@@ -121,7 +121,7 @@ def api_update_settings():
 
     try:
         payload = request.get_json(silent=True) or {}
-        return jsonify(dashboard_service.api_update_settings_payload(payload))
+        return jsonify(use_cases.api_update_settings_payload(payload))
     except Exception as exc:  # pragma: no cover - runtime path
         return jsonify({"error": str(exc)}), HTTPStatus.BAD_REQUEST
 
@@ -135,7 +135,7 @@ def api_source_delete(source_id: str):
     source_id = source_id.strip()
     if not source_id:
         return jsonify({"error": "Missing source id"}), HTTPStatus.BAD_REQUEST
-    return jsonify(dashboard_service.api_delete_source_payload(source_id))
+    return jsonify(use_cases.api_delete_source_payload(source_id))
 
 
 @api_bp.delete("/gsheet/<path:connection_id>")
@@ -147,4 +147,4 @@ def api_gsheet_delete(connection_id: str):
     connection_id = connection_id.strip()
     if not connection_id:
         return jsonify({"error": "Missing connection id"}), HTTPStatus.BAD_REQUEST
-    return jsonify(dashboard_service.api_delete_gsheet_payload(connection_id))
+    return jsonify(use_cases.api_delete_gsheet_payload(connection_id))
