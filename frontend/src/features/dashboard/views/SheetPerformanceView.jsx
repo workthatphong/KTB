@@ -991,7 +991,11 @@ export function SheetPerformanceView({
                     <div className="border-t border-slate-100 my-1"></div>
                     <ToggleSetting 
                       checked={isTotalView3} 
-                      onChange={() => setIsTotalView3(prev => !prev)} 
+                      onChange={() => setIsTotalView3(prev => {
+                        const next = !prev;
+                        if (next) setShowDiffChart(false);
+                        return next;
+                      })} 
                     >
                       Total
                     </ToggleSetting>
@@ -1003,6 +1007,7 @@ export function SheetPerformanceView({
                           if (next) {
                             setAlignUsers3(true);
                             setIsGroupedView3(false);
+                            setIsTotalView3(false);
                           }
                           return next;
                         });
