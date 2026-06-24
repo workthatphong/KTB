@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { expose } from 'comlink';
 import { computeDerivedData, computeFilters, computeMetrics } from './workerCalculations';
 

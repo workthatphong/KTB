@@ -6,7 +6,8 @@
     "dev": "vite --host 0.0.0.0 --config vite.config.js",
     "build": "vite build --config vite.config.js",
     "analyze": "vite build --mode analyze --config vite.config.js",
-    "preview": "vite preview --host 0.0.0.0 --config vite.config.js"
+    "preview": "vite preview --host 0.0.0.0 --config vite.config.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.0",

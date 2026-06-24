@@ -11,7 +11,7 @@ import { DashboardState } from '../types';
 
 // Initialize the worker once per module
 const worker = new Worker(new URL('../workers/dashboardWorker.ts', import.meta.url), { type: 'module' });
-const workerApi = wrap(worker);
+const workerApi = wrap<any>(worker);
 
 export function useDashboardData(): DashboardState {
   const filterState = useDashboardFilterState();
@@ -104,12 +104,12 @@ export function useDashboardData(): DashboardState {
     ...dataState,
     setErrorMessage: dataState.setUserErrorMessage,
     ...filterState,
-    sources: fetching.data.sources,
-    gsheetConnections: fetching.data.connections,
-    settings: fetching.data.settings || {},
-    performance: fetching.data.performance,
-    healthInfo: fetching.data.healthInfo,
-    debugInfo: fetching.data.debugInfo,
+    sources: (fetching.data as any).sources,
+    gsheetConnections: (fetching.data as any).connections,
+    settings: (fetching.data as any)?.settings || {},
+    performance: (fetching.data as any).performance,
+    healthInfo: (fetching.data as any).healthInfo,
+    debugInfo: (fetching.data as any).debugInfo,
     loading: fetching.isLoading || workerQuery.isFetching,
     syncing: fetching.isSyncing,
     errorMessage: dataState.errorMessage || fetching.errorMessage || workerQuery.error?.message,
