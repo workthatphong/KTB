@@ -24,10 +24,10 @@
     "allowJs": true,
     "checkJs": false,
     
+    "ignoreDeprecations": "6.0",
     /* Paths */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"],

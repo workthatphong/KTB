@@ -1,7 +1,7 @@
 import { API_BASE } from './constants.js';
 
-export async function requestJson(path, options = {}) {
-  const headers = { ...(options.headers || {}) };
+export async function requestJson(path: string, options: any = {}) {
+  const headers: any = { ...(options.headers || {}) };
   if (options.body && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
@@ -17,7 +17,7 @@ export async function requestJson(path, options = {}) {
       signal: options.signal || controller.signal,
     });
     const rawText = await response.text();
-    let data = {};
+    let data: any = {};
     try {
       data = rawText ? JSON.parse(rawText) : {};
     } catch {
@@ -27,9 +27,9 @@ export async function requestJson(path, options = {}) {
       throw new Error(data.error || `Request failed: ${response.status}`);
     }
     return data;
-  } catch (error) {
+  } catch (error: any) {
     if (error?.name === 'AbortError') {
-      const timeoutError = new Error(`Request timed out after ${timeoutMs}ms`);
+      const timeoutError: any = new Error(`Request timed out after ${timeoutMs}ms`);
       timeoutError.isTimeout = true;
       throw timeoutError;
     }
