@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { FileText, Maximize2, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
-import { useDashboardDataCtx, useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
+import { useDashboardDataCtx, useDashboardUICtx } from '@/features/dashboard/contexts/DashboardContext.jsx';
 import { ChartPanelFallback } from './ChartPanelFallback.jsx';
 
 const processTimeBreakdownChartPromise = import('../../../../charts/ProcessTimeBreakdownChart.jsx').then((m) => ({ default: m.ProcessTimeBreakdownChart }));

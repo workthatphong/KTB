@@ -9,7 +9,7 @@ import {
   ProcessTimePanel,
   TransitionTimePanel
 } from './components/dashboard-view/DashboardViewPanels.jsx';
-import { useDashboardDataCtx, useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
+import { useDashboardDataCtx, useDashboardUICtx } from '@/features/dashboard/contexts/DashboardContext.jsx';
 
 export const DashboardView = React.memo(() => {
   const dashboard = useDashboardDataCtx();

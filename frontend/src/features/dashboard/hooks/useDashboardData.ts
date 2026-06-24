@@ -7,11 +7,13 @@ import { useDashboardDataFetching } from './useDashboardDataFetching.js';
 import { initialKpiData } from '@/lib/constants.js';
 import { buildKpiData } from '@/lib/utils.js';
 
+import { DashboardState } from '../types';
+
 // Initialize the worker once per module
-const worker = new Worker(new URL('../workers/dashboardWorker.js', import.meta.url), { type: 'module' });
+const worker = new Worker(new URL('../workers/dashboardWorker.ts', import.meta.url), { type: 'module' });
 const workerApi = wrap(worker);
 
-export function useDashboardData() {
+export function useDashboardData(): DashboardState {
   const filterState = useDashboardFilterState();
   const dataState = useDashboardDataState();
   const fetching = useDashboardDataFetching();

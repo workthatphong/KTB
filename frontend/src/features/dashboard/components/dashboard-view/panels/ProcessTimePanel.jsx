@@ -1,7 +1,7 @@
 import React, { Suspense, useRef, useEffect, useState } from 'react';
 import { FileText, Maximize2, SlidersHorizontal, Clock } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
-import { useDashboardDataCtx, useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
+import { useDashboardDataCtx, useDashboardUICtx } from '@/features/dashboard/contexts/DashboardContext.jsx';
 import { ChartPanelFallback } from './ChartPanelFallback.jsx';
 import { ToggleSetting } from './ToggleSetting.jsx';
 

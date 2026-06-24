@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { FileText, Maximize2, Users } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
-import { useDashboardDataCtx, useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
+import { useDashboardDataCtx, useDashboardUICtx } from '@/features/dashboard/contexts/DashboardContext.jsx';
 import { ChartPanelFallback } from './ChartPanelFallback.jsx';
 
 const userContributionStackChartPromise = import('../../../../charts/UserContributionStackChart.jsx').then((m) => ({ default: m.UserContributionStackChart }));

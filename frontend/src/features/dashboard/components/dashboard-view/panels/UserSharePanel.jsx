@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { FileText, Maximize2, Users } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState.jsx';
-import { useDashboardUICtx } from '@/contexts/DashboardContext.jsx';
+import { useDashboardUICtx } from '@/features/dashboard/contexts/DashboardContext.jsx';
 import { ChartPanelFallback } from './ChartPanelFallback.jsx';
 
 const donutWorkloadChartPromise = import('../../../../charts/DonutWorkloadChart.jsx').then((m) => ({ default: m.DonutWorkloadChart }));

@@ -4,7 +4,7 @@ import { useAppController } from './hooks/useAppController.js';
 import { useDashboardData } from './features/dashboard/hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
 import { PanelLoader, DataManagementLoader } from './components/shared/Loaders.jsx';
-import { DashboardProvider } from './contexts/DashboardContext.jsx';
+import { DashboardProvider } from './features/dashboard/contexts/DashboardContext.jsx';
 
 const DashboardView = lazy(() => import('./features/dashboard/DashboardView.jsx').then(m => ({ default: m.DashboardView })));
 const DataManagementView = lazy(() => import('./features/data-management/DataManagementView.jsx').then(m => ({ default: m.DataManagementView })));
