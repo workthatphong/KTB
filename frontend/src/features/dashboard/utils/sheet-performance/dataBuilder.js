@@ -1,5 +1,5 @@
-import { buildKpisFromSegments } from '@/lib/kpiUtils.js';
-import { toDrillGroup, toCompleteMarkerType } from '@/lib/segmentUtils.js';
+import { buildKpisFromSegments } from '@/features/dashboard/utils/kpiUtils.js';
+import { toDrillGroup, toCompleteMarkerType } from '@/features/dashboard/utils/segmentUtils.js';
 import { USER_ACTION_TYPES } from './constants.js';
 
 export function buildSheetPerformanceChartsData(segments) {

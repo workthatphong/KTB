@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAppController } from './hooks/useAppController.js';
-import { useDashboardData } from './hooks/useDashboardData.js';
+import { useDashboardData } from './features/dashboard/hooks/useDashboardData.js';
 import { DashboardLayout } from './features/dashboard/DashboardLayout.jsx';
 import { PanelLoader, DataManagementLoader } from './components/shared/Loaders.jsx';
 import { DashboardProvider } from './contexts/DashboardContext.jsx';

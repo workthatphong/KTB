@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDuration, toDisplayDate } from '@/lib/utils.js';
 import { mapSegmentsToRows } from '@/features/timeline/timelineUtils.js';
-import { mergeContinuousReprocessingSegments, toTimelineLane } from '@/lib/segmentUtils.js';
+import { mergeContinuousReprocessingSegments, toTimelineLane } from '@/features/dashboard/utils/segmentUtils.js';
 import { isTimelineDurationSegment, toTimelineDetailCountKey, toTimelineBarLabel, shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
 function buildTimelineDetailData(segments, timelineSettings) {

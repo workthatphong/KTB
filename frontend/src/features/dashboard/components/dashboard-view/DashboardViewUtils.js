@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { GANTT_DRILL_GROUP_COLORS } from '@/lib/constants.js';
-import { toDrillGroup } from '@/lib/segmentUtils.js';
+import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
 
 export function buildChartAnimationKey(rows, fields) {
   if (!Array.isArray(rows) || rows.length === 0) return 'empty';

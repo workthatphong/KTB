@@ -1,4 +1,4 @@
-import { toDrillGroup } from '@/lib/segmentUtils.js';
+import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
 
 function isTransitionIdleSegment(segmentType) {
   const type = String(segmentType || '');

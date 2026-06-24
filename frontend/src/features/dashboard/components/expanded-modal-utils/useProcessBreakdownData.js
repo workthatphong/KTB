@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { toDrillGroup } from '@/lib/segmentUtils.js';
+import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
 import { GANTT_DRILL_GROUP_COLORS } from '@/lib/constants.js';
 
 export function useProcessBreakdownData(

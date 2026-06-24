@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, User, ChevronDown } from 'lucide-react';
 import { formatDuration, toDisplayDate } from '@/lib/utils.js';
-import { toTimelineLane, toGanttSegmentTypeLabel } from '@/lib/segmentUtils.js';
+import { toTimelineLane, toGanttSegmentTypeLabel } from '@/features/dashboard/utils/segmentUtils.js';
 import { shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
 function buildUserGroups(segments, workloadVisibleRows) {

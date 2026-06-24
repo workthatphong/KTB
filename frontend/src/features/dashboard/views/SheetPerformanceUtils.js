@@ -1,4 +1,4 @@
-import { toDrillGroup } from '@/lib/segmentUtils.js';
+import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
 
 export function getCognizeVsOthersData(rows, timeCategory = 'all') {
   if (!rows || rows.length === 0) return { cognizeSeconds: 0, othersSeconds: 0, totalSeconds: 0 };

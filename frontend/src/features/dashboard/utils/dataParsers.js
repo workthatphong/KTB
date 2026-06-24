@@ -4,7 +4,7 @@ import {
   WORKFLOW_FLOW_SEGMENT_TYPES,
   TRANSITION_FRIENDLY_LABELS
 } from '../../../lib/constants.js';
-import { isDataEditSegmentType, isMetaEditSegmentType } from '@/lib/segmentUtils.js';
+import { isDataEditSegmentType, isMetaEditSegmentType } from '@/features/dashboard/utils/segmentUtils.js';
 
 export function calculateFlowRows(filteredBaseSegments) {
   const groupedByDocument = new Map();

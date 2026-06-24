@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatDuration } from '@/lib/utils.js';
-import { isIdleContextSegment, isProcessingEquivalentIdleSegment } from '@/lib/segmentUtils.js';
+import { isIdleContextSegment, isProcessingEquivalentIdleSegment } from '@/features/dashboard/utils/segmentUtils.js';
 import { SheetBreakdownChart } from '@/features/charts/SheetBreakdownChart.jsx';
 
 const KpiBreakdownView = React.memo(({ kpiId, segments, expanded = false }) => {

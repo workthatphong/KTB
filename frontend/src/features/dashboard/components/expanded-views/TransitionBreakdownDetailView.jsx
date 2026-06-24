@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, ChevronDown } from 'lucide-react';
 import { formatDuration, toDisplayDate } from '@/lib/utils.js';
-import { toGanttSegmentTypeLabel } from '@/lib/segmentUtils.js';
+import { toGanttSegmentTypeLabel } from '@/features/dashboard/utils/segmentUtils.js';
 import { buildTransitionBreakdownGroups } from '@/features/dashboard/utils/transitionMetrics.js';
 import { shouldExcludeDetailActivity } from '@/features/dashboard/utils/expandedViewUtils.js';
 
