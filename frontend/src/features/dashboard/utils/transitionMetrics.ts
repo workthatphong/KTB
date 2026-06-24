@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils.js';
+import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils';
 
 function isTransitionIdleSegment(segmentType) {
   const type = String(segmentType || '');

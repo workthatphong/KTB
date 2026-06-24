@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { buildKpisFromSegments } from '@/features/dashboard/utils/kpiUtils.js';
-import { toDrillGroup, toCompleteMarkerType } from '@/features/dashboard/utils/segmentUtils.js';
-import { USER_ACTION_TYPES } from './constants.js';
+import { buildKpisFromSegments } from '@/features/dashboard/utils/kpiUtils';
+import { toDrillGroup, toCompleteMarkerType } from '@/features/dashboard/utils/segmentUtils';
+import { USER_ACTION_TYPES } from './constants';
 
 export function buildSheetPerformanceChartsData(segments) {
   const safeSegments = Array.isArray(segments) ? segments : [];

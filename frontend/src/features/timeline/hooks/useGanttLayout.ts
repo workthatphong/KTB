@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useMemo, useCallback } from 'react';
-import { GANTT_MAX_TIMELINE_WIDTH_PX } from '@/lib/constants.js';
-import { mapSegmentsToRows } from '@/features/timeline/timelineUtils.js';
-import { resolveBusinessAxisTimestamp } from '@/features/dashboard/utils/segmentData.js';
+import { GANTT_MAX_TIMELINE_WIDTH_PX } from '@/lib/constants';
+import { mapSegmentsToRows } from '@/features/timeline/timelineUtils';
+import { resolveBusinessAxisTimestamp } from '@/features/dashboard/utils/segmentData';
 import {
   buildGanttAxisAnchors,
   buildGanttDisplayBounds,
@@ -14,7 +14,7 @@ import {
   buildGanttTicks,
   compactGanttTimestamp,
   interpolateGanttAxisX
-} from '../ganttLayoutUtils.js';
+} from '../ganttLayoutUtils';
 
 export function useGanttLayout({
   segments,

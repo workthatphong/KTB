@@ -13,9 +13,9 @@ import {
   Cell,
   LabelList,
 } from 'recharts';
-import { formatDuration } from '@/lib/utils.js';
-import { formatTimeTick } from '@/lib/dateFormatters.js';
-import { clampLabel, DurationBarLabel, CustomTooltip } from './SheetBreakdownChartComponents.jsx';
+import { formatDuration } from '@/lib/utils';
+import { formatTimeTick } from '@/lib/dateFormatters';
+import { clampLabel, DurationBarLabel, CustomTooltip } from './SheetBreakdownChartComponents';
 
 export const SheetBreakdownChart = React.memo(({
   data,

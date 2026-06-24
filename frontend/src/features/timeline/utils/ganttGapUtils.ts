@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { GANTT_GAP_COMPACTION_THRESHOLD_MS, GANTT_VISUAL_GAP_MS } from './ganttConstants.js';
+import { GANTT_GAP_COMPACTION_THRESHOLD_MS, GANTT_VISUAL_GAP_MS } from './ganttConstants';
 
 export function buildGanttGapInfo(collapseGaps, visibleSegments, displayMinTs, displayMaxTs) {
   if (!collapseGaps || visibleSegments.length === 0) {

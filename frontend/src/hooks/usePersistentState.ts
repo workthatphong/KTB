@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
-import { requestJson } from '@/lib/api.js';
+import { requestJson } from '@/lib/api';
 
 function getSavedState(key, defaultValue, remoteSettings) {
   if (remoteSettings && remoteSettings[key] !== undefined) {

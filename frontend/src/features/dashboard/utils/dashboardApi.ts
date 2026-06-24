@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { requestJson } from '@/lib/api.js';
+import { requestJson } from '@/lib/api';
 
 export async function fetchDashboardPayload(options = {}) {
   const params = new URLSearchParams();

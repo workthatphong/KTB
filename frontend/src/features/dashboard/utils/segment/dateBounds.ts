@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { DAY_WINDOW_MAP } from './constants.js';
+import { DAY_WINDOW_MAP } from './constants';
 
 export function getDateRangeBounds(parsedSegments, datePreset, dateStart, dateEnd) {
   if (parsedSegments.length === 0) {

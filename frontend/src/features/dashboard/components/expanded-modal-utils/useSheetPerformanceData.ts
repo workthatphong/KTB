@@ -12,7 +12,7 @@ import {
   selectSystemTimeChartData,
   selectIdleTimeChartData,
   sortSheetPerformanceChartData
-} from '../../utils/sheetPerformanceCharts.js';
+} from '../../utils/sheetPerformanceCharts';
 
 export function useSheetPerformanceData(
   sheetPerformanceSegments,

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { toTimelineLane } from '@/lib/utils.js';
-import { DAY_WINDOW_MAP } from './constants.js';
+import { toTimelineLane } from '@/lib/utils';
+import { DAY_WINDOW_MAP } from './constants';
 
 export function buildUserOptions({
   parsedSegments,

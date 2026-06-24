@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchDashboardPayload, triggerGSheetSync } from '@/features/dashboard/utils/dashboardApi.js';
-import { buildSupabaseErrorMessage } from './useDashboardDataState.js';
+import { fetchDashboardPayload, triggerGSheetSync } from '@/features/dashboard/utils/dashboardApi';
+import { buildSupabaseErrorMessage } from './useDashboardDataState';
 
 export function useDashboardDataFetching() {
   const queryClient = useQueryClient();

@@ -1,7 +1,7 @@
 // @ts-nocheck
-export * from './segment/constants.js';
-export * from './segment/parser.js';
-export * from './segment/timeUtils.js';
-export * from './segment/documentTree.js';
-export * from './segment/dateBounds.js';
-export * from './segment/userOptions.js';
+export * from './segment/constants';
+export * from './segment/parser';
+export * from './segment/timeUtils';
+export * from './segment/documentTree';
+export * from './segment/dateBounds';
+export * from './segment/userOptions';

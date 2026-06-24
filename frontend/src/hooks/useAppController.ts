@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useMemo, useState } from 'react';
-import { usePersistentState } from './usePersistentState.js';
-import { requestJson } from '@/lib/api.js';
-import { createDefaultSheetPerformanceChartSettings } from '@/features/dashboard/utils/sheetPerformanceCharts.js';
+import { usePersistentState } from './usePersistentState';
+import { requestJson } from '@/lib/api';
+import { createDefaultSheetPerformanceChartSettings } from '@/features/dashboard/utils/sheetPerformanceCharts';
 
 export function useAppController(dashboard) {
   const {

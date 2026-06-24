@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { DAY_MS } from './constants.js';
+import { DAY_MS } from './constants';
 
 export function isWeekendSegment(segment) {
   const startDay = new Date(segment.rawStartTs ?? segment.startTs).getDay();

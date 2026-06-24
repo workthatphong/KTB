@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { mergeContinuousReprocessingSegments } from '@/lib/utils.js';
+import { mergeContinuousReprocessingSegments } from '@/lib/utils';
 
 export function buildGanttLanes(visibleSegments, showSystemLane, showIdleLane) {
   const laneDurationMap = {};

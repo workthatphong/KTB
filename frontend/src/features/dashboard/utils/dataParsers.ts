@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { safeNumber } from '@/lib/utils.js';
+import { safeNumber } from '@/lib/utils';
 import { 
   FLOW_INSIGHT_GROUPS, 
   WORKFLOW_FLOW_SEGMENT_TYPES,
   TRANSITION_FRIENDLY_LABELS
-} from '../../../lib/constants.js';
-import { isDataEditSegmentType, isMetaEditSegmentType } from '@/features/dashboard/utils/segmentUtils.js';
+} from '../../../lib/constants';
+import { isDataEditSegmentType, isMetaEditSegmentType } from '@/features/dashboard/utils/segmentUtils';
 
 export function calculateFlowRows(filteredBaseSegments) {
   const groupedByDocument = new Map();

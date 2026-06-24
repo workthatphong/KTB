@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { safeNumber, formatDuration } from '@/lib/utils.js';
+import { safeNumber, formatDuration } from '@/lib/utils';
 
 export const SystemProcessingTrendChart = ({ rows }) => {
   if (!rows || rows.length === 0) return null;

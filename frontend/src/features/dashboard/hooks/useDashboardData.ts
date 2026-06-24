@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { wrap } from 'comlink';
-import { useDashboardFilterState } from './useDashboardFilterState.js';
-import { useDashboardDataState } from './useDashboardDataState.js';
-import { useDashboardDataFetching } from './useDashboardDataFetching.js';
-import { initialKpiData } from '@/lib/constants.js';
-import { buildKpiData } from '@/lib/utils.js';
+import { useDashboardFilterState } from './useDashboardFilterState';
+import { useDashboardDataState } from './useDashboardDataState';
+import { useDashboardDataFetching } from './useDashboardDataFetching';
+import { initialKpiData } from '@/lib/constants';
+import { buildKpiData } from '@/lib/utils';
 
 import { DashboardState } from '../types';
 

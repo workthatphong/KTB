@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { toDrillGroup } from '@/lib/utils.js';
+import { toDrillGroup } from '@/lib/utils';
 
 export const SEGMENT_GROUP_OPTIONS = ['Uploading', 'Processing', 'Reprocess', 'Review', 'EditData', 'EditMeta', 'Idle'];
 

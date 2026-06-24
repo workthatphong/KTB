@@ -4,7 +4,7 @@ import {
   togglePinInList,
   updateSelectionForFile,
   updateSelectionForSheet,
-} from './utils.js';
+} from './utils';
 
 export const useFilterState = ({ dashboard, filterMode }) => {
   const isSystemFilterMode = filterMode === 'system-performance';

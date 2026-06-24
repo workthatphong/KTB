@@ -7,9 +7,9 @@ import {
   parseSegments,
   SEGMENT_GROUP_OPTIONS,
   toSegmentGroup,
-} from '../utils/segmentData.js';
+} from '../utils/segmentData';
 import { extractFileNameFromSheetKey, isIdleContextSegment, toTimelineLane, buildKpisFromSegments, safeNumber } from '@/lib/utils.ts';
-import { calculateFlowRows, calculateUserStatsRows } from '../utils/dataParsers.js';
+import { calculateFlowRows, calculateUserStatsRows } from '../utils/dataParsers';
 
 export function computeDerivedData(params: any) {
   const {

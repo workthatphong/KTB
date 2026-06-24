@@ -1,8 +1,8 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as d3 from 'd3';
-import { CHART_PALETTE } from '@/lib/constants.js';
-import { safeNumber, formatDuration, formatPercent } from '@/lib/utils.js';
+import { CHART_PALETTE } from '@/lib/constants';
+import { safeNumber, formatDuration, formatPercent } from '@/lib/utils';
 
 /**
  * Advanced Workload Share Visualization

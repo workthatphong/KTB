@@ -1,8 +1,8 @@
 // @ts-nocheck
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { formatDuration } from '@/lib/utils.js';
-import { formatTimeTick } from '@/lib/dateFormatters.js';
+import { formatDuration } from '@/lib/utils';
+import { formatTimeTick } from '@/lib/dateFormatters';
 
 export function clampLabel(label, maxLength = 12) {
   const text = String(label || '');

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { usePersistentState } from '../../../hooks/usePersistentState.js';
+import { usePersistentState } from '../../../hooks/usePersistentState';
 
 export function useDashboardFilterState() {
   const [datePreset, setDatePreset] = usePersistentState('filter_datePreset', 'all');

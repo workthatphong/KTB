@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { buildSheetKey } from '@/lib/utils.js';
+import { buildSheetKey } from '@/lib/utils';
 
 export function parseSegments(segments) {
   const parsed = [];

@@ -2,11 +2,11 @@
 import {
   CORE_WORK_SESSION_TYPES,
   initialKpiData
-} from '../../../lib/constants.js';
+} from '../../../lib/constants';
 import { Clock, Users, Timer, RefreshCw, AlertTriangle } from 'lucide-react';
-import { formatDuration, formatPercent } from '../../../lib/durationFormatters.js';
-import { safeNumber } from '../../../lib/numberUtils.js';
-import { isDataEditSegmentType, isIdleContextSegment, isMetaEditSegmentType, isProcessingEquivalentIdleSegment } from './segmentUtils.js';
+import { formatDuration, formatPercent } from '../../../lib/durationFormatters';
+import { safeNumber } from '../../../lib/numberUtils';
+import { isDataEditSegmentType, isIdleContextSegment, isMetaEditSegmentType, isProcessingEquivalentIdleSegment } from './segmentUtils';
 
 export function buildKpiData(kpis) {
   if (!kpis) return initialKpiData;

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { toDrillGroup, toGanttSegmentTypeLabel } from '@/features/dashboard/utils/segmentUtils.js';
+import { toDrillGroup, toGanttSegmentTypeLabel } from '@/features/dashboard/utils/segmentUtils';
 
 export const POINT_IN_TIME_SEGMENT_TYPES = new Set([
   'AUTO_TIMEOUT_MARKER',

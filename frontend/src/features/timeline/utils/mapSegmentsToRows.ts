@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { REOPEN_MARKER_TYPES } from '../../../lib/constants.js';
+import { REOPEN_MARKER_TYPES } from '../../../lib/constants';
 import {
   toTimelineLane,
   toDrillGroup,
   safeNumber,
   mergeAdjacentIdleSegments
-} from '../../../lib/utils.js';
+} from '../../../lib/utils';
 
 function applySecondSpreadHandoffTiming(rows) {
   const rowsByContext = new Map();

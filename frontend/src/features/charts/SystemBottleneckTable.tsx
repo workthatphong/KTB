@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { safeNumber, clampPercent, formatDuration } from '@/lib/utils.js';
+import { safeNumber, clampPercent, formatDuration } from '@/lib/utils';
 
 export const SystemBottleneckTable = ({ rows, maxVisibleRows = 6 }) => {
   if (!rows || rows.length === 0) return null;

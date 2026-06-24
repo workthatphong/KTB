@@ -1,4 +1,4 @@
 // @ts-nocheck
-export { mapSegmentsToRows } from './utils/mapSegmentsToRows.js';
-export { calculateTimeCompaction } from './utils/calculateTimeCompaction.js';
-export { calculateTimelineTicks } from './utils/calculateTimelineTicks.js';
+export { mapSegmentsToRows } from './utils/mapSegmentsToRows';
+export { calculateTimeCompaction } from './utils/calculateTimeCompaction';
+export { calculateTimelineTicks } from './utils/calculateTimelineTicks';

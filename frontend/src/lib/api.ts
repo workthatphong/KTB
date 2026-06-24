@@ -1,4 +1,4 @@
-import { API_BASE } from './constants.js';
+import { API_BASE } from './constants';
 
 export async function requestJson(path: string, options: any = {}) {
   const headers: any = { ...(options.headers || {}) };

@@ -1,7 +1,7 @@
 // @ts-nocheck
-export * from './utils/ganttConstants.js';
-export * from './utils/ganttLegendUtils.js';
-export * from './utils/ganttGapUtils.js';
-export * from './utils/ganttLaneUtils.js';
-export * from './utils/ganttAxisUtils.js';
-export * from './utils/ganttPositionUtils.js';
+export * from './utils/ganttConstants';
+export * from './utils/ganttLegendUtils';
+export * from './utils/ganttGapUtils';
+export * from './utils/ganttLaneUtils';
+export * from './utils/ganttAxisUtils';
+export * from './utils/ganttPositionUtils';

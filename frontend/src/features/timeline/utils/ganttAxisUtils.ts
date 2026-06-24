@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { GANTT_TICK_STEP_CANDIDATES_MS } from './ganttConstants.js';
+import { GANTT_TICK_STEP_CANDIDATES_MS } from './ganttConstants';
 
 export function buildGanttDisplayBounds(laneVisibleSegments, mappedSegments) {
   const boundsSegments = laneVisibleSegments.length > 0 ? laneVisibleSegments : mappedSegments;

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { GANTT_DRILL_GROUPS } from '@/lib/constants.js';
+import { GANTT_DRILL_GROUPS } from '@/lib/constants';
 
 export function buildGanttLegendItems(showIdleLane, showSystemLane, showStarMarkers) {
   const items = GANTT_DRILL_GROUPS.filter((item) => {

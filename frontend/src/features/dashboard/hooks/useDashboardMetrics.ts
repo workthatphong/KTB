@@ -6,10 +6,10 @@ import {
   isIdleContextSegment,
   safeNumber,
   toTimelineLane,
-} from '../../../lib/utils.js';
-import { initialKpiData } from '@/lib/constants.js';
-import { calculateFlowRows, calculateUserStatsRows } from '@/features/dashboard/utils/dataParsers.js';
-import { toSegmentGroup } from '@/features/dashboard/utils/segmentData.js';
+} from '../../../lib/utils';
+import { initialKpiData } from '@/lib/constants';
+import { calculateFlowRows, calculateUserStatsRows } from '@/features/dashboard/utils/dataParsers';
+import { toSegmentGroup } from '@/features/dashboard/utils/segmentData';
 
 export function useDashboardMetrics(params) {
   const {

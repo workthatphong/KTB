@@ -8,7 +8,7 @@ import {
   normalizeSelectedSegmentTypes,
   parseSegments,
   SEGMENT_GROUP_OPTIONS,
-} from '../utils/segmentData.js';
+} from '../utils/segmentData';
 
 export function useDashboardDerivedData(params) {
   const {

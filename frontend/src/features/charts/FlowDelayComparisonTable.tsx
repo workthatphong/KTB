@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
-import { CHART_PALETTE } from '@/lib/constants.js';
-import { safeNumber, formatDuration } from '@/lib/utils.js';
+import { CHART_PALETTE } from '@/lib/constants';
+import { safeNumber, formatDuration } from '@/lib/utils';
 
 export const FlowDelayComparisonTable = ({ rows, maxVisibleRows = 0 }) => {
   const maxAvgSeconds = rows.reduce((max, row) => Math.max(max, safeNumber(row.avgSeconds)), 0) || 1;

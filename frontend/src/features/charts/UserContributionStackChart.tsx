@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useMemo } from 'react';
-import { safeNumber, clampPercent, formatDuration, formatPercent } from '@/lib/utils.js';
+import { safeNumber, clampPercent, formatDuration, formatPercent } from '@/lib/utils';
 
 /**
  * Top User Work Mix (Restored Original Styles with Interactive Tooltips)
