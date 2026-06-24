@@ -30,11 +30,10 @@
 
 1. Install dependencies:
    Backend: `pip install -r requirements.txt`
-   Frontend: `npm --prefix frontend install`
-   (Or `cd frontend && npm install`)
+   Frontend: `npm install` (Run at the root directory, it uses npm workspaces)
 2. Build frontend:
-   `npm --prefix frontend run build`
-   optional bundle analysis: `npm --prefix frontend run analyze`
+   `npm run build`
+   optional bundle analysis: `npm run analyze --workspace=frontend`
 3. Start server:
    `bash scripts/start.sh` (Linux/macOS)
    or `.\scripts\start.ps1` (Windows)
