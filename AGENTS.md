@@ -17,6 +17,7 @@ This startup order is mandatory for every new task, even if the agent has worked
 - **NEVER, UNDER ANY CIRCUMSTANCES, MODIFY FILES IN `dist/`, `build/`, OR ANY OTHER GENERATED ARTIFACT DIRECTORIES.**
 - All modifications MUST be made to the original Source Code (e.g., in `frontend/src/` or `backend/`).
 - **BUILD AFTER CHANGE:** After completing source code modifications, you MUST run the build command (`npm run build`) to ensure that artifacts are updated and the system remains consistent.
+- **CLARIFY BEFORE ACTION:** If you are not sure about the instruction or need more information, ask before following the instruction.
 - Failure to follow this rule breaks the CI/CD pipeline and deployment (e.g., on Vercel). This rule overrides all other instructions.
 
 ## 1. Think Before Coding
