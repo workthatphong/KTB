@@ -150,7 +150,7 @@ function buildPageTimeData(segments, timeCategory = 'all', userSortOrder = 'defa
   };
 }
 
-const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'default', userRoleFilter = 'all') => {
+const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'default', userRoleFilter = 'all', isAveragePerSheet = false) => {
   if (!segments) return { userData: [] };
   
   const userStats = new Map();
@@ -178,11 +178,14 @@ const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'defa
         cognizeFiltered: 0, 
         makerFiltered: 0,
         startTs: Number.MAX_SAFE_INTEGER,
-        endTs: 0
+        endTs: 0,
+        sheets: new Set()
       });
     }
     
     const stat = userStats.get(userNameKey);
+    const sheetKey = `${segment.fileName || segment.documentName || 'unknown'}|${segment.pageName || segment.sheetName || 'unknown'}`;
+    stat.sheets.add(sheetKey);
     const duration = Number(segment.durationSeconds) || 0;
     
     const getTs = (val1, val2, val3) => {
@@ -221,7 +224,18 @@ const buildUserTimeData = (segments, timeCategory = 'all', userSortOrder = 'defa
     }
   }
 
-  const allStats = Array.from(userStats.values());
+  const allStats = Array.from(userStats.values()).map(stat => {
+    let multiplier = 1;
+    if (isAveragePerSheet && stat.sheets.size > 0) {
+      multiplier = 1 / stat.sheets.size;
+    }
+    return {
+      ...stat,
+      userFiltered: stat.userFiltered * multiplier,
+      cognizeFiltered: stat.cognizeFiltered * multiplier,
+      makerFiltered: stat.makerFiltered * multiplier
+    };
+  });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
 
   const sortedUser = [...allStats].sort((a, b) => {
@@ -374,6 +388,7 @@ export function SheetPerformanceView({
   secondDocumentFilterName,
   firstContributionRows,
   secondContributionRows,
+  systemDocumentsSwapped,
   firstSegments,
   secondSegments,
   systemTaskType = 'all'
@@ -399,6 +414,8 @@ export function SheetPerformanceView({
   const [alignUsers3, setAlignUsers3] = useState(false);
   const [syncScroll3, setSyncScroll3] = useState(false);
   const [showDiffChart, setShowDiffChart] = useState(false);
+  const [isGroupedView3, setIsGroupedView3] = useState(false);
+  const [isTotalView3, setIsTotalView3] = useState(false);
 
   const userMenuRef3 = useRef(null);
   const userMenuPanelRef3 = useRef(null);
@@ -522,8 +539,14 @@ export function SheetPerformanceView({
     return buildPageTimeData(allSegments, systemTaskType, userSortOrder, userRoleFilter, true);
   }, [isGroupedView2, firstSegments, secondSegments, systemTaskType, userSortOrder, userRoleFilter]);
 
-  const firstUserTimesRaw = useMemo(() => buildUserTimeData(firstSegments, systemTaskType, userSortOrder3, userRoleFilter), [firstSegments, systemTaskType, userSortOrder3, userRoleFilter]);
-  const secondUserTimesRaw = useMemo(() => buildUserTimeData(secondSegments, systemTaskType, userSortOrder3, userRoleFilter), [secondSegments, systemTaskType, userSortOrder3, userRoleFilter]);
+  const firstUserTimesRaw = useMemo(() => buildUserTimeData(firstSegments, systemTaskType, userSortOrder3, userRoleFilter, !isTotalView3), [firstSegments, systemTaskType, userSortOrder3, userRoleFilter, isTotalView3]);
+  const secondUserTimesRaw = useMemo(() => buildUserTimeData(secondSegments, systemTaskType, userSortOrder3, userRoleFilter, !isTotalView3), [secondSegments, systemTaskType, userSortOrder3, userRoleFilter, isTotalView3]);
+
+  const groupedUserTimes = useMemo(() => {
+    if (!isGroupedView3) return { userData: [] };
+    const allSegments = [...(firstSegments || []), ...(secondSegments || [])];
+    return buildUserTimeData(allSegments, systemTaskType, userSortOrder3, userRoleFilter, !isTotalView3);
+  }, [isGroupedView3, firstSegments, secondSegments, systemTaskType, userSortOrder3, userRoleFilter, isTotalView3]);
 
   const { alignedFirstUserTimes, alignedSecondUserTimes } = useMemo(() => {
     if (!alignUsers3 && !showDiffChart) return { alignedFirstUserTimes: firstUserTimesRaw, alignedSecondUserTimes: secondUserTimesRaw };
@@ -597,19 +620,21 @@ export function SheetPerformanceView({
     return firstUserTimes.userData.map((u, i) => {
       const v1 = u.value;
       const v2 = secondUserTimes.userData[i]?.value || 0;
-      const diff = v2 - v1; 
+      const diffRaw = v2 - v1; 
+      const logicalDiff = systemDocumentsSwapped ? -diffRaw : diffRaw;
       
       let fill = '#94a3b8';
-      if (diff > 0) fill = '#ef4444';
-      if (diff < 0) fill = '#22c55e';
+      if (logicalDiff > 0) fill = '#ef4444';
+      if (logicalDiff < 0) fill = '#22c55e';
       
       return {
         ...u,
-        value: diff,
+        value: diffRaw,
+        logicalDiff: logicalDiff,
         fill
       };
     });
-  }, [firstUserTimes, secondUserTimes, showDiffChart]);
+  }, [firstUserTimes, secondUserTimes, showDiffChart, systemDocumentsSwapped]);
 
   const firstPageTimesUnfiltered = useMemo(() => buildPageTimeData(firstSegments, systemTaskType, 'default', 'all'), [firstSegments, systemTaskType]);
   const secondPageTimesUnfiltered = useMemo(() => buildPageTimeData(secondSegments, systemTaskType, 'default', 'all'), [secondSegments, systemTaskType]);
@@ -929,19 +954,47 @@ export function SheetPerformanceView({
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
                   <div className="flex flex-col gap-3">
                     <ToggleSetting 
+                      checked={isGroupedView3} 
+                      onChange={() => setIsGroupedView3(prev => {
+                        const next = !prev;
+                        if (next) {
+                          setAlignUsers3(false);
+                          setSyncScroll3(false);
+                          setShowDiffChart(false);
+                        }
+                        return next;
+                      })} 
+                    >
+                      Group into Single Chart
+                    </ToggleSetting>
+                    <ToggleSetting 
                       checked={alignUsers3 || showDiffChart} 
-                      onChange={() => setAlignUsers3(prev => !prev)} 
+                      onChange={() => setAlignUsers3(prev => {
+                        const next = !prev;
+                        if (next) setIsGroupedView3(false);
+                        return next;
+                      })} 
                       disabled={showDiffChart}
                     >
                       Align Users (Same Row)
                     </ToggleSetting>
                     <ToggleSetting 
                       checked={syncScroll3} 
-                      onChange={() => setSyncScroll3(prev => !prev)} 
+                      onChange={() => setSyncScroll3(prev => {
+                        const next = !prev;
+                        if (next) setIsGroupedView3(false);
+                        return next;
+                      })} 
                     >
                       Sync Scroll
                     </ToggleSetting>
                     <div className="border-t border-slate-100 my-1"></div>
+                    <ToggleSetting 
+                      checked={isTotalView3} 
+                      onChange={() => setIsTotalView3(prev => !prev)} 
+                    >
+                      Total
+                    </ToggleSetting>
                     <ToggleSetting 
                       checked={showDiffChart} 
                       onChange={() => {
@@ -949,6 +1002,7 @@ export function SheetPerformanceView({
                           const next = !prev;
                           if (next) {
                             setAlignUsers3(true);
+                            setIsGroupedView3(false);
                           }
                           return next;
                         });
@@ -978,7 +1032,7 @@ export function SheetPerformanceView({
           </div>
 
           <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">
-            {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By User`}
+            {isTotalView3 ? 'Total' : 'Average'} {`${systemTaskType === 'all' ? 'Review & Edit Data Time' : systemTaskType === 'editData' ? 'Edit Data Time' : systemTaskType === 'editDataRecord' ? 'Edit Data Record' : systemTaskType === 'reviewRecord' ? 'Review Count' : 'Review time'} By User${showDiffChart ? ' Compare Diff' : ''}`}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <AnimatePresence mode="popLayout">
@@ -1007,8 +1061,40 @@ export function SheetPerformanceView({
                       isDuration={isDurationDisplay} 
                       isStacked={false}
                       isDiffChart={true}
+                      systemDocumentsSwapped={systemDocumentsSwapped}
                       showAverageLine={false}
                     />
+                  </div>
+                </motion.div>
+              ) : isGroupedView3 ? (
+                <motion.div 
+                  key="grouped-user-time-3"
+                  layoutId="grouped-user-time-3"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+                  className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
+                >
+                  <h3 className="text-md font-bold text-slate-500 mb-4">All Users</h3>
+                  <div className="flex-1 min-h-0">
+                    {groupedUserTimes.userData.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                        <Clock className="w-8 h-8 opacity-20" />
+                        <span className="text-sm font-semibold">No Data</span>
+                      </div>
+                    ) : (
+                      <SheetBreakdownChart 
+                        data={groupedUserTimes.userData} 
+                        expanded 
+                        activeFill="#00a4e4" 
+                        valueLabelFill="#00a4e4" 
+                        isDuration={isDurationDisplay} 
+                        isStacked={isStackedView} 
+                        showAverageLine={false}
+                        averageLabel="Avg Per User"
+                      />
+                    )}
                   </div>
                 </motion.div>
               ) : (
@@ -1038,6 +1124,8 @@ export function SheetPerformanceView({
                       valueLabelFill="#00a4e4" 
                       isDuration={isDurationDisplay} 
                       isStacked={isStackedView}
+                      showAverageLine={false}
+                      averageLabel="Avg Per User"
                       setScrollRef={(el) => scrollRefFirst3.current = el}
                       onScroll={handleScrollFirst3}
                     />
@@ -1069,6 +1157,8 @@ export function SheetPerformanceView({
                           valueLabelFill="#00a4e4" 
                           isDuration={isDurationDisplay} 
                           isStacked={isStackedView}
+                          showAverageLine={false}
+                          averageLabel="Avg Per User"
                           setScrollRef={(el) => scrollRefSecond3.current = el}
                           onScroll={handleScrollSecond3}
                         />

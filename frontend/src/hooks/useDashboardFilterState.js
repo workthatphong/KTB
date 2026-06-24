@@ -31,6 +31,7 @@ export function useDashboardFilterState() {
   const [systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile] = usePersistentState('system_filter_secondActiveDocumentFile', '');
   const [systemFirstDocumentFilterName, setSystemFirstDocumentFilterName] = usePersistentState('system_filter_firstDocumentFilterName', 'First documents');
   const [systemSecondDocumentFilterName, setSystemSecondDocumentFilterName] = usePersistentState('system_filter_secondDocumentFilterName', 'Second Documents');
+  const [systemDocumentsSwapped, setSystemDocumentsSwapped] = usePersistentState('system_filter_documentsSwapped', false);
   const [fileDisplayNames, setFileDisplayNames] = usePersistentState('filter_fileDisplayNames', {});
   const [pageDisplayNames, setPageDisplayNames] = usePersistentState('filter_pageDisplayNames', {});
 
@@ -65,6 +66,7 @@ export function useDashboardFilterState() {
     systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile,
     systemFirstDocumentFilterName, setSystemFirstDocumentFilterName,
     systemSecondDocumentFilterName, setSystemSecondDocumentFilterName,
+    systemDocumentsSwapped, setSystemDocumentsSwapped,
     fileDisplayNames, setFileDisplayNames,
     pageDisplayNames, setPageDisplayNames,
   };

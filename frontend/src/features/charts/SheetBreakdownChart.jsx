@@ -40,7 +40,8 @@ function DurationBarLabel({ x, y, width, height, value, index, data, isDuration,
   let text = isDuration ? formatDuration(displayValue) : displayValue.toLocaleString();
   
   if (isDiffChart && value !== 0) {
-    text = (value > 0 ? '+' : '-') + text;
+    const logicalValue = data?.[index]?.logicalDiff !== undefined ? data[index].logicalDiff : value;
+    text = (logicalValue > 0 ? '+' : '-') + text;
   }
 
   return (
@@ -102,6 +103,7 @@ const CustomTooltip = ({ active, payload, label, isDuration, isDiffChart, isButt
     }
 
     const value = payloadObj?.value !== undefined ? payloadObj.value : payload[0]?.value;
+    const logicalValue = payloadObj?.logicalDiff !== undefined ? payloadObj.logicalDiff : value;
 
     return createPortal(
       <div 
@@ -110,7 +112,7 @@ const CustomTooltip = ({ active, payload, label, isDuration, isDiffChart, isButt
       >
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
         <p className="text-lg font-extrabold text-[#17335f]">
-          {isDiffChart && value !== 0 ? (value > 0 ? '+' : '-') : ''}
+          {isDiffChart && value !== 0 ? (logicalValue > 0 ? '+' : '-') : ''}
           {isDuration ? formatDuration(Math.abs(value)) : Math.abs(value).toLocaleString()}
         </p>
         {(startTs || endTs) && (
@@ -138,6 +140,7 @@ export const SheetBreakdownChart = React.memo(({
   isStacked = false,
   isDiffChart = false,
   isButterflyChart = false,
+  systemDocumentsSwapped = false,
   onScroll,
   setScrollRef,
 }) => {
@@ -285,7 +288,7 @@ export const SheetBreakdownChart = React.memo(({
                       )} 
                     />
                     {data.map((entry, index) => (
-                      <Cell key={`cell-left-${index}`} fill={entry.leftFill} />
+                      <Cell key={`cell-left-${index}-${entry.leftFill}`} fill={entry.leftFill} />
                     ))}
                   </Bar>
                   <Bar dataKey="rightValue" stackId="a" radius={[0, 6, 6, 0]} barSize={20}>
@@ -301,7 +304,7 @@ export const SheetBreakdownChart = React.memo(({
                       )} 
                     />
                     {data.map((entry, index) => (
-                      <Cell key={`cell-right-${index}`} fill={entry.rightFill} />
+                      <Cell key={`cell-right-${index}-${entry.rightFill}`} fill={entry.rightFill} />
                     ))}
                   </Bar>
                 </>
@@ -341,12 +344,15 @@ export const SheetBreakdownChart = React.memo(({
                       />
                     )} 
                   />
-                  {data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.fill || ((Number(entry.value) >= average) ? activeFill : inactiveFill)} 
-                    />
-                  ))}
+                  {data.map((entry, index) => {
+                    const cellFill = entry.fill || ((Number(entry.value) >= average) ? activeFill : inactiveFill);
+                    return (
+                      <Cell 
+                        key={`cell-${index}-${cellFill}`} 
+                        fill={cellFill} 
+                      />
+                    );
+                  })}
                 </Bar>
               )}
               {showAverageLine && (
@@ -379,7 +385,8 @@ export const SheetBreakdownChart = React.memo(({
               tickFormatter={(val) => {
                 const absVal = Math.abs(val);
                 const str = isDuration ? formatDuration(absVal) : absVal.toLocaleString();
-                return val < 0 && isDiffChart ? `-${str}` : (val > 0 && isDiffChart ? `+${str}` : str);
+                const logicalVal = systemDocumentsSwapped ? -val : val;
+                return logicalVal < 0 && isDiffChart ? `-${str}` : (logicalVal > 0 && isDiffChart ? `+${str}` : str);
               }}
               axisLine={{ stroke: '#e2e8f0' }}
               tickLine={false}

@@ -157,6 +157,8 @@ export const FilterBar = React.memo(({
     const tempActiveDocumentFile = activeDocumentFile;
     const tempFirstName = dashboard.systemFirstDocumentFilterName;
     
+    if (dashboard.setSystemDocumentsSwapped) dashboard.setSystemDocumentsSwapped(prev => !prev);
+    
     setSelectedFiles(secondSelectedFiles);
     if (setSelectedSheets) setSelectedSheets(secondSelectedSheets);
     setPinnedFiles(secondPinnedFiles);
