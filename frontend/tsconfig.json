@@ -20,10 +20,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     
-    /* Incremental Migration */
-    "allowJs": true,
-    "checkJs": false,
-    
     "ignoreDeprecations": "6.0",
     /* Paths */
     "paths": {
