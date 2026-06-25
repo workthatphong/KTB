@@ -90,6 +90,13 @@ export const FilterBar = React.memo(({
                 onRenameFile={state.handleRenameFile}
                 onRenamePage={state.handleRenamePage}
                 onClearSelection={state.handleClearDocumentSelection}
+                hasSetComparison={true}
+                selectedSheetsSet2={dashboard.systemSelectedSheetsSet2}
+                onToggleSheetSelectionSet2={state.handleToggleSheetSelectionSet2}
+                set1Name={dashboard.systemDocument1Set1Name}
+                setSet1Name={dashboard.setSystemDocument1Set1Name}
+                set2Name={dashboard.systemDocument1Set2Name}
+                setSet2Name={dashboard.setSystemDocument1Set2Name}
               />
               <DocumentFilterPopover
                 title={dashboard.systemSecondDocumentFilterName}
@@ -118,6 +125,13 @@ export const FilterBar = React.memo(({
                 onRenameFile={state.handleRenameFile}
                 onRenamePage={state.handleRenamePage}
                 onClearSelection={state.handleClearSecondDocumentSelection}
+                hasSetComparison={true}
+                selectedSheetsSet2={dashboard.systemSecondSelectedSheetsSet2}
+                onToggleSheetSelectionSet2={state.handleToggleSecondSheetSelectionSet2}
+                set1Name={dashboard.systemDocument2Set1Name}
+                setSet1Name={dashboard.setSystemDocument2Set1Name}
+                set2Name={dashboard.systemDocument2Set2Name}
+                setSet2Name={dashboard.setSystemDocument2Set2Name}
               />
               <TaskTypeFilter
                 systemTaskType={systemTaskType}

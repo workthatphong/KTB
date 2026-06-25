@@ -65,6 +65,14 @@ function App() {
                     secondDocumentFilterName={dashboard.systemSecondDocumentFilterName}
                     firstContributionRows={dashboard.systemContributionRows}
                     secondContributionRows={dashboard.systemSecondContributionRows}
+                    firstContributionRowsSet1={dashboard.systemContributionRowsSet1}
+                    firstContributionRowsSet2={dashboard.systemContributionRowsSet2}
+                    secondContributionRowsSet1={dashboard.systemSecondContributionRowsSet1}
+                    secondContributionRowsSet2={dashboard.systemSecondContributionRowsSet2}
+                    firstDocument1Set1Name={dashboard.systemDocument1Set1Name}
+                    firstDocument1Set2Name={dashboard.systemDocument1Set2Name}
+                    secondDocument2Set1Name={dashboard.systemDocument2Set1Name}
+                    secondDocument2Set2Name={dashboard.systemDocument2Set2Name}
                     systemDocumentsSwapped={dashboard.systemDocumentsSwapped}
                     firstSegments={dashboard.systemFilteredBaseSegments}
                     secondSegments={dashboard.systemSecondFilteredBaseSegments}

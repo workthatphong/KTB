@@ -39,6 +39,13 @@ export const DocumentFilterPopover = React.memo(({
   onRenameFile,
   onRenamePage,
   onClearSelection,
+  hasSetComparison = false,
+  selectedSheetsSet2 = [],
+  onToggleSheetSelectionSet2,
+  set1Name,
+  setSet1Name,
+  set2Name,
+  setSet2Name,
 }) => {
   const filteredDocumentTree = useMemo(
     () => getFilteredDocumentTree({ documentTree, documentFileSearch, pinnedFiles, fileDisplayNames }),
@@ -57,6 +64,7 @@ export const DocumentFilterPopover = React.memo(({
   );
 
   const selectedSheetSet = useMemo(() => new Set(selectedSheets), [selectedSheets]);
+  const selectedSheetSet2 = useMemo(() => new Set(selectedSheetsSet2), [selectedSheetsSet2]);
   const pinnedFileSet = useMemo(() => new Set(pinnedFiles), [pinnedFiles]);
   const pinnedSheetSet = useMemo(() => new Set(pinnedSheets), [pinnedSheets]);
 
@@ -113,6 +121,13 @@ export const DocumentFilterPopover = React.memo(({
             onToggleSheetSelection={onToggleSheetSelection}
             onTogglePin={onTogglePinnedSheet}
             onRenamePage={onRenamePage}
+            hasSetComparison={hasSetComparison}
+            selectedSheetSet2={selectedSheetSet2}
+            onToggleSheetSelectionSet2={onToggleSheetSelectionSet2}
+            set1Name={set1Name}
+            setSet1Name={setSet1Name}
+            set2Name={set2Name}
+            setSet2Name={setSet2Name}
           />
         ) : null}
       </div>

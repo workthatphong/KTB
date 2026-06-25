@@ -15,9 +15,20 @@ export function DocumentSheetListColumn({
   onToggleSheetSelection,
   onTogglePin,
   onRenamePage,
+  hasSetComparison = false,
+  selectedSheetSet2 = new Set(),
+  onToggleSheetSelectionSet2 = () => {},
+  set1Name = 'Set 1',
+  setSet1Name = () => {},
+  set2Name = 'Set 2',
+  setSet2Name = () => {},
 }) {
   const [editingSheetKey, setEditingSheetKey] = React.useState('');
   const [draftDisplayName, setDraftDisplayName] = React.useState('');
+  
+  const [activeSet, setActiveSet] = React.useState(1);
+  const [editingSet, setEditingSet] = React.useState(0);
+  const [draftSetName, setDraftSetName] = React.useState('');
 
   const beginRename = (sheetKey, sheetName) => {
     setEditingSheetKey(sheetKey);
@@ -34,10 +45,71 @@ export function DocumentSheetListColumn({
     cancelRename();
   };
 
+  const beginEditSet = (setNum, currentName) => {
+    setEditingSet(setNum);
+    setDraftSetName(currentName);
+  };
+
+  const commitEditSet = (setNum) => {
+    if (setNum === 1) setSet1Name(draftSetName || 'Set 1');
+    if (setNum === 2) setSet2Name(draftSetName || 'Set 2');
+    setEditingSet(0);
+  };
+
+  const currentSelectedSheetSet = activeSet === 1 ? selectedSheetSet : selectedSheetSet2;
+  const currentOnToggleSheetSelection = activeSet === 1 ? onToggleSheetSelection : onToggleSheetSelectionSet2;
+
   return (
     <div className="w-1/2 flex flex-col bg-slate-50/30">
       <div className="p-3 border-b border-slate-50 space-y-2">
-        <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Selected sheet</div>
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-wider text-slate-500 shrink-0">Selected sheet</div>
+          {hasSetComparison && (
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg max-w-[140px]">
+              {/* Set 1 Button */}
+              {editingSet === 1 ? (
+                <input
+                  value={draftSetName}
+                  onChange={(e) => setDraftSetName(e.target.value)}
+                  onBlur={() => commitEditSet(1)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') commitEditSet(1); if (e.key === 'Escape') setEditingSet(0); }}
+                  className="w-20 h-6 text-xs font-medium bg-white border border-blue-200 rounded px-1.5 focus:outline-none"
+                  autoFocus
+                />
+              ) : (
+                <button
+                  onClick={() => setActiveSet(1)}
+                  onDoubleClick={() => beginEditSet(1, set1Name)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0 ${activeSet === 1 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  title="Double click to rename"
+                >
+                  {set1Name}
+                </button>
+              )}
+
+              {/* Set 2 Button */}
+              {editingSet === 2 ? (
+                <input
+                  value={draftSetName}
+                  onChange={(e) => setDraftSetName(e.target.value)}
+                  onBlur={() => commitEditSet(2)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') commitEditSet(2); if (e.key === 'Escape') setEditingSet(0); }}
+                  className="w-20 h-6 text-xs font-medium bg-white border border-blue-200 rounded px-1.5 focus:outline-none ml-1"
+                  autoFocus
+                />
+              ) : (
+                <button
+                  onClick={() => setActiveSet(2)}
+                  onDoubleClick={() => beginEditSet(2, set2Name)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-md transition-all whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0 ${activeSet === 2 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                  title="Double click to rename"
+                >
+                  {set2Name}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <DropdownSearch
           value={documentSheetSearch}
           onChange={setDocumentSheetSearch}
@@ -55,7 +127,7 @@ export function DocumentSheetListColumn({
           <div className="p-4 text-xs text-slate-400 text-center fade-slide-down">No sheets found</div>
         ) : (
           filteredSheetsForActiveFile.map((sheet) => {
-            const isChecked = selectedSheetSet.has(sheet.key);
+            const isChecked = currentSelectedSheetSet.has(sheet.key);
             const isPinned = pinnedSheetSet.has(sheet.key);
             const invalidCount = invalidSheetCounts?.[sheet.key] || 0;
             const displayName = pageDisplayNames?.[sheet.key] || sheet.name;
@@ -70,7 +142,7 @@ export function DocumentSheetListColumn({
                 <input
                   type="checkbox"
                   checked={isChecked}
-                  onChange={() => onToggleSheetSelection(sheet.name)}
+                  onChange={() => currentOnToggleSheetSelection(sheet.name)}
                   className="h-4 w-4 accent-blue-600 rounded"
                 />
                 <div className="flex-1 min-w-0">

@@ -66,6 +66,19 @@ export const useFilterState = ({ dashboard, filterMode }) => {
     if (setSelectedSheets) setSelectedSheets(nextSheets);
   }, [activeDocumentFile, selectedFiles, selectedSheets, setSelectedFiles, setSelectedSheets]);
 
+  const handleToggleSheetSelectionSet2 = useCallback((sheetName) => {
+    if (!activeDocumentFile) return;
+
+    const { nextFiles, nextSheets } = updateSelectionForSheet({
+      selectedFiles,
+      selectedSheets: dashboard.systemSelectedSheetsSet2 || [],
+      fileName: activeDocumentFile,
+      sheetName,
+    });
+    // We don't update selectedFiles for set 2 since files are shared across sets
+    if (dashboard.setSystemSelectedSheetsSet2) dashboard.setSystemSelectedSheetsSet2(nextSheets);
+  }, [activeDocumentFile, selectedFiles, dashboard.systemSelectedSheetsSet2, dashboard.setSystemSelectedSheetsSet2]);
+
   const handleTogglePinnedFile = useCallback((fileName) => {
     setPinnedFiles((prev) => togglePinInList(prev, fileName));
   }, [setPinnedFiles]);
@@ -102,6 +115,18 @@ export const useFilterState = ({ dashboard, filterMode }) => {
     if (setSecondSelectedFiles) setSecondSelectedFiles(nextFiles);
     if (setSecondSelectedSheets) setSecondSelectedSheets(nextSheets);
   }, [secondActiveDocumentFile, secondSelectedFiles, secondSelectedSheets, setSecondSelectedFiles, setSecondSelectedSheets]);
+
+  const handleToggleSecondSheetSelectionSet2 = useCallback((sheetName) => {
+    if (!secondActiveDocumentFile) return;
+
+    const { nextFiles, nextSheets } = updateSelectionForSheet({
+      selectedFiles: secondSelectedFiles,
+      selectedSheets: dashboard.systemSecondSelectedSheetsSet2 || [],
+      fileName: secondActiveDocumentFile,
+      sheetName,
+    });
+    if (dashboard.setSystemSecondSelectedSheetsSet2) dashboard.setSystemSecondSelectedSheetsSet2(nextSheets);
+  }, [secondActiveDocumentFile, secondSelectedFiles, dashboard.systemSecondSelectedSheetsSet2, dashboard.setSystemSecondSelectedSheetsSet2]);
 
   const handleTogglePinnedSecondFile = useCallback((fileName) => {
     if (setSecondPinnedFiles) setSecondPinnedFiles((prev) => togglePinInList(prev, fileName));
@@ -209,5 +234,7 @@ export const useFilterState = ({ dashboard, filterMode }) => {
     handleSwapDocuments,
     handleRenameFile,
     handleRenamePage,
+    handleToggleSheetSelectionSet2,
+    handleToggleSecondSheetSelectionSet2,
   };
 };

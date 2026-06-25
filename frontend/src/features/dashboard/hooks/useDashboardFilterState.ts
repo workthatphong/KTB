@@ -32,6 +32,12 @@ export function useDashboardFilterState() {
   const [systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile] = usePersistentState('system_filter_secondActiveDocumentFile', '');
   const [systemFirstDocumentFilterName, setSystemFirstDocumentFilterName] = usePersistentState('system_filter_firstDocumentFilterName', 'First documents');
   const [systemSecondDocumentFilterName, setSystemSecondDocumentFilterName] = usePersistentState('system_filter_secondDocumentFilterName', 'Second Documents');
+  const [systemSelectedSheetsSet2, setSystemSelectedSheetsSet2] = usePersistentState('system_filter_selectedSheetsSet2', []);
+  const [systemSecondSelectedSheetsSet2, setSystemSecondSelectedSheetsSet2] = usePersistentState('system_filter_secondSelectedSheetsSet2', []);
+  const [systemDocument1Set1Name, setSystemDocument1Set1Name] = usePersistentState('system_filter_document1Set1Name', 'Set 1');
+  const [systemDocument1Set2Name, setSystemDocument1Set2Name] = usePersistentState('system_filter_document1Set2Name', 'Set 2');
+  const [systemDocument2Set1Name, setSystemDocument2Set1Name] = usePersistentState('system_filter_document2Set1Name', 'Set 1');
+  const [systemDocument2Set2Name, setSystemDocument2Set2Name] = usePersistentState('system_filter_document2Set2Name', 'Set 2');
   const [systemDocumentsSwapped, setSystemDocumentsSwapped] = usePersistentState('system_filter_documentsSwapped', false);
   const [fileDisplayNames, setFileDisplayNames] = usePersistentState('filter_fileDisplayNames', {});
   const [pageDisplayNames, setPageDisplayNames] = usePersistentState('filter_pageDisplayNames', {});
@@ -67,6 +73,12 @@ export function useDashboardFilterState() {
     systemSecondActiveDocumentFile, setSystemSecondActiveDocumentFile,
     systemFirstDocumentFilterName, setSystemFirstDocumentFilterName,
     systemSecondDocumentFilterName, setSystemSecondDocumentFilterName,
+    systemSelectedSheetsSet2, setSystemSelectedSheetsSet2,
+    systemSecondSelectedSheetsSet2, setSystemSecondSelectedSheetsSet2,
+    systemDocument1Set1Name, setSystemDocument1Set1Name,
+    systemDocument1Set2Name, setSystemDocument1Set2Name,
+    systemDocument2Set1Name, setSystemDocument2Set1Name,
+    systemDocument2Set2Name, setSystemDocument2Set2Name,
     systemDocumentsSwapped, setSystemDocumentsSwapped,
     fileDisplayNames, setFileDisplayNames,
     pageDisplayNames, setPageDisplayNames,

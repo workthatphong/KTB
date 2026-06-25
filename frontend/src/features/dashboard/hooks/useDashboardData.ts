@@ -39,8 +39,10 @@ export function useDashboardData(): DashboardState {
       systemExcludeWeekends: filterState.systemExcludeWeekends,
       systemSelectedFiles: filterState.systemSelectedFiles,
       systemSelectedSheets: filterState.systemSelectedSheets,
+      systemSelectedSheetsSet2: filterState.systemSelectedSheetsSet2,
       systemSecondSelectedFiles: filterState.systemSecondSelectedFiles,
       systemSecondSelectedSheets: filterState.systemSecondSelectedSheets,
+      systemSecondSelectedSheetsSet2: filterState.systemSecondSelectedSheetsSet2,
     }
   }), [
     fetching.data.sources,
@@ -61,8 +63,10 @@ export function useDashboardData(): DashboardState {
     filterState.systemExcludeWeekends,
     filterState.systemSelectedFiles,
     filterState.systemSelectedSheets,
+    filterState.systemSelectedSheetsSet2,
     filterState.systemSecondSelectedFiles,
     filterState.systemSecondSelectedSheets,
+    filterState.systemSecondSelectedSheetsSet2,
   ]);
 
   const workerQuery = useQuery({
@@ -95,7 +99,11 @@ export function useDashboardData(): DashboardState {
     workloadContributors: [],
     systemFlowRows: [],
     systemContributionRows: [],
+    systemContributionRowsSet1: [],
+    systemContributionRowsSet2: [],
     systemSecondContributionRows: [],
+    systemSecondContributionRowsSet1: [],
+    systemSecondContributionRowsSet2: [],
   };
 
   const kpiData = useMemo(() => workerData.kpis ? buildKpiData(workerData.kpis) : initialKpiData, [workerData.kpis]);

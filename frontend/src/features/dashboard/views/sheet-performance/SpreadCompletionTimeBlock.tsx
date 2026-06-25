@@ -22,6 +22,7 @@ export function SpreadCompletionTimeBlock({
   const [useTaskTypeFilter, setUseTaskTypeFilter] = useState(false);
   const [useIdleFilter, setUseIdleFilter] = useState(false);
   const [metricType, setMetricType] = useState('spread1to2'); // 'spread1to2' or 'spread2tofinal'
+  const [isGroupedView, setIsGroupedView] = useState(false);
   
   const sortMenuRef = useRef(null);
   const sortMenuPanelRef = useRef(null);
@@ -104,8 +105,17 @@ export function SpreadCompletionTimeBlock({
       : buildSpread2ToFinalActionData(secondSegments, systemTaskType);
   }, [secondSegments, systemTaskType, metricType]);
 
+  const { userData: rawGroupedData } = useMemo(() => {
+    if (!isGroupedView) return { userData: [] };
+    const allSegments = [...(firstSegments || []), ...(secondSegments || [])];
+    return metricType === 'spread1to2' 
+      ? buildSpreadCompletionTimeData(allSegments, systemTaskType, true)
+      : buildSpread2ToFinalActionData(allSegments, systemTaskType, true);
+  }, [isGroupedView, firstSegments, secondSegments, systemTaskType, metricType]);
+
   const firstData = useMemo(() => processData(rawFirstData), [rawFirstData, sortOrder, useTaskTypeFilter, useIdleFilter]);
   const secondData = useMemo(() => processData(rawSecondData), [rawSecondData, sortOrder, useTaskTypeFilter, useIdleFilter]);
+  const groupedData = useMemo(() => processData(rawGroupedData), [rawGroupedData, sortOrder, useTaskTypeFilter, useIdleFilter]);
 
   const taskTypeLabel = systemTaskType === 'all' ? 'Review & Edit Data Time' : 
                         systemTaskType === 'editData' ? 'Edit Data Time' : 
@@ -139,6 +149,10 @@ export function SpreadCompletionTimeBlock({
             >
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Display & Sort</div>
               <div className="flex flex-col gap-3">
+                <ToggleSetting checked={isGroupedView} onChange={() => setIsGroupedView(prev => !prev)}>
+                  Group into Single Chart
+                </ToggleSetting>
+                <div className="border-t border-slate-100 my-1"></div>
                 <ToggleSetting checked={sortOrder === 'desc'} onChange={() => setSortOrder(prev => prev === 'desc' ? 'default' : 'desc')}>
                   Highest First
                 </ToggleSetting>
@@ -199,67 +213,100 @@ export function SpreadCompletionTimeBlock({
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         <AnimatePresence mode="popLayout">
-          <motion.div 
-            key={`spread-time-${firstPanelId}`}
-            layoutId={`spread-time-${firstPanelId}`}
-            className="flex flex-col min-h-[240px]"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-500">{firstDocumentFilterName || 'First documents'}</h3>
-            </div>
-            <div className="flex-1 min-h-0">
-              {firstData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                  <Clock className="w-8 h-8 opacity-20" />
-                  <span className="text-sm font-semibold">No Data</span>
+          {isGroupedView ? (
+            <motion.div 
+              key="grouped-spread-time"
+              layoutId="grouped-spread-time"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -20 }}
+              transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+              className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
+            >
+              <h3 className="text-md font-bold text-slate-500 mb-4">All Documents</h3>
+              <div className="flex-1 min-h-0">
+                {groupedData.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                    <Clock className="w-8 h-8 opacity-20" />
+                    <span className="text-sm font-semibold">No Data</span>
+                  </div>
+                ) : (
+                  <SheetBreakdownChart 
+                    data={groupedData} 
+                    expanded={false} 
+                    activeFill="#10b981" 
+                    valueLabelFill="#10b981" 
+                    isDuration={isDurationMetric} 
+                    showAverageLine={true}
+                  />
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <>
+              <motion.div 
+                key={`spread-time-${firstPanelId}`}
+                layoutId={`spread-time-${firstPanelId}`}
+                className="flex flex-col min-h-[240px]"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-md font-bold text-slate-500">{firstDocumentFilterName || 'First documents'}</h3>
                 </div>
-              ) : (
-                <SheetBreakdownChart 
-                  data={firstData} 
-                  expanded={false} 
-                  activeFill="#10b981" 
-                  valueLabelFill="#10b981" 
-                  isDuration={isDurationMetric} 
-                  showAverageLine={true}
-                />
-              )}
-            </div>
-          </motion.div>
+                <div className="flex-1 min-h-0">
+                  {firstData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                      <Clock className="w-8 h-8 opacity-20" />
+                      <span className="text-sm font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SheetBreakdownChart 
+                      data={firstData} 
+                      expanded={false} 
+                      activeFill="#10b981" 
+                      valueLabelFill="#10b981" 
+                      isDuration={isDurationMetric} 
+                      showAverageLine={true}
+                    />
+                  )}
+                </div>
+              </motion.div>
 
-          <motion.div 
-            key={`spread-time-${secondPanelId}`}
-            layoutId={`spread-time-${secondPanelId}`}
-            className="flex flex-col min-h-[240px]"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -20 }}
-            transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-md font-bold text-slate-500">{secondDocumentFilterName || 'Second Documents'}</h3>
-            </div>
-            <div className="flex-1 min-h-0">
-              {secondData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
-                  <Clock className="w-8 h-8 opacity-20" />
-                  <span className="text-sm font-semibold">No Data</span>
+              <motion.div 
+                key={`spread-time-${secondPanelId}`}
+                layoutId={`spread-time-${secondPanelId}`}
+                className="flex flex-col min-h-[240px]"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-md font-bold text-slate-500">{secondDocumentFilterName || 'Second Documents'}</h3>
                 </div>
-              ) : (
-                <SheetBreakdownChart 
-                  data={secondData} 
-                  expanded={false} 
-                  activeFill="#10b981" 
-                  valueLabelFill="#10b981" 
-                  isDuration={isDurationMetric} 
-                  showAverageLine={true}
-                />
-              )}
-            </div>
-          </motion.div>
+                <div className="flex-1 min-h-0">
+                  {secondData.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
+                      <Clock className="w-8 h-8 opacity-20" />
+                      <span className="text-sm font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SheetBreakdownChart 
+                      data={secondData} 
+                      expanded={false} 
+                      activeFill="#10b981" 
+                      valueLabelFill="#10b981" 
+                      isDuration={isDurationMetric} 
+                      showAverageLine={true}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            </>
+          )}
         </AnimatePresence>
       </div>
     </div>

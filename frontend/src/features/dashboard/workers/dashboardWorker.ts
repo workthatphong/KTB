@@ -26,7 +26,7 @@ const api = {
       dateEnd: filterState.systemDateEnd,
       excludeWeekends: filterState.systemExcludeWeekends,
       selectedFiles: filterState.systemSelectedFiles,
-      selectedSheets: filterState.systemSelectedSheets,
+      selectedSheets: Array.from(new Set([...(filterState.systemSelectedSheets || []), ...(filterState.systemSelectedSheetsSet2 || [])])),
       selectedSegmentTypes: [],
     });
 
@@ -38,7 +38,7 @@ const api = {
       dateEnd: filterState.systemDateEnd,
       excludeWeekends: filterState.systemExcludeWeekends,
       selectedFiles: filterState.systemSecondSelectedFiles,
-      selectedSheets: filterState.systemSecondSelectedSheets,
+      selectedSheets: Array.from(new Set([...(filterState.systemSecondSelectedSheets || []), ...(filterState.systemSecondSelectedSheetsSet2 || [])])),
       selectedSegmentTypes: [],
     });
 
@@ -52,9 +52,9 @@ const api = {
       excludeWeekends: filterState.excludeWeekends,
     });
 
-    const systemFilters = computeFilters(systemDerived.parsedSegments, {
+    const systemFiltersSet1 = computeFilters(systemDerived.parsedSegments, {
       selectedFiles: filterState.systemSelectedFiles,
-      selectedSheets: filterState.systemSelectedSheets,
+      selectedSheets: filterState.systemSelectedSheets || [],
       selectedUsers: [],
       selectedSegmentTypes: [],
       showIdle: true,
@@ -62,15 +62,45 @@ const api = {
       excludeWeekends: filterState.systemExcludeWeekends,
     });
 
-    const systemSecondFilters = computeFilters(systemSecondDerived.parsedSegments, {
+    const systemFiltersSet2 = filterState.systemSelectedSheetsSet2?.length > 0 ? computeFilters(systemDerived.parsedSegments, {
+      selectedFiles: [],
+      selectedSheets: filterState.systemSelectedSheetsSet2,
+      selectedUsers: [],
+      selectedSegmentTypes: [],
+      showIdle: true,
+      dateRangeBounds: systemDerived.dateRangeBounds,
+      excludeWeekends: filterState.systemExcludeWeekends,
+    }) : { filteredBaseSegments: [], ganttVisibleSegments: [] };
+
+    const systemFilters = {
+      filteredBaseSegments: [...systemFiltersSet1.filteredBaseSegments, ...systemFiltersSet2.filteredBaseSegments],
+      ganttVisibleSegments: [...systemFiltersSet1.ganttVisibleSegments, ...systemFiltersSet2.ganttVisibleSegments],
+    };
+
+    const systemSecondFiltersSet1 = computeFilters(systemSecondDerived.parsedSegments, {
       selectedFiles: filterState.systemSecondSelectedFiles,
-      selectedSheets: filterState.systemSecondSelectedSheets,
+      selectedSheets: filterState.systemSecondSelectedSheets || [],
       selectedUsers: [],
       selectedSegmentTypes: [],
       showIdle: true,
       dateRangeBounds: systemSecondDerived.dateRangeBounds,
       excludeWeekends: filterState.systemExcludeWeekends,
     });
+
+    const systemSecondFiltersSet2 = filterState.systemSecondSelectedSheetsSet2?.length > 0 ? computeFilters(systemSecondDerived.parsedSegments, {
+      selectedFiles: [],
+      selectedSheets: filterState.systemSecondSelectedSheetsSet2,
+      selectedUsers: [],
+      selectedSegmentTypes: [],
+      showIdle: true,
+      dateRangeBounds: systemSecondDerived.dateRangeBounds,
+      excludeWeekends: filterState.systemExcludeWeekends,
+    }) : { filteredBaseSegments: [], ganttVisibleSegments: [] };
+
+    const systemSecondFilters = {
+      filteredBaseSegments: [...systemSecondFiltersSet1.filteredBaseSegments, ...systemSecondFiltersSet2.filteredBaseSegments],
+      ganttVisibleSegments: [...systemSecondFiltersSet1.ganttVisibleSegments, ...systemSecondFiltersSet2.ganttVisibleSegments],
+    };
 
     const systemFileFilters = computeFilters(systemDerived.parsedSegments, {
       selectedFiles: filterState.systemSelectedFiles,
@@ -94,8 +124,32 @@ const api = {
       selectedSegmentTypes: [],
     });
 
+    const systemMetricsSet1 = computeMetrics({
+      filteredBaseSegments: systemFiltersSet1.filteredBaseSegments,
+      showWorkloadIdle: true,
+      selectedSegmentTypes: [],
+    });
+
+    const systemMetricsSet2 = computeMetrics({
+      filteredBaseSegments: systemFiltersSet2.filteredBaseSegments,
+      showWorkloadIdle: true,
+      selectedSegmentTypes: [],
+    });
+
     const systemSecondMetrics = computeMetrics({
       filteredBaseSegments: systemSecondFilters.filteredBaseSegments,
+      showWorkloadIdle: true,
+      selectedSegmentTypes: [],
+    });
+
+    const systemSecondMetricsSet1 = computeMetrics({
+      filteredBaseSegments: systemSecondFiltersSet1.filteredBaseSegments,
+      showWorkloadIdle: true,
+      selectedSegmentTypes: [],
+    });
+
+    const systemSecondMetricsSet2 = computeMetrics({
+      filteredBaseSegments: systemSecondFiltersSet2.filteredBaseSegments,
       showWorkloadIdle: true,
       selectedSegmentTypes: [],
     });
@@ -125,7 +179,11 @@ const api = {
       workloadContributors: userMetrics.workloadContributors,
       systemFlowRows: systemMetrics.flowRows,
       systemContributionRows: systemMetrics.contributionRows,
+      systemContributionRowsSet1: systemMetricsSet1.contributionRows,
+      systemContributionRowsSet2: systemMetricsSet2.contributionRows,
       systemSecondContributionRows: systemSecondMetrics.contributionRows,
+      systemSecondContributionRowsSet1: systemSecondMetricsSet1.contributionRows,
+      systemSecondContributionRowsSet2: systemSecondMetricsSet2.contributionRows,
     };
   }
 };

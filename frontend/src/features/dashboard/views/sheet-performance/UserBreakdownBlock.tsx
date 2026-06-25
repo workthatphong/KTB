@@ -11,6 +11,14 @@ export function UserBreakdownBlock({
   secondDocumentFilterName,
   firstContributionRows,
   secondContributionRows,
+  firstContributionRowsSet1,
+  firstContributionRowsSet2,
+  secondContributionRowsSet1,
+  secondContributionRowsSet2,
+  firstDocument1Set1Name,
+  firstDocument1Set2Name,
+  secondDocument2Set1Name,
+  secondDocument2Set2Name,
   firstSegments,
   secondSegments,
   systemTaskType,
@@ -20,6 +28,7 @@ export function UserBreakdownBlock({
 }) {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [displayMetric, setDisplayMetric] = useState('avg'); // 'pct_total', 'pct_avg', 'total', 'avg'
+  const [analyzeSets, setAnalyzeSets] = useState(false);
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -42,18 +51,32 @@ export function UserBreakdownBlock({
   const secondUserAvg = useMemo(() => secondPageTimesUnfiltered.userData.length > 0 ? secondPageTimesUnfiltered.userData.reduce((acc, curr) => acc + curr.value, 0) / secondPageTimesUnfiltered.userData.length : 0, [secondPageTimesUnfiltered.userData]);
 
   const isTotalBased = displayMetric === 'pct_total' || displayMetric === 'total';
-  
-  const firstDisplayData = useMemo(() => ({
-    cognizeSeconds: isTotalBased ? firstData.cognizeSeconds : (firstData.totalSeconds > 0 ? (firstData.cognizeSeconds / firstData.totalSeconds) * firstUserAvg : 0),
-    othersSeconds: isTotalBased ? firstData.othersSeconds : (firstData.totalSeconds > 0 ? (firstData.othersSeconds / firstData.totalSeconds) * firstUserAvg : 0),
-    totalSeconds: isTotalBased ? firstData.totalSeconds : firstUserAvg
-  }), [isTotalBased, firstUserAvg, firstData]);
 
-  const secondDisplayData = useMemo(() => ({
-    cognizeSeconds: isTotalBased ? secondData.cognizeSeconds : (secondData.totalSeconds > 0 ? (secondData.cognizeSeconds / secondData.totalSeconds) * secondUserAvg : 0),
-    othersSeconds: isTotalBased ? secondData.othersSeconds : (secondData.totalSeconds > 0 ? (secondData.othersSeconds / secondData.totalSeconds) * secondUserAvg : 0),
-    totalSeconds: isTotalBased ? secondData.totalSeconds : secondUserAvg
-  }), [isTotalBased, secondUserAvg, secondData]);
+  const formatDisplayData = (dataRow, totalAvg, isTotal) => {
+    if (!dataRow) return { cognizeSeconds: 0, othersSeconds: 0, totalSeconds: 0 };
+    return {
+      cognizeSeconds: isTotal ? dataRow.cognizeSeconds : (dataRow.totalSeconds > 0 ? (dataRow.cognizeSeconds / dataRow.totalSeconds) * totalAvg : 0),
+      othersSeconds: isTotal ? dataRow.othersSeconds : (dataRow.totalSeconds > 0 ? (dataRow.othersSeconds / dataRow.totalSeconds) * totalAvg : 0),
+      totalSeconds: isTotal ? dataRow.totalSeconds : totalAvg
+    };
+  };
+
+  const firstDisplayData = useMemo(() => formatDisplayData(firstData, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstData]);
+  const secondDisplayData = useMemo(() => formatDisplayData(secondData, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondData]);
+
+  // Set-based processing
+  const firstDataSet1 = useMemo(() => getCognizeVsOthersData(firstContributionRowsSet1 || [], systemTaskType), [firstContributionRowsSet1, systemTaskType]);
+  const firstDataSet2 = useMemo(() => getCognizeVsOthersData(firstContributionRowsSet2 || [], systemTaskType), [firstContributionRowsSet2, systemTaskType]);
+  const secondDataSet1 = useMemo(() => getCognizeVsOthersData(secondContributionRowsSet1 || [], systemTaskType), [secondContributionRowsSet1, systemTaskType]);
+  const secondDataSet2 = useMemo(() => getCognizeVsOthersData(secondContributionRowsSet2 || [], systemTaskType), [secondContributionRowsSet2, systemTaskType]);
+
+  const firstDisplayDataSet1 = useMemo(() => formatDisplayData(firstDataSet1, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstDataSet1]);
+  const firstDisplayDataSet2 = useMemo(() => formatDisplayData(firstDataSet2, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstDataSet2]);
+  const secondDisplayDataSet1 = useMemo(() => formatDisplayData(secondDataSet1, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondDataSet1]);
+  const secondDisplayDataSet2 = useMemo(() => formatDisplayData(secondDataSet2, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondDataSet2]);
+
+  const hasFirstSets = analyzeSets && ((firstContributionRowsSet1?.length || 0) > 0 || (firstContributionRowsSet2?.length || 0) > 0);
+  const hasSecondSets = analyzeSets && ((secondContributionRowsSet1?.length || 0) > 0 || (secondContributionRowsSet2?.length || 0) > 0);
 
   return (
     <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-1 ${showFilterMenu ? 'z-[120]' : 'z-10'}`}>
@@ -85,6 +108,16 @@ export function UserBreakdownBlock({
                   </button>
                 ))}
               </div>
+              <div className="border-t border-slate-100 my-2"></div>
+              <label className="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-slate-50 rounded-md transition-colors">
+                <input 
+                  type="checkbox" 
+                  checked={analyzeSets} 
+                  onChange={() => setAnalyzeSets(!analyzeSets)}
+                  className="accent-blue-600 w-3.5 h-3.5 rounded border-slate-300"
+                />
+                <span className="text-xs font-medium text-slate-600">Analyze Sets</span>
+              </label>
             </div>
           )}
         </div>
@@ -106,20 +139,55 @@ export function UserBreakdownBlock({
             transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
             className="flex flex-col relative z-10"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-md font-bold text-slate-500">{firstDocumentFilterName || 'First documents'}</h3>
-              <span className="text-md font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayData.totalSeconds) : `${firstDisplayData.totalSeconds.toLocaleString()} items`}</span>
-            </div>
-            <div className="flex-1 mt-2">
-              {firstDisplayData.totalSeconds === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-slate-400 gap-3">
-                  <Users className="w-8 h-8 opacity-20" />
-                  <span className="text-sm font-semibold">No Data</span>
+            {hasFirstSets ? (
+              <div className="flex flex-col gap-6 w-full mt-2">
+                {/* Set 1 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-500">{`${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`}</h3>
+                    <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayDataSet1.totalSeconds) : `${firstDisplayDataSet1.totalSeconds.toLocaleString()} items`}</span>
+                  </div>
+                  {firstDisplayDataSet1.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-4 text-slate-300 gap-2">
+                      <span className="text-xs font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={firstDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
                 </div>
-              ) : (
-                <SingleCognizeBar data={firstDisplayData} displayMetric={displayMetric} isDuration={isDurationDisplay} />
-              )}
-            </div>
+                {/* Set 2 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-500">{`${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`}</h3>
+                    <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayDataSet2.totalSeconds) : `${firstDisplayDataSet2.totalSeconds.toLocaleString()} items`}</span>
+                  </div>
+                  {firstDisplayDataSet2.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-4 text-slate-300 gap-2">
+                      <span className="text-xs font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={firstDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-md font-bold text-slate-500">{firstDocumentFilterName || 'First documents'}</h3>
+                  <span className="text-md font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayData.totalSeconds) : `${firstDisplayData.totalSeconds.toLocaleString()} items`}</span>
+                </div>
+                <div className="flex-1 mt-2">
+                  {firstDisplayData.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-slate-400 gap-3">
+                      <Users className="w-8 h-8 opacity-20" />
+                      <span className="text-sm font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={firstDisplayData} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
           
           {/* Second Documents */}
@@ -132,20 +200,55 @@ export function UserBreakdownBlock({
             transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
             className="flex flex-col relative z-10"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-md font-bold text-slate-500">{secondDocumentFilterName || 'Second Documents'}</h3>
-              <span className="text-md font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayData.totalSeconds) : `${secondDisplayData.totalSeconds.toLocaleString()} items`}</span>
-            </div>
-            <div className="flex-1 mt-2">
-              {secondDisplayData.totalSeconds === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-slate-400 gap-3">
-                  <Users className="w-8 h-8 opacity-20" />
-                  <span className="text-sm font-semibold">No Data</span>
+            {hasSecondSets ? (
+              <div className="flex flex-col gap-6 w-full mt-2">
+                {/* Set 1 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-500">{`${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`}</h3>
+                    <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayDataSet1.totalSeconds) : `${secondDisplayDataSet1.totalSeconds.toLocaleString()} items`}</span>
+                  </div>
+                  {secondDisplayDataSet1.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-4 text-slate-300 gap-2">
+                      <span className="text-xs font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={secondDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
                 </div>
-              ) : (
-                <SingleCognizeBar data={secondDisplayData} displayMetric={displayMetric} isDuration={isDurationDisplay} />
-              )}
-            </div>
+                {/* Set 2 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-500">{`${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`}</h3>
+                    <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayDataSet2.totalSeconds) : `${secondDisplayDataSet2.totalSeconds.toLocaleString()} items`}</span>
+                  </div>
+                  {secondDisplayDataSet2.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-4 text-slate-300 gap-2">
+                      <span className="text-xs font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={secondDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-md font-bold text-slate-500">{secondDocumentFilterName || 'Second Documents'}</h3>
+                  <span className="text-md font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayData.totalSeconds) : `${secondDisplayData.totalSeconds.toLocaleString()} items`}</span>
+                </div>
+                <div className="flex-1 mt-2">
+                  {secondDisplayData.totalSeconds === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-6 text-slate-400 gap-3">
+                      <Users className="w-8 h-8 opacity-20" />
+                      <span className="text-sm font-semibold">No Data</span>
+                    </div>
+                  ) : (
+                    <SingleCognizeBar data={secondDisplayData} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

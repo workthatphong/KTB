@@ -10,6 +10,14 @@ export function SheetPerformanceView({
   secondDocumentFilterName,
   firstContributionRows,
   secondContributionRows,
+  firstContributionRowsSet1,
+  firstContributionRowsSet2,
+  secondContributionRowsSet1,
+  secondContributionRowsSet2,
+  firstDocument1Set1Name,
+  firstDocument1Set2Name,
+  secondDocument2Set1Name,
+  secondDocument2Set2Name,
   systemDocumentsSwapped,
   firstSegments,
   secondSegments,
@@ -56,6 +64,14 @@ export function SheetPerformanceView({
           secondDocumentFilterName={secondDocumentFilterName}
           firstContributionRows={firstContributionRows}
           secondContributionRows={secondContributionRows}
+          firstContributionRowsSet1={firstContributionRowsSet1}
+          firstContributionRowsSet2={firstContributionRowsSet2}
+          secondContributionRowsSet1={secondContributionRowsSet1}
+          secondContributionRowsSet2={secondContributionRowsSet2}
+          firstDocument1Set1Name={firstDocument1Set1Name}
+          firstDocument1Set2Name={firstDocument1Set2Name}
+          secondDocument2Set1Name={secondDocument2Set1Name}
+          secondDocument2Set2Name={secondDocument2Set2Name}
           firstSegments={firstSegments}
           secondSegments={secondSegments}
           systemTaskType={systemTaskType}
