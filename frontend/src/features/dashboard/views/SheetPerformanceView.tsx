@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { UserBreakdownBlock } from './sheet-performance/UserBreakdownBlock';
 import { TimePerPageBlock } from './sheet-performance/TimePerPageBlock';
 import { TimePerUserBlock } from './sheet-performance/TimePerUserBlock';
+import { SpreadCompletionTimeBlock } from './sheet-performance/SpreadCompletionTimeBlock';
 
 export function SheetPerformanceView({ 
   firstDocumentFilterName,
@@ -94,6 +95,17 @@ export function SheetPerformanceView({
           systemDocumentsSwapped={systemDocumentsSwapped}
           firstPanelId={firstPanelId}
           secondPanelId={secondPanelId}
+        />
+
+        <SpreadCompletionTimeBlock
+          firstDocumentFilterName={firstDocumentFilterName}
+          firstSegments={firstSegments}
+          secondDocumentFilterName={secondDocumentFilterName}
+          secondSegments={secondSegments}
+          firstPanelId={firstPanelId}
+          secondPanelId={secondPanelId}
+          isTransparentPopup={isTransparentPopup}
+          systemTaskType={systemTaskType}
         />
       </div>
     </div>

@@ -67,7 +67,7 @@ function DurationBarLabel({ x, y, width, height, value, index, chartData, isMobi
   );
 }
 
-export const ProcessTimeBreakdownChart = ({ data, showLabels = true }) => {
+export const ProcessTimeBreakdownChart = ({ data, showLabels = true, customStackKeys = null }) => {
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 640);
   
   React.useEffect(() => {
@@ -76,10 +76,35 @@ export const ProcessTimeBreakdownChart = ({ data, showLabels = true }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const currentStackKeys = customStackKeys || STACK_KEYS;
   const rows = Array.isArray(data) ? data : [];
-  const hasStackShape = rows.some((row) => STACK_KEYS.some(({ key }) => Number(row[key]) > 0));
-  const chartData = React.useMemo(() => normalizeChartData(data), [data]);
-  const stackKeys = React.useMemo(() => getStackKeys(data), [data]);
+  const hasStackShape = rows.some((row) => currentStackKeys.some(({ key }) => Number(row[key]) > 0));
+  
+  const chartData = React.useMemo(() => {
+    if (rows.length === 0) return [];
+    if (hasStackShape) {
+      return rows.map((row, index) => ({
+        ...row,
+        name: row.name || row.label || `Step ${index + 1}`,
+      }));
+    }
+    return rows.map((row, index) => ({
+      ...row,
+      id: row.key || row.id || row.label || `segment_${index}`,
+      name: row.label || row.name || `Segment ${index + 1}`,
+      seconds: Number(row.seconds) || 0,
+      color: row.color || '#94A3B8',
+    }));
+  }, [data, hasStackShape]);
+
+  const stackKeys = React.useMemo(() => {
+    if (hasStackShape) return currentStackKeys;
+    return rows.map((row, index) => ({
+      key: row.key || row.id || row.label || `segment_${index}`,
+      label: row.label || row.name || `Segment ${index + 1}`,
+      color: row.color || '#94A3B8',
+    }));
+  }, [data, hasStackShape, currentStackKeys]);
   
   return (
     <div className="h-full min-h-[320px] w-full">
