@@ -14,6 +14,10 @@ export function SheetPerformanceView({
   firstContributionRowsSet2,
   secondContributionRowsSet1,
   secondContributionRowsSet2,
+  firstSegmentsSet1,
+  firstSegmentsSet2,
+  secondSegmentsSet1,
+  secondSegmentsSet2,
   firstDocument1Set1Name,
   firstDocument1Set2Name,
   secondDocument2Set1Name,
@@ -68,6 +72,10 @@ export function SheetPerformanceView({
           firstContributionRowsSet2={firstContributionRowsSet2}
           secondContributionRowsSet1={secondContributionRowsSet1}
           secondContributionRowsSet2={secondContributionRowsSet2}
+          firstSegmentsSet1={firstSegmentsSet1}
+          firstSegmentsSet2={firstSegmentsSet2}
+          secondSegmentsSet1={secondSegmentsSet1}
+          secondSegmentsSet2={secondSegmentsSet2}
           firstDocument1Set1Name={firstDocument1Set1Name}
           firstDocument1Set2Name={firstDocument1Set2Name}
           secondDocument2Set1Name={secondDocument2Set1Name}

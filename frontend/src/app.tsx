@@ -69,6 +69,10 @@ function App() {
                     firstContributionRowsSet2={dashboard.systemContributionRowsSet2}
                     secondContributionRowsSet1={dashboard.systemSecondContributionRowsSet1}
                     secondContributionRowsSet2={dashboard.systemSecondContributionRowsSet2}
+                    firstSegmentsSet1={dashboard.systemFilteredBaseSegmentsSet1}
+                    firstSegmentsSet2={dashboard.systemFilteredBaseSegmentsSet2}
+                    secondSegmentsSet1={dashboard.systemSecondFilteredBaseSegmentsSet1}
+                    secondSegmentsSet2={dashboard.systemSecondFilteredBaseSegmentsSet2}
                     firstDocument1Set1Name={dashboard.systemDocument1Set1Name}
                     firstDocument1Set2Name={dashboard.systemDocument1Set2Name}
                     secondDocument2Set1Name={dashboard.systemDocument2Set1Name}

@@ -169,7 +169,11 @@ const api = {
       filteredBaseSegments: userFilters.filteredBaseSegments,
       ganttVisibleSegments: userFilters.ganttVisibleSegments,
       systemFilteredBaseSegments: systemFilters.filteredBaseSegments,
+      systemFilteredBaseSegmentsSet1: systemFiltersSet1.filteredBaseSegments,
+      systemFilteredBaseSegmentsSet2: systemFiltersSet2.filteredBaseSegments,
       systemSecondFilteredBaseSegments: systemSecondFilters.filteredBaseSegments,
+      systemSecondFilteredBaseSegmentsSet1: systemSecondFiltersSet1.filteredBaseSegments,
+      systemSecondFilteredBaseSegmentsSet2: systemSecondFiltersSet2.filteredBaseSegments,
       systemFileLevelSegments: systemFileFilters.filteredBaseSegments,
 
       chartBaseSegments: userMetrics.chartBaseSegments,

@@ -15,6 +15,10 @@ export function UserBreakdownBlock({
   firstContributionRowsSet2,
   secondContributionRowsSet1,
   secondContributionRowsSet2,
+  firstSegmentsSet1,
+  firstSegmentsSet2,
+  secondSegmentsSet1,
+  secondSegmentsSet2,
   firstDocument1Set1Name,
   firstDocument1Set2Name,
   secondDocument2Set1Name,
@@ -61,6 +65,13 @@ export function UserBreakdownBlock({
     };
   };
 
+  const getAveragePerSheet = (segments) => {
+    const pageTimes = buildPageTimeData(segments || [], systemTaskType, 'default', 'all');
+    return pageTimes.userData.length > 0
+      ? pageTimes.userData.reduce((acc, curr) => acc + curr.value, 0) / pageTimes.userData.length
+      : 0;
+  };
+
   const firstDisplayData = useMemo(() => formatDisplayData(firstData, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstData]);
   const secondDisplayData = useMemo(() => formatDisplayData(secondData, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondData]);
 
@@ -70,10 +81,15 @@ export function UserBreakdownBlock({
   const secondDataSet1 = useMemo(() => getCognizeVsOthersData(secondContributionRowsSet1 || [], systemTaskType), [secondContributionRowsSet1, systemTaskType]);
   const secondDataSet2 = useMemo(() => getCognizeVsOthersData(secondContributionRowsSet2 || [], systemTaskType), [secondContributionRowsSet2, systemTaskType]);
 
-  const firstDisplayDataSet1 = useMemo(() => formatDisplayData(firstDataSet1, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstDataSet1]);
-  const firstDisplayDataSet2 = useMemo(() => formatDisplayData(firstDataSet2, firstUserAvg, isTotalBased), [isTotalBased, firstUserAvg, firstDataSet2]);
-  const secondDisplayDataSet1 = useMemo(() => formatDisplayData(secondDataSet1, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondDataSet1]);
-  const secondDisplayDataSet2 = useMemo(() => formatDisplayData(secondDataSet2, secondUserAvg, isTotalBased), [isTotalBased, secondUserAvg, secondDataSet2]);
+  const firstSet1Avg = useMemo(() => getAveragePerSheet(firstSegmentsSet1), [firstSegmentsSet1, systemTaskType]);
+  const firstSet2Avg = useMemo(() => getAveragePerSheet(firstSegmentsSet2), [firstSegmentsSet2, systemTaskType]);
+  const secondSet1Avg = useMemo(() => getAveragePerSheet(secondSegmentsSet1), [secondSegmentsSet1, systemTaskType]);
+  const secondSet2Avg = useMemo(() => getAveragePerSheet(secondSegmentsSet2), [secondSegmentsSet2, systemTaskType]);
+
+  const firstDisplayDataSet1 = useMemo(() => formatDisplayData(firstDataSet1, analyzeSets ? firstSet1Avg : firstUserAvg, isTotalBased), [analyzeSets, firstSet1Avg, firstUserAvg, firstDataSet1, isTotalBased]);
+  const firstDisplayDataSet2 = useMemo(() => formatDisplayData(firstDataSet2, analyzeSets ? firstSet2Avg : firstUserAvg, isTotalBased), [analyzeSets, firstSet2Avg, firstUserAvg, firstDataSet2, isTotalBased]);
+  const secondDisplayDataSet1 = useMemo(() => formatDisplayData(secondDataSet1, analyzeSets ? secondSet1Avg : secondUserAvg, isTotalBased), [analyzeSets, isTotalBased, secondSet1Avg, secondUserAvg, secondDataSet1]);
+  const secondDisplayDataSet2 = useMemo(() => formatDisplayData(secondDataSet2, analyzeSets ? secondSet2Avg : secondUserAvg, isTotalBased), [analyzeSets, isTotalBased, secondSet2Avg, secondUserAvg, secondDataSet2]);
 
   const hasFirstSets = analyzeSets && ((firstContributionRowsSet1?.length || 0) > 0 || (firstContributionRowsSet2?.length || 0) > 0);
   const hasSecondSets = analyzeSets && ((secondContributionRowsSet1?.length || 0) > 0 || (secondContributionRowsSet2?.length || 0) > 0);
@@ -140,11 +156,13 @@ export function UserBreakdownBlock({
             className="flex flex-col relative z-10"
           >
             {hasFirstSets ? (
-              <div className="flex flex-col gap-6 w-full mt-2">
+              <div className="flex flex-col gap-4 w-full">
+                {/* Document Name */}
+                <h3 className="text-md font-bold text-slate-500 text-center">{firstDocumentFilterName || 'First documents'}</h3>
                 {/* Set 1 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-500">{`${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`}</h3>
+                    <h4 className="text-sm font-semibold text-slate-400">{firstDocument1Set1Name || 'Set 1'}</h4>
                     <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayDataSet1.totalSeconds) : `${firstDisplayDataSet1.totalSeconds.toLocaleString()} items`}</span>
                   </div>
                   {firstDisplayDataSet1.totalSeconds === 0 ? (
@@ -158,7 +176,7 @@ export function UserBreakdownBlock({
                 {/* Set 2 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-500">{`${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`}</h3>
+                    <h4 className="text-sm font-semibold text-slate-400">{firstDocument1Set2Name || 'Set 2'}</h4>
                     <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(firstDisplayDataSet2.totalSeconds) : `${firstDisplayDataSet2.totalSeconds.toLocaleString()} items`}</span>
                   </div>
                   {firstDisplayDataSet2.totalSeconds === 0 ? (
@@ -201,11 +219,13 @@ export function UserBreakdownBlock({
             className="flex flex-col relative z-10"
           >
             {hasSecondSets ? (
-              <div className="flex flex-col gap-6 w-full mt-2">
+              <div className="flex flex-col gap-4 w-full">
+                {/* Document Name */}
+                <h3 className="text-md font-bold text-slate-500 text-center">{secondDocumentFilterName || 'Second Documents'}</h3>
                 {/* Set 1 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-500">{`${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`}</h3>
+                    <h4 className="text-sm font-semibold text-slate-400">{secondDocument2Set1Name || 'Set 1'}</h4>
                     <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayDataSet1.totalSeconds) : `${secondDisplayDataSet1.totalSeconds.toLocaleString()} items`}</span>
                   </div>
                   {secondDisplayDataSet1.totalSeconds === 0 ? (
@@ -219,7 +239,7 @@ export function UserBreakdownBlock({
                 {/* Set 2 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-500">{`${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`}</h3>
+                    <h4 className="text-sm font-semibold text-slate-400">{secondDocument2Set2Name || 'Set 2'}</h4>
                     <span className="text-sm font-bold text-slate-500">{isDurationDisplay ? formatDuration(secondDisplayDataSet2.totalSeconds) : `${secondDisplayDataSet2.totalSeconds.toLocaleString()} items`}</span>
                   </div>
                   {secondDisplayDataSet2.totalSeconds === 0 ? (
