@@ -37,8 +37,7 @@ export const SheetBreakdownChart = React.memo(({
   const containerRef = useRef(null);
   const scrollAreaRef = useRef(null);
   const [scrollAreaWidth, setScrollAreaWidth] = useState(0);
-  
-  if (!data || data.length === 0) return null;
+  const safeData = Array.isArray(data) ? data : [];
 
   const labelSpace = 90; // Pixels needed for label
   const yAxisGap = (isDiffChart || isButterflyChart) ? 85 : 5;
@@ -46,8 +45,12 @@ export const SheetBreakdownChart = React.memo(({
   const chartMargin = { top: 10, right: 80, left: 10, bottom: 5 };
   const estimatedPlotWidth = Math.max((scrollAreaWidth || 800) - yAxisWidth - chartMargin.left - chartMargin.right, 200);
 
-  const average = forcedAverage !== null ? forcedAverage : (data.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) / data.length);
-  const maxVal = Math.max(...data.map(d => Number(d.value) || 0), average, 1);
+  const average = forcedAverage !== null
+    ? forcedAverage
+    : (safeData.length > 0
+      ? safeData.reduce((acc, curr) => acc + (Number(curr.value) || 0), 0) / safeData.length
+      : 0);
+  const maxVal = Math.max(...safeData.map(d => Number(d.value) || 0), average, 1);
 
   let niceMax = maxVal * 1.25;
   if (estimatedPlotWidth > labelSpace + 20) {
@@ -57,7 +60,7 @@ export const SheetBreakdownChart = React.memo(({
   }
 
   const maxAbs = Math.max(
-    ...data.map(d => {
+    ...safeData.map(d => {
       if (isButterflyChart) {
         return Math.max(Math.abs(d.leftValue || 0), Math.abs(d.rightValue || 0));
       }
@@ -77,7 +80,7 @@ export const SheetBreakdownChart = React.memo(({
   const xDomain = (isDiffChart || isButterflyChart) ? [-niceMaxAbs, niceMaxAbs] : [0, niceMax];  
 
   const barHeight = 40;
-  const totalContentHeight = data.length * barHeight;
+  const totalContentHeight = safeData.length * barHeight;
   const viewportHeight = expanded ? totalContentHeight : Math.min(totalContentHeight, barHeight * 8);
   const expandedMaxHeight = 'min(70vh, 640px)';
   
@@ -111,6 +114,8 @@ export const SheetBreakdownChart = React.memo(({
     };
   }, []);
 
+  if (safeData.length === 0) return null;
+
   return (
     <div
       className={`w-full flex flex-col bg-white relative transition-all ${expanded ? '' : 'mt-4'}`}
@@ -140,7 +145,7 @@ export const SheetBreakdownChart = React.memo(({
         <div style={{ height: `${totalContentHeight}px`, width: '100%' }}>
           <ResponsiveContainer width="100%" height="100%" debounce={200}>
             <BarChart
-              data={data}
+              data={safeData}
               layout="vertical"
               syncId={syncId}
               margin={{ ...chartMargin, top: 10, bottom: 5 }}
@@ -171,14 +176,14 @@ export const SheetBreakdownChart = React.memo(({
                       content={(props) => (
                         <DurationBarLabel 
                           {...props} 
-                          data={data} 
+                          data={safeData} 
                           isDuration={isDuration} 
                           average={average}
                           isButterflyChart={true}
                         />
                       )} 
                     />
-                    {data.map((entry, index) => (
+                    {safeData.map((entry, index) => (
                       <Cell key={`cell-left-${index}-${entry.leftFill}`} fill={entry.leftFill} />
                     ))}
                   </Bar>
@@ -187,14 +192,14 @@ export const SheetBreakdownChart = React.memo(({
                       content={(props) => (
                         <DurationBarLabel 
                           {...props} 
-                          data={data} 
+                          data={safeData} 
                           isDuration={isDuration} 
                           average={average}
                           isButterflyChart={true}
                         />
                       )} 
                     />
-                    {data.map((entry, index) => (
+                    {safeData.map((entry, index) => (
                       <Cell key={`cell-right-${index}-${entry.rightFill}`} fill={entry.rightFill} />
                     ))}
                   </Bar>
@@ -208,7 +213,7 @@ export const SheetBreakdownChart = React.memo(({
                         <DurationBarLabel 
                           {...props} 
                           value={props.payload ? props.payload.value : props.value}
-                          data={data} 
+                          data={safeData} 
                           isDuration={isDuration} 
                           average={average}
                           fillColor={valueLabelFill}
@@ -225,17 +230,17 @@ export const SheetBreakdownChart = React.memo(({
                 >
                   <LabelList 
                     content={(props) => (
-                      <DurationBarLabel 
-                        {...props} 
-                        data={data} 
-                        isDuration={isDuration} 
-                        average={average}
-                        fillColor={valueLabelFill}
+                        <DurationBarLabel 
+                          {...props} 
+                          data={safeData} 
+                          isDuration={isDuration} 
+                          average={average}
+                          fillColor={valueLabelFill}
                         isDiffChart={isDiffChart}
                       />
                     )} 
                   />
-                  {data.map((entry, index) => {
+                  {safeData.map((entry, index) => {
                     const cellFill = entry.fill || ((Number(entry.value) >= average) ? activeFill : inactiveFill);
                     return (
                       <Cell 
