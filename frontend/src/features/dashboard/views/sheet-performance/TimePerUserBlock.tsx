@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { SheetBreakdownChart } from '../../../charts/SheetBreakdownChart';
@@ -12,6 +12,14 @@ export function TimePerUserBlock({
   secondDocumentFilterName,
   firstSegments,
   secondSegments,
+  firstSegmentsSet1,
+  firstSegmentsSet2,
+  secondSegmentsSet1,
+  secondSegmentsSet2,
+  firstDocument1Set1Name,
+  firstDocument1Set2Name,
+  secondDocument2Set1Name,
+  secondDocument2Set2Name,
   systemTaskType,
   isDurationDisplay,
   userRoleFilter,
@@ -28,6 +36,7 @@ export function TimePerUserBlock({
   const [showDiffChart, setShowDiffChart] = usePersistentState('sheet_perf_timePerUser_showDiffChart', false);
   const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_timePerUser_groupedView', false);
   const [isTotalView, setIsTotalView] = usePersistentState('sheet_perf_timePerUser_totalView', false);
+  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_timePerUser_comparisonMode', 'documents');
 
   const scrollRefFirst = useRef(null);
   const scrollRefSecond = useRef(null);
@@ -58,14 +67,65 @@ export function TimePerUserBlock({
     }
   };
 
+  const comparisonConfig = useMemo(() => {
+    const configs = {
+      documents: {
+        leftTitle: firstDocumentFilterName || 'First documents',
+        rightTitle: secondDocumentFilterName || 'Second Documents',
+        leftSegments: firstSegments || [],
+        rightSegments: secondSegments || [],
+      },
+      first_document_sets: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`,
+        rightTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`,
+        leftSegments: firstSegmentsSet1 || [],
+        rightSegments: firstSegmentsSet2 || [],
+      },
+      second_document_sets: {
+        leftTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`,
+        leftSegments: secondSegmentsSet1 || [],
+        rightSegments: secondSegmentsSet2 || [],
+      },
+      set1_across_documents: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`,
+        leftSegments: firstSegmentsSet1 || [],
+        rightSegments: secondSegmentsSet1 || [],
+      },
+      set2_across_documents: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`,
+        leftSegments: firstSegmentsSet2 || [],
+        rightSegments: secondSegmentsSet2 || [],
+      },
+    };
+
+    return configs[comparisonMode] || configs.documents;
+  }, [
+    comparisonMode,
+    firstDocumentFilterName,
+    secondDocumentFilterName,
+    firstSegments,
+    secondSegments,
+    firstSegmentsSet1,
+    firstSegmentsSet2,
+    secondSegmentsSet1,
+    secondSegmentsSet2,
+    firstDocument1Set1Name,
+    firstDocument1Set2Name,
+    secondDocument2Set1Name,
+    secondDocument2Set2Name,
+  ]);
+
   const {
     groupedUserTimes,
     firstUserTimes,
     secondUserTimes,
     diffUserData
   } = useTimePerUserData({
-    firstSegments,
-    secondSegments,
+    firstSegments: comparisonConfig.leftSegments,
+    secondSegments: comparisonConfig.rightSegments,
     systemTaskType,
     userSortOrder,
     userRoleFilter,
@@ -94,6 +154,8 @@ export function TimePerUserBlock({
         setShowDiffChart={setShowDiffChart}
         userSortOrder={userSortOrder}
         setUserSortOrder={setUserSortOrder}
+        comparisonMode={comparisonMode}
+        setComparisonMode={setComparisonMode}
       />
 
       <h2 className="text-xl font-extrabold text-[#17335f] text-center mb-6">
@@ -112,8 +174,8 @@ export function TimePerUserBlock({
               transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
-                <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
-                <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
+                <h3 className="text-md font-bold text-slate-500 mb-4">{comparisonConfig.leftTitle}</h3>
+                <h3 className="text-md font-bold text-slate-500 mb-4">{comparisonConfig.rightTitle}</h3>
               </div>
               <div className="flex-1 min-h-0">
                 <SheetBreakdownChart 
@@ -137,7 +199,7 @@ export function TimePerUserBlock({
               transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
               className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
             >
-              <h3 className="text-md font-bold text-slate-500 mb-4">All Users</h3>
+              <h3 className="text-md font-bold text-slate-500 mb-4">{`${comparisonConfig.leftTitle} + ${comparisonConfig.rightTitle}`}</h3>
               <div className="flex-1 min-h-0">
                 {groupedUserTimes.userData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
@@ -169,7 +231,7 @@ export function TimePerUserBlock({
                 transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
                 className="flex flex-col min-h-[240px]"
               >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{firstDocumentFilterName || 'First documents'}</h3>
+                <h3 className="text-md font-bold text-slate-500 mb-4">{comparisonConfig.leftTitle}</h3>
                 <div className="flex-1 min-h-0">
                   {firstUserTimes.userData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
@@ -201,7 +263,7 @@ export function TimePerUserBlock({
                 transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
                 className="flex flex-col min-h-[240px]"
               >
-                <h3 className="text-md font-bold text-slate-500 mb-4">{secondDocumentFilterName || 'Second Documents'}</h3>
+                <h3 className="text-md font-bold text-slate-500 mb-4">{comparisonConfig.rightTitle}</h3>
                 <div className="flex-1 min-h-0">
                   {secondUserTimes.userData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">

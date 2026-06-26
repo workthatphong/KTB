@@ -102,14 +102,14 @@ export function TimePerPageBlock({
         rightSegments: secondSegments || [],
       },
       first_document_sets: {
-        leftTitle: firstDocument1Set1Name || 'Set 1',
-        rightTitle: firstDocument1Set2Name || 'Set 2',
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`,
+        rightTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`,
         leftSegments: firstSegmentsSet1 || [],
         rightSegments: firstSegmentsSet2 || [],
       },
       second_document_sets: {
-        leftTitle: secondDocument2Set1Name || 'Set 1',
-        rightTitle: secondDocument2Set2Name || 'Set 2',
+        leftTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`,
         leftSegments: secondSegmentsSet1 || [],
         rightSegments: secondSegmentsSet2 || [],
       },

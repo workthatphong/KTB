@@ -13,6 +13,14 @@ export function SpreadCompletionTimeBlock({
   firstSegments,
   secondDocumentFilterName,
   secondSegments,
+  firstSegmentsSet1,
+  firstSegmentsSet2,
+  secondSegmentsSet1,
+  secondSegmentsSet2,
+  firstDocument1Set1Name,
+  firstDocument1Set2Name,
+  secondDocument2Set1Name,
+  secondDocument2Set2Name,
   firstPanelId,
   secondPanelId,
   isTransparentPopup,
@@ -24,6 +32,7 @@ export function SpreadCompletionTimeBlock({
   const [useIdleFilter, setUseIdleFilter] = usePersistentState('sheet_perf_spread_useIdleFilter', false);
   const [metricType, setMetricType] = usePersistentState('sheet_perf_spread_metricType', 'spread1to2'); // 'spread1to2', 'spread2tofinal' or 'alltime'
   const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_spread_groupedView', false);
+  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_spread_comparisonMode', 'documents');
   
   const sortMenuRef = useRef(null);
   const sortMenuPanelRef = useRef(null);
@@ -80,6 +89,57 @@ export function SpreadCompletionTimeBlock({
     };
   }, [showSortMenu]);
 
+  const comparisonConfig = useMemo(() => {
+    const configs = {
+      documents: {
+        leftTitle: firstDocumentFilterName || 'First documents',
+        rightTitle: secondDocumentFilterName || 'Second Documents',
+        leftSegments: firstSegments || [],
+        rightSegments: secondSegments || [],
+      },
+      first_document_sets: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`,
+        rightTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`,
+        leftSegments: firstSegmentsSet1 || [],
+        rightSegments: firstSegmentsSet2 || [],
+      },
+      second_document_sets: {
+        leftTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`,
+        leftSegments: secondSegmentsSet1 || [],
+        rightSegments: secondSegmentsSet2 || [],
+      },
+      set1_across_documents: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set1Name || 'Set 1'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set1Name || 'Set 1'}`,
+        leftSegments: firstSegmentsSet1 || [],
+        rightSegments: secondSegmentsSet1 || [],
+      },
+      set2_across_documents: {
+        leftTitle: `${firstDocumentFilterName || 'First documents'} ${firstDocument1Set2Name || 'Set 2'}`,
+        rightTitle: `${secondDocumentFilterName || 'Second Documents'} ${secondDocument2Set2Name || 'Set 2'}`,
+        leftSegments: firstSegmentsSet2 || [],
+        rightSegments: secondSegmentsSet2 || [],
+      },
+    };
+
+    return configs[comparisonMode] || configs.documents;
+  }, [
+    comparisonMode,
+    firstDocumentFilterName,
+    secondDocumentFilterName,
+    firstSegments,
+    secondSegments,
+    firstSegmentsSet1,
+    firstSegmentsSet2,
+    secondSegmentsSet1,
+    secondSegmentsSet2,
+    firstDocument1Set1Name,
+    firstDocument1Set2Name,
+    secondDocument2Set1Name,
+    secondDocument2Set2Name,
+  ]);
+
   const processData = (rawData) => {
     if (!rawData) return [];
     let arr = rawData.map(d => ({
@@ -100,29 +160,29 @@ export function SpreadCompletionTimeBlock({
 
   const { userData: rawFirstData } = useMemo(() => {
     return metricType === 'spread1to2' 
-      ? buildSpreadCompletionTimeData(firstSegments, systemTaskType)
+      ? buildSpreadCompletionTimeData(comparisonConfig.leftSegments, systemTaskType)
       : metricType === 'spread2tofinal'
-        ? buildSpread2ToFinalActionData(firstSegments, systemTaskType)
-        : buildAllTimeData(firstSegments, systemTaskType);
-  }, [firstSegments, systemTaskType, metricType]);
+        ? buildSpread2ToFinalActionData(comparisonConfig.leftSegments, systemTaskType)
+        : buildAllTimeData(comparisonConfig.leftSegments, systemTaskType);
+  }, [comparisonConfig.leftSegments, systemTaskType, metricType]);
 
   const { userData: rawSecondData } = useMemo(() => {
     return metricType === 'spread1to2' 
-      ? buildSpreadCompletionTimeData(secondSegments, systemTaskType)
+      ? buildSpreadCompletionTimeData(comparisonConfig.rightSegments, systemTaskType)
       : metricType === 'spread2tofinal'
-        ? buildSpread2ToFinalActionData(secondSegments, systemTaskType)
-        : buildAllTimeData(secondSegments, systemTaskType);
-  }, [secondSegments, systemTaskType, metricType]);
+        ? buildSpread2ToFinalActionData(comparisonConfig.rightSegments, systemTaskType)
+        : buildAllTimeData(comparisonConfig.rightSegments, systemTaskType);
+  }, [comparisonConfig.rightSegments, systemTaskType, metricType]);
 
   const { userData: rawGroupedData } = useMemo(() => {
     if (!isGroupedView) return { userData: [] };
-    const allSegments = [...(firstSegments || []), ...(secondSegments || [])];
+    const allSegments = [...(comparisonConfig.leftSegments || []), ...(comparisonConfig.rightSegments || [])];
     return metricType === 'spread1to2' 
       ? buildSpreadCompletionTimeData(allSegments, systemTaskType, true)
       : metricType === 'spread2tofinal'
         ? buildSpread2ToFinalActionData(allSegments, systemTaskType, true)
         : buildAllTimeData(allSegments, systemTaskType);
-  }, [isGroupedView, firstSegments, secondSegments, systemTaskType, metricType]);
+  }, [isGroupedView, comparisonConfig.leftSegments, comparisonConfig.rightSegments, systemTaskType, metricType]);
 
   const firstData = useMemo(() => processData(rawFirstData), [rawFirstData, sortOrder, useTaskTypeFilter, useIdleFilter, metricType]);
   const secondData = useMemo(() => processData(rawSecondData), [rawSecondData, sortOrder, useTaskTypeFilter, useIdleFilter, metricType]);
@@ -162,6 +222,23 @@ export function SpreadCompletionTimeBlock({
               <div className="flex flex-col gap-3">
                 <ToggleSetting checked={isGroupedView} onChange={() => setIsGroupedView(prev => !prev)}>
                   Group into Single Chart
+                </ToggleSetting>
+                <div className="border-t border-slate-100 my-1"></div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1.5">Comparison</div>
+                <ToggleSetting checked={comparisonMode === 'documents'} onChange={() => setComparisonMode('documents')}>
+                  Docs
+                </ToggleSetting>
+                <ToggleSetting checked={comparisonMode === 'first_document_sets'} onChange={() => setComparisonMode('first_document_sets')}>
+                  Doc 1 Sets
+                </ToggleSetting>
+                <ToggleSetting checked={comparisonMode === 'second_document_sets'} onChange={() => setComparisonMode('second_document_sets')}>
+                  Doc 2 Sets
+                </ToggleSetting>
+                <ToggleSetting checked={comparisonMode === 'set1_across_documents'} onChange={() => setComparisonMode('set1_across_documents')}>
+                  Set 1 Cross
+                </ToggleSetting>
+                <ToggleSetting checked={comparisonMode === 'set2_across_documents'} onChange={() => setComparisonMode('set2_across_documents')}>
+                  Set 2 Cross
                 </ToggleSetting>
                 <div className="border-t border-slate-100 my-1"></div>
                 <ToggleSetting checked={sortOrder === 'desc'} onChange={() => setSortOrder(prev => prev === 'desc' ? 'default' : 'desc')}>
@@ -240,7 +317,7 @@ export function SpreadCompletionTimeBlock({
               transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
               className="flex flex-col min-h-[240px] col-span-1 lg:col-span-2"
             >
-              <h3 className="text-md font-bold text-slate-500 mb-4">All Documents</h3>
+              <h3 className="text-md font-bold text-slate-500 mb-4">{`${comparisonConfig.leftTitle} + ${comparisonConfig.rightTitle}`}</h3>
               <div className="flex-1 min-h-0">
                 {groupedData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-slate-400 gap-3">
@@ -271,7 +348,7 @@ export function SpreadCompletionTimeBlock({
                 transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-md font-bold text-slate-500">{firstDocumentFilterName || 'First documents'}</h3>
+                  <h3 className="text-md font-bold text-slate-500">{comparisonConfig.leftTitle}</h3>
                 </div>
                 <div className="flex-1 min-h-0">
                   {firstData.length === 0 ? (
@@ -302,7 +379,7 @@ export function SpreadCompletionTimeBlock({
                 transition={{ duration: 0.6, type: 'spring', bounce: 0.3 }}
               >
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-md font-bold text-slate-500">{secondDocumentFilterName || 'Second Documents'}</h3>
+                  <h3 className="text-md font-bold text-slate-500">{comparisonConfig.rightTitle}</h3>
                 </div>
                 <div className="flex-1 min-h-0">
                   {secondData.length === 0 ? (
