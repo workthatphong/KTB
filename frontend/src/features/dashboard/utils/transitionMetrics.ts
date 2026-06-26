@@ -1,6 +1,40 @@
 // @ts-nocheck
 import { toDrillGroup } from '@/features/dashboard/utils/segmentUtils';
 
+const ANCHOR_MATCH_TOLERANCE_MS = 1000;
+
+function getSegmentStartTs(segment) {
+  return Number(segment?.startTs) || Date.parse(String(segment?.start || '')) || 0;
+}
+
+function getSegmentEndTs(segment) {
+  return Number(segment?.endTs) || Date.parse(String(segment?.end || '')) || 0;
+}
+
+function resolveIdleAnchorDrill(sorted, idleIndex) {
+  const current = sorted[idleIndex];
+  const idleStartTs = getSegmentStartTs(current);
+  if (!idleStartTs) return '';
+
+  const anchorDrills = [];
+  for (let i = 0; i < idleIndex; i += 1) {
+    const candidate = sorted[i];
+    const candidateEndTs = getSegmentEndTs(candidate);
+    if (!candidateEndTs) continue;
+    if (Math.abs(candidateEndTs - idleStartTs) > ANCHOR_MATCH_TOLERANCE_MS) continue;
+    anchorDrills.push(toDrillGroup(candidate.segmentType));
+  }
+
+  if (anchorDrills.includes('Reprocessing')) return 'Reprocessing';
+  if (anchorDrills.includes('Processing')) return 'Processing';
+  if (anchorDrills.includes('Review')) return 'Review';
+  if (anchorDrills.includes('EditData')) return 'EditData';
+  if (anchorDrills.includes('EditMeta')) return 'EditMeta';
+  if (anchorDrills.includes('Uploading')) return 'Uploading';
+
+  return '';
+}
+
 function isTransitionIdleSegment(segmentType) {
   const type = String(segmentType || '');
   return toDrillGroup(type) === 'Idle' || type === 'IDLE_WAITING_FOR_SCHEDULED_REPROCESS';
@@ -31,7 +65,7 @@ export function buildTransitionBreakdownGroups(segments, labels = {}) {
   });
 
   segmentsBySheet.forEach((items) => {
-    const sorted = [...items].sort((a, b) => a.startTs - b.startTs);
+    const sorted = [...items].sort((a, b) => getSegmentStartTs(a) - getSegmentStartTs(b));
     let hasFutureReviewOrEdit = false;
     const sheetTotals = new Map([
       ['after-processing', 0],
@@ -51,19 +85,21 @@ export function buildTransitionBreakdownGroups(segments, labels = {}) {
 
       const prev = i > 0 ? sorted[i - 1] : null;
       const prevDrill = prev ? toDrillGroup(prev.segmentType) : '';
+      const anchorDrill = resolveIdleAnchorDrill(sorted, i);
+      const transitionSourceDrill = anchorDrill || prevDrill;
       let groupKey = 'between-review-edit';
 
-      if (prevDrill === 'Processing') {
+      if (transitionSourceDrill === 'Processing') {
         groupKey = 'after-processing';
-      } else if (prevDrill === 'Reprocessing') {
+      } else if (transitionSourceDrill === 'Reprocessing') {
         groupKey = 'after-reprocessing';
       } else if (
         hasFutureReviewOrEdit &&
         (
-          prevDrill === 'Review'
-          || prevDrill === 'EditData'
-          || prevDrill === 'EditMeta'
-          || prevDrill === 'Uploading'
+          transitionSourceDrill === 'Review'
+          || transitionSourceDrill === 'EditData'
+          || transitionSourceDrill === 'EditMeta'
+          || transitionSourceDrill === 'Uploading'
         )
       ) {
         groupKey = 'between-review-edit';
