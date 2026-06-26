@@ -94,6 +94,14 @@ export function SheetPerformanceView({
           secondDocumentFilterName={secondDocumentFilterName}
           firstSegments={firstSegments}
           secondSegments={secondSegments}
+          firstSegmentsSet1={firstSegmentsSet1}
+          firstSegmentsSet2={firstSegmentsSet2}
+          secondSegmentsSet1={secondSegmentsSet1}
+          secondSegmentsSet2={secondSegmentsSet2}
+          firstDocument1Set1Name={firstDocument1Set1Name}
+          firstDocument1Set2Name={firstDocument1Set2Name}
+          secondDocument2Set1Name={secondDocument2Set1Name}
+          secondDocument2Set2Name={secondDocument2Set2Name}
           systemTaskType={systemTaskType}
           isDurationDisplay={isDurationDisplay}
           uniqueUsers={uniqueUsers}

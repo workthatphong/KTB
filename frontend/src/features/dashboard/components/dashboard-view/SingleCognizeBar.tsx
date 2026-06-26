@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { formatDuration, formatPercent, clampPercent } from '@/lib/utils';
 
-export const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDuration = true }) => {
+export const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDuration = true, showLegend = true, othersLabel = 'Maker' }) => {
   const [hoveredSegment, setHoveredSegment] = useState(null);
 
   const { cognizeSeconds, othersSeconds, totalSeconds } = data;
@@ -31,7 +31,7 @@ export const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDur
     tooltipLeft = cognizePercent / 2;
   } else if (hoveredSegment === 'others') {
     tooltipData = {
-      label: 'Maker',
+      label: othersLabel,
       value: displayValOthers,
       percent: formatPercent(othersSeconds / totalSeconds),
       color: '#F59E0B'
@@ -41,21 +41,20 @@ export const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDur
 
   return (
     <div className="mt-2">
-      {/* Labels */}
-      <div className="flex justify-between items-center text-sm font-bold text-[#17335f] mb-3">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-sm bg-[#00a4e4]"></span>
-          Cognize
+      {showLegend ? (
+        <div className="flex justify-between items-center text-sm font-bold text-[#17335f] mb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-sm bg-[#00a4e4]"></span>
+            Cognize
+          </div>
+          <div className="flex items-center gap-2">
+            {othersLabel}
+            <span className="w-3 h-3 rounded-sm bg-[#F59E0B]"></span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          Maker
-          <span className="w-3 h-3 rounded-sm bg-[#F59E0B]"></span>
-        </div>
-      </div>
+      ) : null}
 
-      {/* Bar and Tooltip Wrapper */}
       <div className="relative w-full">
-        {/* Tooltip */}
         {isHovering && tooltipData && (
           <div 
             className="absolute bottom-full mb-3 z-[200] pointer-events-none transition-all duration-200 ease-out"
@@ -90,7 +89,6 @@ export const SingleCognizeBar = React.memo(({ data, displayMetric = 'avg', isDur
           </div>
         )}
 
-        {/* Main Bar */}
         <div className="h-8 w-full rounded-full bg-slate-100 overflow-hidden shadow-inner flex relative">
           <div 
             onMouseEnter={() => setHoveredSegment('cognize')}

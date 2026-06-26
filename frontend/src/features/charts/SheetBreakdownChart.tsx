@@ -79,6 +79,7 @@ export const SheetBreakdownChart = React.memo(({
   const barHeight = 40;
   const totalContentHeight = data.length * barHeight;
   const viewportHeight = expanded ? totalContentHeight : Math.min(totalContentHeight, barHeight * 8);
+  const expandedMaxHeight = 'min(70vh, 640px)';
   
   const plotWidth = Math.max(scrollAreaWidth - yAxisWidth - chartMargin.left - chartMargin.right, 0);
   const averageLabelLeft = yAxisWidth + chartMargin.left + (niceMax > 0 ? (average / niceMax) * plotWidth : 0);
@@ -112,7 +113,8 @@ export const SheetBreakdownChart = React.memo(({
 
   return (
     <div
-      className={`w-full flex flex-col bg-white relative transition-all ${expanded ? 'h-[min(70vh,640px)]' : 'mt-4'}`}
+      className={`w-full flex flex-col bg-white relative transition-all ${expanded ? '' : 'mt-4'}`}
+      style={expanded ? { maxHeight: expandedMaxHeight } : undefined}
       ref={containerRef}
     >
       {showAverageLine && scrollAreaWidth > 0 && (

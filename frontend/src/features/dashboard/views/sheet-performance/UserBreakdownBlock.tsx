@@ -94,6 +94,18 @@ export function UserBreakdownBlock({
 
   const hasFirstSets = analyzeSets && ((firstContributionRowsSet1?.length || 0) > 0 || (firstContributionRowsSet2?.length || 0) > 0);
   const hasSecondSets = analyzeSets && ((secondContributionRowsSet1?.length || 0) > 0 || (secondContributionRowsSet2?.length || 0) > 0);
+  const renderSetLegend = () => (
+    <div className="mt-2 flex w-full items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-sm bg-[#00a4e4]" />
+        Cognize
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="h-2.5 w-2.5 rounded-sm bg-[#F59E0B]" />
+        User
+      </div>
+    </div>
+  );
 
   return (
     <div className={`bg-white p-6 rounded-2xl border border-[#d7e8f6] shadow-ktb flex flex-col relative group animate-stagger-1 ${showFilterMenu ? 'z-[120]' : 'z-10'}`}>
@@ -158,9 +170,10 @@ export function UserBreakdownBlock({
           >
             {hasFirstSets ? (
               <div className="flex flex-col gap-4 w-full">
-                {/* Document Name */}
-                <h3 className="text-md font-bold text-slate-500 text-center">{firstDocumentFilterName || 'First documents'}</h3>
-                {/* Set 1 */}
+                <div>
+                  <h3 className="text-md font-bold text-slate-500 text-center">{firstDocumentFilterName || 'First documents'}</h3>
+                  {renderSetLegend()}
+                </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-slate-400">{firstDocument1Set1Name || 'Set 1'}</h4>
@@ -171,10 +184,9 @@ export function UserBreakdownBlock({
                       <span className="text-xs font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SingleCognizeBar data={firstDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                    <SingleCognizeBar data={firstDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} showLegend={false} othersLabel="User" />
                   )}
                 </div>
-                {/* Set 2 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-slate-400">{firstDocument1Set2Name || 'Set 2'}</h4>
@@ -185,7 +197,7 @@ export function UserBreakdownBlock({
                       <span className="text-xs font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SingleCognizeBar data={firstDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                    <SingleCognizeBar data={firstDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} showLegend={false} othersLabel="User" />
                   )}
                 </div>
               </div>
@@ -221,9 +233,10 @@ export function UserBreakdownBlock({
           >
             {hasSecondSets ? (
               <div className="flex flex-col gap-4 w-full">
-                {/* Document Name */}
-                <h3 className="text-md font-bold text-slate-500 text-center">{secondDocumentFilterName || 'Second Documents'}</h3>
-                {/* Set 1 */}
+                <div>
+                  <h3 className="text-md font-bold text-slate-500 text-center">{secondDocumentFilterName || 'Second Documents'}</h3>
+                  {renderSetLegend()}
+                </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-slate-400">{secondDocument2Set1Name || 'Set 1'}</h4>
@@ -234,10 +247,9 @@ export function UserBreakdownBlock({
                       <span className="text-xs font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SingleCognizeBar data={secondDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                    <SingleCognizeBar data={secondDisplayDataSet1} displayMetric={displayMetric} isDuration={isDurationDisplay} showLegend={false} othersLabel="User" />
                   )}
                 </div>
-                {/* Set 2 */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-semibold text-slate-400">{secondDocument2Set2Name || 'Set 2'}</h4>
@@ -248,7 +260,7 @@ export function UserBreakdownBlock({
                       <span className="text-xs font-semibold">No Data</span>
                     </div>
                   ) : (
-                    <SingleCognizeBar data={secondDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} />
+                    <SingleCognizeBar data={secondDisplayDataSet2} displayMetric={displayMetric} isDuration={isDurationDisplay} showLegend={false} othersLabel="User" />
                   )}
                 </div>
               </div>
