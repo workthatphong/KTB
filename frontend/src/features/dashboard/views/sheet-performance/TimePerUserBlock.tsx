@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react';
 import { SheetBreakdownChart } from '../../../charts/SheetBreakdownChart';
 import { useTimePerUserData } from './hooks/useTimePerUserData';
 import { TimePerUserMenu } from './TimePerUserMenu';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function TimePerUserBlock({
   firstDocumentFilterName,
@@ -21,12 +22,12 @@ export function TimePerUserBlock({
   secondPanelId
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userSortOrder, setUserSortOrder] = useState('desc');
-  const [alignUsers, setAlignUsers] = useState(false);
-  const [syncScroll, setSyncScroll] = useState(false);
-  const [showDiffChart, setShowDiffChart] = useState(false);
-  const [isGroupedView, setIsGroupedView] = useState(false);
-  const [isTotalView, setIsTotalView] = useState(false);
+  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerUser_sortOrder', 'desc');
+  const [alignUsers, setAlignUsers] = usePersistentState('sheet_perf_timePerUser_alignUsers', false);
+  const [syncScroll, setSyncScroll] = usePersistentState('sheet_perf_timePerUser_syncScroll', false);
+  const [showDiffChart, setShowDiffChart] = usePersistentState('sheet_perf_timePerUser_showDiffChart', false);
+  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_timePerUser_groupedView', false);
+  const [isTotalView, setIsTotalView] = usePersistentState('sheet_perf_timePerUser_totalView', false);
 
   const scrollRefFirst = useRef(null);
   const scrollRefSecond = useRef(null);

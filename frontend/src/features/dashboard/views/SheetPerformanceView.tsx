@@ -1,9 +1,10 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { UserBreakdownBlock } from './sheet-performance/UserBreakdownBlock';
 import { TimePerPageBlock } from './sheet-performance/TimePerPageBlock';
 import { TimePerUserBlock } from './sheet-performance/TimePerUserBlock';
 import { SpreadCompletionTimeBlock } from './sheet-performance/SpreadCompletionTimeBlock';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function SheetPerformanceView({ 
   firstDocumentFilterName,
@@ -27,9 +28,9 @@ export function SheetPerformanceView({
   secondSegments,
   systemTaskType = 'all'
 }) {
-  const [userRoleFilter, setUserRoleFilter] = useState('all');
-  const [isStackedView, setIsStackedView] = useState(false);
-  const [isTransparentPopup, setIsTransparentPopup] = useState(false);
+  const [userRoleFilter, setUserRoleFilter] = usePersistentState('sheet_perf_userRoleFilter', 'all');
+  const [isStackedView, setIsStackedView] = usePersistentState('sheet_perf_isStackedView', false);
+  const [isTransparentPopup, setIsTransparentPopup] = usePersistentState('sheet_perf_isTransparentPopup', false);
 
   const isDurationDisplay = systemTaskType !== 'editDataRecord' && systemTaskType !== 'reviewRecord';
 

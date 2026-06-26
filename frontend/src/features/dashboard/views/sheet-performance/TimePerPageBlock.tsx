@@ -6,6 +6,7 @@ import { Clock, SlidersHorizontal } from 'lucide-react';
 import { ToggleSetting } from '../../components/dashboard-view/DashboardViewPanels';
 import { SheetBreakdownChart } from '../../../charts/SheetBreakdownChart';
 import { buildPageTimeData } from '../SheetPerformanceUtils';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function TimePerPageBlock({
   firstDocumentFilterName,
@@ -25,8 +26,8 @@ export function TimePerPageBlock({
   secondPanelId
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userSortOrder, setUserSortOrder] = useState('desc');
-  const [isGroupedView2, setIsGroupedView2] = useState(false);
+  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerPage_sortOrder', 'desc');
+  const [isGroupedView2, setIsGroupedView2] = usePersistentState('sheet_perf_timePerPage_groupedView', false);
   
   const userMenuRef = useRef(null);
   const userMenuPanelRef = useRef(null);

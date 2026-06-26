@@ -55,7 +55,8 @@ export const FilterPopover = ({
       const target = event.target;
       const clickedAnchor = rootRef.current && rootRef.current.contains(target);
       const clickedPanel = panelRef.current && panelRef.current.contains(target);
-      if (!clickedAnchor && !clickedPanel) {
+      const clickedPresetPopup = target?.closest?.('.document-preset-popover');
+      if (!clickedAnchor && !clickedPanel && !clickedPresetPopup) {
         setOpenDropdown('');
       }
     };

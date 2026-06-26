@@ -26,7 +26,11 @@ export function useAppController(dashboard) {
   const [systemSecondDocumentFileSearch, setSystemSecondDocumentFileSearch] = useState('');
   const [systemSecondDocumentSheetSearch, setSystemSecondDocumentSheetSearch] = useState('');
   const [systemTaskType, setSystemTaskType] = usePersistentState('filter_systemTaskType', 'all', dashboard.settings);
-  const [sheetPerformanceChartSettings, setSheetPerformanceChartSettings] = useState(() => createDefaultSheetPerformanceChartSettings());
+  const [sheetPerformanceChartSettings, setSheetPerformanceChartSettings] = usePersistentState(
+    'sheet_performance_chartSettings',
+    createDefaultSheetPerformanceChartSettings(),
+    dashboard.settings,
+  );
   const [showProcessBreakdownIdle, setShowProcessBreakdownIdle] = usePersistentState('filter_showProcessBreakdownIdle', true, dashboard.settings);
   const [mergeReviewAndEdit, setMergeReviewAndEdit] = usePersistentState('chart_mergeReviewAndEdit', true, dashboard.settings);
   const [mergeSpread, setMergeSpread] = usePersistentState('chart_mergeSpread', false, dashboard.settings);

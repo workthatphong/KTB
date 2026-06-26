@@ -13,6 +13,7 @@ import { DocumentFileListColumn } from './DocumentFileListColumn';
 import { DocumentSheetListColumn } from './DocumentSheetListColumn';
 
 export const DocumentFilterPopover = React.memo(({
+  filterId = 'documents',
   title = "Documents",
   onTitleChange,
   openDropdown,
@@ -39,6 +40,8 @@ export const DocumentFilterPopover = React.memo(({
   onRenameFile,
   onRenamePage,
   onClearSelection,
+  onOpenPresetManager,
+  showPresetButton = false,
   hasSetComparison = false,
   selectedSheetsSet2 = [],
   onToggleSheetSelectionSet2,
@@ -78,7 +81,7 @@ export const DocumentFilterPopover = React.memo(({
 
   return (
     <FilterPopover
-      id={`document-file-${title}`}
+      id={`document-file-${filterId}`}
       title={title}
       onTitleChange={onTitleChange}
       summary={getDocumentSummary(selectedFiles, selectedSheets, allowSheetSelection)}
@@ -105,6 +108,8 @@ export const DocumentFilterPopover = React.memo(({
           onTogglePin={onTogglePinnedFile}
           onRenameFile={onRenameFile}
           onClearSelection={onClearSelection}
+          onOpenPresetManager={onOpenPresetManager}
+          showPresetButton={showPresetButton}
           fullWidth={!allowSheetSelection}
         />
 

@@ -6,6 +6,7 @@ import { Clock, SlidersHorizontal } from 'lucide-react';
 import { SheetBreakdownChart } from '../../../charts/SheetBreakdownChart';
 import { buildAllTimeData, buildSpreadCompletionTimeData, buildSpread2ToFinalActionData } from '../SheetPerformanceUtils';
 import { ToggleSetting } from '../../components/dashboard-view/DashboardViewPanels';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function SpreadCompletionTimeBlock({
   firstDocumentFilterName,
@@ -18,11 +19,11 @@ export function SpreadCompletionTimeBlock({
   systemTaskType
 }) {
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [sortOrder, setSortOrder] = useState('default'); // 'default', 'asc', 'desc'
-  const [useTaskTypeFilter, setUseTaskTypeFilter] = useState(false);
-  const [useIdleFilter, setUseIdleFilter] = useState(false);
-  const [metricType, setMetricType] = useState('spread1to2'); // 'spread1to2', 'spread2tofinal' or 'alltime'
-  const [isGroupedView, setIsGroupedView] = useState(false);
+  const [sortOrder, setSortOrder] = usePersistentState('sheet_perf_spread_sortOrder', 'default'); // 'default', 'asc', 'desc'
+  const [useTaskTypeFilter, setUseTaskTypeFilter] = usePersistentState('sheet_perf_spread_useTaskTypeFilter', false);
+  const [useIdleFilter, setUseIdleFilter] = usePersistentState('sheet_perf_spread_useIdleFilter', false);
+  const [metricType, setMetricType] = usePersistentState('sheet_perf_spread_metricType', 'spread1to2'); // 'spread1to2', 'spread2tofinal' or 'alltime'
+  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_spread_groupedView', false);
   
   const sortMenuRef = useRef(null);
   const sortMenuPanelRef = useRef(null);

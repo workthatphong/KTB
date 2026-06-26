@@ -7,6 +7,7 @@ import { useFilterState } from './filter-bar/useFilterState';
 import { TaskTypeFilter } from './filter-bar/TaskTypeFilter';
 import { SwapDocumentsButton } from './filter-bar/SwapDocumentsButton';
 import { RefreshButton } from './filter-bar/RefreshButton';
+import { DocumentPresetPopover } from './filter-bar/DocumentPresetPopover';
 
 export const FilterBar = React.memo(({
   dashboard,
@@ -25,6 +26,10 @@ export const FilterBar = React.memo(({
   setSystemTaskType,
   onMenuClick,
 }) => {
+  const [presetPopoverState, setPresetPopoverState] = React.useState({
+    open: false,
+    anchorRect: null,
+  });
   const {
     loading,
     syncing,
@@ -35,6 +40,20 @@ export const FilterBar = React.memo(({
   } = dashboard;
 
   const state = useFilterState({ dashboard, filterMode });
+
+  const openPresetPopover = (anchorRect) => {
+    setPresetPopoverState({
+      open: true,
+      anchorRect,
+    });
+  };
+
+  const closePresetPopover = () => {
+    setPresetPopoverState({
+      open: false,
+      anchorRect: null,
+    });
+  };
 
   return (
     <header className="scroll-clarity-layer shrink-0 bg-white/95 border-b border-[#d7e8f6] px-4 md:px-8 py-3 z-[80]">
@@ -64,6 +83,7 @@ export const FilterBar = React.memo(({
           {state.isSystemFilterMode ? (
             <>
               <DocumentFilterPopover
+                filterId="system-first-document"
                 title={dashboard.systemFirstDocumentFilterName}
                 onTitleChange={dashboard.setSystemFirstDocumentFilterName}
                 openDropdown={openDropdown}
@@ -90,6 +110,8 @@ export const FilterBar = React.memo(({
                 onRenameFile={state.handleRenameFile}
                 onRenamePage={state.handleRenamePage}
                 onClearSelection={state.handleClearDocumentSelection}
+                onOpenPresetManager={openPresetPopover}
+                showPresetButton={true}
                 hasSetComparison={true}
                 selectedSheetsSet2={dashboard.systemSelectedSheetsSet2}
                 onToggleSheetSelectionSet2={state.handleToggleSheetSelectionSet2}
@@ -99,6 +121,7 @@ export const FilterBar = React.memo(({
                 setSet2Name={dashboard.setSystemDocument1Set2Name}
               />
               <DocumentFilterPopover
+                filterId="system-second-document"
                 title={dashboard.systemSecondDocumentFilterName}
                 onTitleChange={dashboard.setSystemSecondDocumentFilterName}
                 openDropdown={openDropdown}
@@ -125,6 +148,8 @@ export const FilterBar = React.memo(({
                 onRenameFile={state.handleRenameFile}
                 onRenamePage={state.handleRenamePage}
                 onClearSelection={state.handleClearSecondDocumentSelection}
+                onOpenPresetManager={openPresetPopover}
+                showPresetButton={true}
                 hasSetComparison={true}
                 selectedSheetsSet2={dashboard.systemSecondSelectedSheetsSet2}
                 onToggleSheetSelectionSet2={state.handleToggleSecondSheetSelectionSet2}
@@ -146,6 +171,7 @@ export const FilterBar = React.memo(({
             </>
           ) : (
             <DocumentFilterPopover
+              filterId="dashboard-document"
               title="Documents"
               openDropdown={openDropdown}
               setOpenDropdown={setOpenDropdown}
@@ -179,6 +205,17 @@ export const FilterBar = React.memo(({
           <RefreshButton loading={loading} syncing={syncing} refreshAll={refreshAll} />
         </div>
       </div>
+
+      <DocumentPresetPopover
+        open={presetPopoverState.open}
+        anchorRect={presetPopoverState.anchorRect}
+        presets={dashboard.systemDocumentPresets}
+        onClose={closePresetPopover}
+        onCreatePreset={state.handleCreateDocumentPreset}
+        onApplyPreset={state.handleApplyDocumentPreset}
+        onRenamePreset={state.handleRenameDocumentPreset}
+        onDeletePreset={state.handleDeleteDocumentPreset}
+      />
     </header>
   );
 });

@@ -18,6 +18,8 @@ export function DocumentFileListColumn({
   onTogglePin,
   onRenameFile,
   onClearSelection,
+  onOpenPresetManager,
+  showPresetButton = false,
   fullWidth = false,
 }) {
   const [editingFileName, setEditingFileName] = React.useState('');
@@ -59,12 +61,25 @@ export function DocumentFileListColumn({
       <div className="p-3 border-b border-slate-50 space-y-2">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Source Files</div>
-          <button
-            onClick={onClearSelection}
-            className="text-[11px] font-semibold text-slate-400 hover:text-slate-600"
-          >
-            Clear
-          </button>
+          <div className="flex items-center gap-2">
+            {showPresetButton ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenPresetManager?.(e.currentTarget.getBoundingClientRect());
+                }}
+                className="text-[11px] font-semibold text-[#3860be] hover:text-[#1f4aa7] transition-colors"
+              >
+                Preset
+              </button>
+            ) : null}
+            <button
+              onClick={onClearSelection}
+              className="text-[11px] font-semibold text-slate-400 hover:text-slate-600"
+            >
+              Clear
+            </button>
+          </div>
         </div>
         <DropdownSearch value={documentFileSearch} onChange={setDocumentFileSearch} placeholder="Search files..." />
       </div>

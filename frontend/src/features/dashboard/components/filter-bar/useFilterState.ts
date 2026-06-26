@@ -5,6 +5,10 @@ import {
   updateSelectionForFile,
   updateSelectionForSheet,
 } from './utils';
+import {
+  applyDocumentPreset,
+  buildCurrentDocumentPreset,
+} from './documentPresets';
 
 export const useFilterState = ({ dashboard, filterMode }) => {
   const isSystemFilterMode = filterMode === 'system-performance';
@@ -90,6 +94,7 @@ export const useFilterState = ({ dashboard, filterMode }) => {
   const handleClearDocumentSelection = useCallback(() => {
     setSelectedFiles([]);
     if (setSelectedSheets) setSelectedSheets([]);
+    if (dashboard.setSystemSelectedSheetsSet2) dashboard.setSystemSelectedSheetsSet2([]);
   }, [setSelectedFiles, setSelectedSheets]);
 
   const handleToggleSecondFileSelection = useCallback((fileName, currentlyChecked = false) => {
@@ -139,6 +144,7 @@ export const useFilterState = ({ dashboard, filterMode }) => {
   const handleClearSecondDocumentSelection = useCallback(() => {
     if (setSecondSelectedFiles) setSecondSelectedFiles([]);
     if (setSecondSelectedSheets) setSecondSelectedSheets([]);
+    if (dashboard.setSystemSecondSelectedSheetsSet2) dashboard.setSystemSecondSelectedSheetsSet2([]);
   }, [setSecondSelectedFiles, setSecondSelectedSheets]);
 
   const [isSwapping, setIsSwapping] = useState(false);
@@ -175,6 +181,42 @@ export const useFilterState = ({ dashboard, filterMode }) => {
     setSelectedFiles, setSelectedSheets, setPinnedFiles, setPinnedSheets, setActiveDocumentFile,
     setSecondSelectedFiles, setSecondSelectedSheets, setSecondPinnedFiles, setSecondPinnedSheets, setSecondActiveDocumentFile
   ]);
+
+  const handleCreateDocumentPreset = useCallback((presetName) => {
+    if (!dashboard.setSystemDocumentPresets) return;
+    dashboard.setSystemDocumentPresets((prev) => {
+      const nextPreset = buildCurrentDocumentPreset(
+        {
+          ...dashboard,
+          systemDocumentPresets: prev,
+        },
+        presetName || `Preset ${prev.length + 1}`,
+      );
+      return [nextPreset, ...prev];
+    });
+  }, [dashboard]);
+
+  const handleApplyDocumentPreset = useCallback((preset) => {
+    applyDocumentPreset(dashboard, preset);
+  }, [dashboard]);
+
+  const handleRenameDocumentPreset = useCallback((presetId, nextName) => {
+    if (!dashboard.setSystemDocumentPresets) return;
+    dashboard.setSystemDocumentPresets((prev) => prev.map((preset) => (
+      preset.id === presetId
+        ? {
+            ...preset,
+            name: String(nextName || '').trim() || preset.name,
+            updatedAt: Date.now(),
+          }
+        : preset
+    )));
+  }, [dashboard]);
+
+  const handleDeleteDocumentPreset = useCallback((presetId) => {
+    if (!dashboard.setSystemDocumentPresets) return;
+    dashboard.setSystemDocumentPresets((prev) => prev.filter((preset) => preset.id !== presetId));
+  }, [dashboard]);
 
   const handleRenameFile = useCallback((fileName, nextDisplayName) => {
     dashboard.setFileDisplayNames((prev) => {
@@ -232,6 +274,10 @@ export const useFilterState = ({ dashboard, filterMode }) => {
     handleTogglePinnedSecondSheet,
     handleClearSecondDocumentSelection,
     handleSwapDocuments,
+    handleCreateDocumentPreset,
+    handleApplyDocumentPreset,
+    handleRenameDocumentPreset,
+    handleDeleteDocumentPreset,
     handleRenameFile,
     handleRenamePage,
     handleToggleSheetSelectionSet2,

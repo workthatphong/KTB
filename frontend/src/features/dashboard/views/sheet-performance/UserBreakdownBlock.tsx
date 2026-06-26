@@ -5,6 +5,7 @@ import { SlidersHorizontal, Users } from 'lucide-react';
 import { formatDuration } from '@/lib/utils';
 import { getCognizeVsOthersData, buildPageTimeData } from '../SheetPerformanceUtils';
 import { SingleCognizeBar } from '../../components/dashboard-view/SingleCognizeBar';
+import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function UserBreakdownBlock({
   firstDocumentFilterName,
@@ -31,8 +32,8 @@ export function UserBreakdownBlock({
   secondPanelId
 }) {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [displayMetric, setDisplayMetric] = useState('avg'); // 'pct_total', 'pct_avg', 'total', 'avg'
-  const [analyzeSets, setAnalyzeSets] = useState(false);
+  const [displayMetric, setDisplayMetric] = usePersistentState('sheet_perf_userBreakdown_displayMetric', 'avg'); // 'pct_total', 'pct_avg', 'total', 'avg'
+  const [analyzeSets, setAnalyzeSets] = usePersistentState('sheet_perf_userBreakdown_analyzeSets', false);
   const filterRef = useRef(null);
 
   useEffect(() => {
