@@ -581,3 +581,86 @@ export function buildSpread2ToFinalActionData(segments: any[], systemTaskType: s
 
   return { userData: result };
 }
+
+export function buildAllTimeData(segments: any[], systemTaskType = 'all') {
+  if (!segments || segments.length === 0) return { userData: [] };
+
+  const getTs = getSharedTs;
+  const getStartTs = getSharedStartTs;
+  const sheetStats = new Map<string, { name: string, startTs: number, endTs: number, filteredValue: number, idleValue: number, reviewValue: number, editValue: number }>();
+
+  for (const segment of segments) {
+    const sheetName = String(segment.pageName || segment.sheetName || '').trim();
+    const sheetKey = sheetName || 'Document';
+    if (!sheetKey) continue;
+
+    const displayName = (sheetName && sheetName !== 'Document') ? sheetName : 'Document';
+
+    if (!sheetStats.has(sheetKey)) {
+      sheetStats.set(sheetKey, { name: displayName, startTs: Number.POSITIVE_INFINITY, endTs: 0, filteredValue: 0, idleValue: 0, reviewValue: 0, editValue: 0 });
+    }
+
+    const stat = sheetStats.get(sheetKey)!;
+    const segStart = getStartTs(segment);
+    const segEnd = getTs(segment);
+
+    if (segStart > 0 && segStart < stat.startTs) stat.startTs = segStart;
+    if (segEnd > 0 && segEnd > stat.endTs) stat.endTs = segEnd;
+
+    const type = String(segment.segmentType || '');
+    const isIdle = (type.startsWith('IDLE_') || type === 'UNKNOWN_FALLBACK_TO_IDLE' || type === 'POST_COMPLETED_ELAPSED' || type === 'UNKNOWN_OR_LOW_CONFIDENCE')
+      && type !== 'IDLE_WAITING_FOR_SCHEDULED_REPROCESS';
+    if (isIdle && segStart > 0 && segEnd > 0 && segEnd > segStart) {
+      stat.idleValue += (segEnd - segStart) / 1000;
+    }
+
+    if (!type.startsWith('USER_')) continue;
+
+    const origUser = String(segment.userName || '').trim();
+    const user = origUser.toLowerCase();
+    if (user === 'system' || user === 'idle') continue;
+
+    const drillGroup = toDrillGroup(segment.segmentType);
+    let matchesCategory = true;
+    if (systemTaskType === 'all' && drillGroup !== 'Review' && drillGroup !== 'EditData') matchesCategory = false;
+    if (systemTaskType === 'editData' && drillGroup !== 'EditData') matchesCategory = false;
+    if (systemTaskType === 'review' && drillGroup !== 'Review') matchesCategory = false;
+    if (systemTaskType === 'editDataRecord' && drillGroup !== 'EditData') matchesCategory = false;
+    if (systemTaskType === 'reviewRecord' && drillGroup !== 'Review') matchesCategory = false;
+
+    if (!matchesCategory) continue;
+
+    const segDuration = Number(segment.durationSeconds) || 0;
+    if (segDuration <= 0) continue;
+
+    stat.filteredValue += systemTaskType === 'editDataRecord'
+      ? (Number(segment.editDataItemCount) || 1)
+      : systemTaskType === 'reviewRecord'
+        ? 1
+        : segDuration;
+
+    if (drillGroup === 'Review') stat.reviewValue += systemTaskType === 'reviewRecord' ? 1 : segDuration;
+    if (drillGroup === 'EditData') stat.editValue += systemTaskType === 'editDataRecord' ? (Number(segment.editDataItemCount) || 1) : segDuration;
+  }
+
+  const result: any[] = [];
+  for (const stat of sheetStats.values()) {
+    if (!Number.isFinite(stat.startTs) || stat.startTs === Number.POSITIVE_INFINITY) continue;
+    if (stat.endTs <= 0 || stat.endTs < stat.startTs) continue;
+    result.push({
+      name: stat.name,
+      value: (stat.endTs - stat.startTs) / 1000,
+      startTs: stat.startTs,
+      endTs: stat.endTs,
+      filteredValue: stat.filteredValue,
+      idleValue: stat.idleValue,
+      reviewValue: stat.reviewValue,
+      editValue: stat.editValue,
+    });
+  }
+
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  result.sort((a, b) => collator.compare(a.name, b.name));
+
+  return { userData: result };
+}

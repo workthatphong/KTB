@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, SlidersHorizontal } from 'lucide-react';
 import { SheetBreakdownChart } from '../../../charts/SheetBreakdownChart';
-import { buildSpreadCompletionTimeData, buildSpread2ToFinalActionData } from '../SheetPerformanceUtils';
+import { buildAllTimeData, buildSpreadCompletionTimeData, buildSpread2ToFinalActionData } from '../SheetPerformanceUtils';
 import { ToggleSetting } from '../../components/dashboard-view/DashboardViewPanels';
 
 export function SpreadCompletionTimeBlock({
@@ -21,7 +21,7 @@ export function SpreadCompletionTimeBlock({
   const [sortOrder, setSortOrder] = useState('default'); // 'default', 'asc', 'desc'
   const [useTaskTypeFilter, setUseTaskTypeFilter] = useState(false);
   const [useIdleFilter, setUseIdleFilter] = useState(false);
-  const [metricType, setMetricType] = useState('spread1to2'); // 'spread1to2' or 'spread2tofinal'
+  const [metricType, setMetricType] = useState('spread1to2'); // 'spread1to2', 'spread2tofinal' or 'alltime'
   const [isGroupedView, setIsGroupedView] = useState(false);
   
   const sortMenuRef = useRef(null);
@@ -83,7 +83,11 @@ export function SpreadCompletionTimeBlock({
     if (!rawData) return [];
     let arr = rawData.map(d => ({
       ...d,
-      value: useTaskTypeFilter ? (d.filteredValue || 0) : useIdleFilter ? (d.idleValue || 0) : d.value
+      value: useTaskTypeFilter
+          ? (d.filteredValue || 0)
+          : useIdleFilter
+            ? (d.idleValue || 0)
+            : d.value
     }));
     if (sortOrder === 'asc') {
       arr.sort((a, b) => (a.value || 0) - (b.value || 0));
@@ -96,13 +100,17 @@ export function SpreadCompletionTimeBlock({
   const { userData: rawFirstData } = useMemo(() => {
     return metricType === 'spread1to2' 
       ? buildSpreadCompletionTimeData(firstSegments, systemTaskType)
-      : buildSpread2ToFinalActionData(firstSegments, systemTaskType);
+      : metricType === 'spread2tofinal'
+        ? buildSpread2ToFinalActionData(firstSegments, systemTaskType)
+        : buildAllTimeData(firstSegments, systemTaskType);
   }, [firstSegments, systemTaskType, metricType]);
 
   const { userData: rawSecondData } = useMemo(() => {
     return metricType === 'spread1to2' 
       ? buildSpreadCompletionTimeData(secondSegments, systemTaskType)
-      : buildSpread2ToFinalActionData(secondSegments, systemTaskType);
+      : metricType === 'spread2tofinal'
+        ? buildSpread2ToFinalActionData(secondSegments, systemTaskType)
+        : buildAllTimeData(secondSegments, systemTaskType);
   }, [secondSegments, systemTaskType, metricType]);
 
   const { userData: rawGroupedData } = useMemo(() => {
@@ -110,12 +118,14 @@ export function SpreadCompletionTimeBlock({
     const allSegments = [...(firstSegments || []), ...(secondSegments || [])];
     return metricType === 'spread1to2' 
       ? buildSpreadCompletionTimeData(allSegments, systemTaskType, true)
-      : buildSpread2ToFinalActionData(allSegments, systemTaskType, true);
+      : metricType === 'spread2tofinal'
+        ? buildSpread2ToFinalActionData(allSegments, systemTaskType, true)
+        : buildAllTimeData(allSegments, systemTaskType);
   }, [isGroupedView, firstSegments, secondSegments, systemTaskType, metricType]);
 
-  const firstData = useMemo(() => processData(rawFirstData), [rawFirstData, sortOrder, useTaskTypeFilter, useIdleFilter]);
-  const secondData = useMemo(() => processData(rawSecondData), [rawSecondData, sortOrder, useTaskTypeFilter, useIdleFilter]);
-  const groupedData = useMemo(() => processData(rawGroupedData), [rawGroupedData, sortOrder, useTaskTypeFilter, useIdleFilter]);
+  const firstData = useMemo(() => processData(rawFirstData), [rawFirstData, sortOrder, useTaskTypeFilter, useIdleFilter, metricType]);
+  const secondData = useMemo(() => processData(rawSecondData), [rawSecondData, sortOrder, useTaskTypeFilter, useIdleFilter, metricType]);
+  const groupedData = useMemo(() => processData(rawGroupedData), [rawGroupedData, sortOrder, useTaskTypeFilter, useIdleFilter, metricType]);
 
   const taskTypeLabel = systemTaskType === 'all' ? 'Review & Edit Data Time' : 
                         systemTaskType === 'editData' ? 'Edit Data Time' : 
@@ -126,7 +136,7 @@ export function SpreadCompletionTimeBlock({
   const isCountMetric = useTaskTypeFilter && (systemTaskType === 'editDataRecord' || systemTaskType === 'reviewRecord');
   const isDurationMetric = !isCountMetric;
 
-  const prefixTitle = metricType === 'spread1to2' ? 'Spread 1 to Spread 2' : 'Spread 2 To Final Action';
+  const prefixTitle = metricType === 'spread1to2' ? 'Spread 1 to Spread 2' : metricType === 'spread2tofinal' ? 'Spread 2 To Final Action' : 'All time';
 
   const chartTitle = useTaskTypeFilter 
     ? `${prefixTitle} ${taskTypeLabel} By Sheet` 
@@ -173,6 +183,12 @@ export function SpreadCompletionTimeBlock({
                   onChange={() => setMetricType('spread2tofinal')}
                 >
                   Spread 2 To Final Action
+                </ToggleSetting>
+                <ToggleSetting 
+                  checked={metricType === 'alltime'} 
+                  onChange={() => setMetricType('alltime')}
+                >
+                  All time
                 </ToggleSetting>
 
                 <div className="border-t border-slate-100 my-1"></div>
