@@ -14,9 +14,9 @@ const worker = new Worker(new URL('../workers/dashboardWorker.ts', import.meta.u
 const workerApi = wrap<any>(worker);
 
 export function useDashboardData(): DashboardState {
-  const filterState = useDashboardFilterState();
   const dataState = useDashboardDataState();
   const fetching = useDashboardDataFetching();
+  const filterState = useDashboardFilterState((fetching.data as any)?.settings || null);
 
   // Create a memoized parameters object to prevent unnecessary worker calls
   const workerParams = useMemo(() => ({

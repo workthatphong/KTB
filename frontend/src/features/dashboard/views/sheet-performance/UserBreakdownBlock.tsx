@@ -8,6 +8,7 @@ import { SingleCognizeBar } from '../../components/dashboard-view/SingleCognizeB
 import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function UserBreakdownBlock({
+  settings,
   firstDocumentFilterName,
   secondDocumentFilterName,
   firstContributionRows,
@@ -32,8 +33,8 @@ export function UserBreakdownBlock({
   secondPanelId
 }) {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
-  const [displayMetric, setDisplayMetric] = usePersistentState('sheet_perf_userBreakdown_displayMetric', 'avg'); // 'pct_total', 'pct_avg', 'total', 'avg'
-  const [analyzeSets, setAnalyzeSets] = usePersistentState('sheet_perf_userBreakdown_analyzeSets', false);
+  const [displayMetric, setDisplayMetric] = usePersistentState('sheet_perf_userBreakdown_displayMetric', 'avg', settings); // 'pct_total', 'pct_avg', 'total', 'avg'
+  const [analyzeSets, setAnalyzeSets] = usePersistentState('sheet_perf_userBreakdown_analyzeSets', false, settings);
   const filterRef = useRef(null);
 
   useEffect(() => {

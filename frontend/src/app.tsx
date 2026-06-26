@@ -61,6 +61,7 @@ function App() {
                 } />
                 <Route path="/sheet-performance" element={
                   <SheetPerformanceView 
+                    settings={dashboard.settings}
                     firstDocumentFilterName={dashboard.systemFirstDocumentFilterName}
                     secondDocumentFilterName={dashboard.systemSecondDocumentFilterName}
                     firstContributionRows={dashboard.systemContributionRows}

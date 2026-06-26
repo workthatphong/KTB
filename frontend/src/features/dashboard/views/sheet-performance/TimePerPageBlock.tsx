@@ -31,12 +31,13 @@ export function TimePerPageBlock({
   isTransparentPopup,
   setIsTransparentPopup,
   firstPanelId,
-  secondPanelId
+  secondPanelId,
+  settings
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerPage_sortOrder', 'desc');
-  const [isGroupedView2, setIsGroupedView2] = usePersistentState('sheet_perf_timePerPage_groupedView', false);
-  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_timePerPage_comparisonMode', 'documents');
+  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerPage_sortOrder', 'desc', settings);
+  const [isGroupedView2, setIsGroupedView2] = usePersistentState('sheet_perf_timePerPage_groupedView', false, settings);
+  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_timePerPage_comparisonMode', 'documents', settings);
   
   const userMenuRef = useRef(null);
   const userMenuPanelRef = useRef(null);

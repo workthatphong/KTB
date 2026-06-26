@@ -27,16 +27,17 @@ export function TimePerUserBlock({
   isTransparentPopup,
   systemDocumentsSwapped,
   firstPanelId,
-  secondPanelId
+  secondPanelId,
+  settings
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerUser_sortOrder', 'desc');
-  const [alignUsers, setAlignUsers] = usePersistentState('sheet_perf_timePerUser_alignUsers', false);
-  const [syncScroll, setSyncScroll] = usePersistentState('sheet_perf_timePerUser_syncScroll', false);
-  const [showDiffChart, setShowDiffChart] = usePersistentState('sheet_perf_timePerUser_showDiffChart', false);
-  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_timePerUser_groupedView', false);
-  const [isTotalView, setIsTotalView] = usePersistentState('sheet_perf_timePerUser_totalView', false);
-  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_timePerUser_comparisonMode', 'documents');
+  const [userSortOrder, setUserSortOrder] = usePersistentState('sheet_perf_timePerUser_sortOrder', 'desc', settings);
+  const [alignUsers, setAlignUsers] = usePersistentState('sheet_perf_timePerUser_alignUsers', false, settings);
+  const [syncScroll, setSyncScroll] = usePersistentState('sheet_perf_timePerUser_syncScroll', false, settings);
+  const [showDiffChart, setShowDiffChart] = usePersistentState('sheet_perf_timePerUser_showDiffChart', false, settings);
+  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_timePerUser_groupedView', false, settings);
+  const [isTotalView, setIsTotalView] = usePersistentState('sheet_perf_timePerUser_totalView', false, settings);
+  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_timePerUser_comparisonMode', 'documents', settings);
 
   const scrollRefFirst = useRef(null);
   const scrollRefSecond = useRef(null);

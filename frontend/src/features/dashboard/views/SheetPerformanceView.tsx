@@ -7,6 +7,7 @@ import { SpreadCompletionTimeBlock } from './sheet-performance/SpreadCompletionT
 import { usePersistentState } from '@/hooks/usePersistentState';
 
 export function SheetPerformanceView({ 
+  settings,
   firstDocumentFilterName,
   secondDocumentFilterName,
   firstContributionRows,
@@ -28,9 +29,9 @@ export function SheetPerformanceView({
   secondSegments,
   systemTaskType = 'all'
 }) {
-  const [userRoleFilter, setUserRoleFilter] = usePersistentState('sheet_perf_userRoleFilter', 'all');
-  const [isStackedView, setIsStackedView] = usePersistentState('sheet_perf_isStackedView', false);
-  const [isTransparentPopup, setIsTransparentPopup] = usePersistentState('sheet_perf_isTransparentPopup', false);
+  const [userRoleFilter, setUserRoleFilter] = usePersistentState('sheet_perf_userRoleFilter', 'all', settings);
+  const [isStackedView, setIsStackedView] = usePersistentState('sheet_perf_isStackedView', false, settings);
+  const [isTransparentPopup, setIsTransparentPopup] = usePersistentState('sheet_perf_isTransparentPopup', false, settings);
 
   const isDurationDisplay = systemTaskType !== 'editDataRecord' && systemTaskType !== 'reviewRecord';
 
@@ -87,6 +88,7 @@ export function SheetPerformanceView({
           isDurationDisplay={isDurationDisplay}
           firstPanelId={firstPanelId}
           secondPanelId={secondPanelId}
+          settings={settings}
         />
 
         <TimePerPageBlock
@@ -113,6 +115,7 @@ export function SheetPerformanceView({
           setIsTransparentPopup={setIsTransparentPopup}
           firstPanelId={firstPanelId}
           secondPanelId={secondPanelId}
+          settings={settings}
         />
 
         <TimePerUserBlock
@@ -136,6 +139,7 @@ export function SheetPerformanceView({
           systemDocumentsSwapped={systemDocumentsSwapped}
           firstPanelId={firstPanelId}
           secondPanelId={secondPanelId}
+          settings={settings}
         />
 
         <SpreadCompletionTimeBlock
@@ -155,6 +159,7 @@ export function SheetPerformanceView({
           secondPanelId={secondPanelId}
           isTransparentPopup={isTransparentPopup}
           systemTaskType={systemTaskType}
+          settings={settings}
         />
       </div>
     </div>

@@ -24,15 +24,16 @@ export function SpreadCompletionTimeBlock({
   firstPanelId,
   secondPanelId,
   isTransparentPopup,
-  systemTaskType
+  systemTaskType,
+  settings
 }) {
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [sortOrder, setSortOrder] = usePersistentState('sheet_perf_spread_sortOrder', 'default'); // 'default', 'asc', 'desc'
-  const [useTaskTypeFilter, setUseTaskTypeFilter] = usePersistentState('sheet_perf_spread_useTaskTypeFilter', false);
-  const [useIdleFilter, setUseIdleFilter] = usePersistentState('sheet_perf_spread_useIdleFilter', false);
-  const [metricType, setMetricType] = usePersistentState('sheet_perf_spread_metricType', 'spread1to2'); // 'spread1to2', 'spread2tofinal' or 'alltime'
-  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_spread_groupedView', false);
-  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_spread_comparisonMode', 'documents');
+  const [sortOrder, setSortOrder] = usePersistentState('sheet_perf_spread_sortOrder', 'default', settings); // 'default', 'asc', 'desc'
+  const [useTaskTypeFilter, setUseTaskTypeFilter] = usePersistentState('sheet_perf_spread_useTaskTypeFilter', false, settings);
+  const [useIdleFilter, setUseIdleFilter] = usePersistentState('sheet_perf_spread_useIdleFilter', false, settings);
+  const [metricType, setMetricType] = usePersistentState('sheet_perf_spread_metricType', 'spread1to2', settings); // 'spread1to2', 'spread2tofinal' or 'alltime'
+  const [isGroupedView, setIsGroupedView] = usePersistentState('sheet_perf_spread_groupedView', false, settings);
+  const [comparisonMode, setComparisonMode] = usePersistentState('sheet_perf_spread_comparisonMode', 'documents', settings);
   
   const sortMenuRef = useRef(null);
   const sortMenuPanelRef = useRef(null);
